@@ -1,0 +1,23 @@
+---
+description: Convenzioni per collection e global di PayloadCMS
+globs: ["**/collections/**", "**/globals/**"]
+alwaysApply: false
+---
+
+# Convenzioni PayloadCMS — collection e global
+
+## Regole vincolanti
+
+- **Ruoli come `select` singolo per area**, non `hasMany` cumulativo: un utente ha un solo valore su `adminRole` e un solo valore su `appRole` contemporaneamente (possono però essere entrambi diversi da `none` per la stessa persona, se opera in entrambe le aree).
+- **Global vs Collection**: usare un **Global** per dati di configurazione che devono poter cambiare senza deploy e senza toccare il codice (es. allow-list domini). Usare logica hardcoded in funzione/codice per regole che cambiano solo quando si ridisegna la logica applicativa (es. mappatura ruolo→sezione).
+- **Campi array vs hasMany testuale**: quando un elenco di valori richiede sotto-campi strutturati o flag differenziati per voce (es. dominio + permessi per area), usare un `array` field con sotto-campi, non un campo `hasMany` semplice — anche se alla prima release serve un solo valore, per evitare una migrazione di schema quando servirà differenziare.
+- **Hook di normalizzazione**: per campi testuali sensibili a duplicati o formattazione (es. domini email), implementare normalizzazione (trim, lowercase, validazione formato, prevenzione duplicati) in `beforeValidate` o `beforeChange`, non lasciarla alla sola validazione in UI.
+- **Accesso in scrittura ai Global sensibili** (es. allow-list domini) va ristretto per ruolo tramite la funzione `access` del Global, non tramite convenzione o disciplina lato UI.
+- **Vincolo Admin panel + auth collection**: il vincolo nativo di Payload che lega il pannello Admin a una sola collection con auth si gestisce con una funzione `access` sul pannello Admin (basata su ruolo), non creando collection separate per Admin e App.
+- **Enum aperti per campi che accoglieranno valori futuri già previsti** (es. `eventType` di un log applicativo): includere fin da subito i valori noti anche se non ancora implementati, per evitare una migrazione di schema quando quelle funzionalità verranno sviluppate. Non aggiungere però campi generici "per ogni evenienza" non ancora richiesti da nessun requisito noto (vedi regola di proporzionalità).
+
+## Cosa NON fare
+
+- Non creare collection separate per utenti Admin e utenti App.
+- Non introdurre una whitelist email separata dalla collection `users`: il record utente stesso è la whitelist.
+- Non aggiungere campi o Global non richiesti dalla documentazione di progetto senza segnalarlo prima.

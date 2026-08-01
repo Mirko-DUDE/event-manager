@@ -1,0 +1,32 @@
+---
+description: Architettura del progetto — un solo sistema, tre aree URL, comunicazione same-origin
+globs:
+alwaysApply: true
+---
+
+# Architettura del progetto
+
+Questo progetto è **un solo progetto Next.js** con **PayloadCMS v3** installato al suo interno.
+Non è, e non deve mai diventare, "due applicazioni" da far comunicare a distanza.
+
+## Regole vincolanti
+
+- **Non modificare a mano** i file del route group `(payload)` dentro `/app` (cartella di progetto Next.js App Router): sono auto-generati da Payload e contengono il pannello Admin e le API REST/GraphQL.
+- Il codice custom dell'Area App vive in un **route group separato**, accanto a `(payload)`, nella stessa cartella `/app` del progetto.
+- Mappa delle URL pubbliche da rispettare sempre:
+  - `/` → sito vetrina, pubblico, nessun login
+  - `/app` → Area App, utenti autenticati
+  - `/admin` → Area Admin, pannello Payload, utenti autenticati con ruolo idoneo
+- **Stessa origine, stesso server, stesso build**: Admin e App sono due percorsi della stessa applicazione.
+- **Conseguenza diretta, da non violare mai**:
+  - Nessuna configurazione CORS.
+  - Nessun `SameSite=None` sui cookie.
+  - Nessun token Bearer introdotto per aggirare limitazioni cross-domain: non esistono limitazioni cross-domain in questo progetto.
+- Comunicazione tra codice e Payload:
+  - **Server-side** (Server Components/Server Actions nel route group App) → **Local API** di Payload, chiamata diretta in-process.
+  - **Client-side** (browser) → **REST API** o **GraphQL API** di Payload, comunque same-origin.
+- L'allow-list dei domini autorizzati (per il login Google) si legge **sempre** da un Global di Payload gestito da pannello Admin, **mai** da costanti hardcoded nel codice.
+
+## Cosa fare se un task sembra richiedere di violare queste regole
+
+Se un'implementazione richiesta sembrerebbe necessitare di configurazione CORS, due deploy separati, o duplicazione della logica di autenticazione tra Admin e App: **fermarsi e segnalare il conflitto con l'architettura decisa**, invece di procedere. Quasi certamente il task è stato frainteso o richiede un chiarimento, non una deroga architetturale.

@@ -1,0 +1,39 @@
+---
+description: Processo di lavoro dell'agente — conferme, documentazione, gestione blocchi e passaggi esterni
+globs:
+alwaysApply: true
+---
+
+# Processo di lavoro con l'agente
+
+## Regole vincolanti
+
+- **Nessuna assunzione oltre la documentazione di progetto**: non dare per deciso nulla che non sia esplicitamente scritto nei file di specifica/piano del progetto. I punti segnalati come "aperti" richiedono conferma esplicita dell'umano prima di essere implementati.
+- **Conferma prima di modifiche architetturali non banali**: se un task implica una scelta strutturale non già decisa (nuova dipendenza rilevante, nuovo pattern, modifica a uno schema condiviso), proporre il piano in breve e attendere conferma prima di scrivere codice, invece di procedere silenziosamente.
+
+## Documentazione obbligatoria — per umani e per agenti
+
+- Ogni funzionalità o modulo sviluppato deve lasciare traccia scritta comprensibile sia a un umano sia a un futuro agente che riprenda il lavoro:
+  - commenti nel codice dove la logica non è ovvia a prima lettura;
+  - aggiornamento dei file di piano/fase relativi, quando un passo viene completato;
+  - note operative dedicate dove la documentazione di progetto lo richiede esplicitamente (es. dove trovare la route di emergenza del super-admin, come rigenerare le credenziali OAuth).
+- Non considerare un task "finito" solo perché il codice funziona: è finito quando anche la documentazione riflette cosa è stato fatto e perché.
+
+## Problemi di installazione o dipendenze
+
+- Se un pacchetto non si installa, genera conflitti di versione, o richiede configurazione a livello di sistema operativo (variabili d'ambiente, permessi, strumenti mancanti): **fermarsi**.
+- Non tentare workaround silenziosi (downgrade non concordati, patch improvvisate, dipendenze alternative non previste).
+- Riportare all'umano il problema esatto (messaggio d'errore, causa probabile) e le istruzioni precise per risolverlo, lasciando a lui l'azione se richiede permessi o strumenti fuori dal controllo dell'agente.
+
+## Passaggi esterni all'ambiente di sviluppo
+
+Quando un passo del piano richiede un'azione **fuori da Cursor/dal codice** — ad esempio:
+- creazione/configurazione del cluster MongoDB Atlas;
+- creazione di credenziali OAuth su Google Cloud Console (Client ID/Secret, redirect URI, consent screen);
+- configurazione di variabili d'ambiente o segreti su Google Cloud Run;
+- configurazione DNS o dominio;
+
+l'agente **non deve mai assumere che il passaggio sia già stato completato**. Deve:
+1. Fermarsi prima di scrivere codice che dipende da quel passaggio.
+2. Spiegare esattamente cosa va fatto, dove, e in che ordine (passo per passo, utilizzabile da chi non è uno sviluppatore esperto del tool esterno).
+3. Attendere conferma esplicita dall'umano che il passaggio è stato completato (es. "fatto", "ho creato le credenziali") prima di proseguire con l'implementazione che ne dipende.

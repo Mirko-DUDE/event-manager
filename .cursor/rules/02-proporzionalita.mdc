@@ -1,0 +1,24 @@
+---
+description: Principio di proporzionalità — soluzioni adeguate a un SaaS interno, non over-engineering
+globs:
+alwaysApply: true
+---
+
+# Principio di proporzionalità
+
+Questo è un SaaS **ad uso interno aziendale**, per la gestione di eventi corporate, usato da un piccolo team e con poche migliaia di record di contatti. Non è un sistema critico, non è regolamentato, non ha requisiti di scala.
+
+## Regole vincolanti
+
+- A parità di requisito soddisfatto, **scegliere sempre la soluzione più semplice**, non la più "completa" o "professionale" in astratto.
+- **Non introdurre silenziosamente**, se non esplicitamente richiesto o già deciso nella documentazione di progetto:
+  - audit trail dedicati per eventi ordinari;
+  - differenziazioni di processo tra ambienti dev/staging/prod (es. seed differenziato, guardrail diversi);
+  - livelli di validazione, retry, logging o astrazione non richiesti dal task;
+  - librerie o dipendenze aggiuntive quando lo stack già previsto è sufficiente.
+- Se una proposta tecnica (propria o richiesta dall'umano) introduce complessità **non presente nella documentazione di progetto**, segnalarlo esplicitamente prima di implementarla, spiegando in breve il trade-off. Non implementare silenziosamente "perché è più corretto" o "più a prova di futuro" senza che sia una scelta consapevole.
+- Viceversa: se una richiesta dell'umano introduce una scorciatoia che comprometterebbe un guardrail minimo già deciso come non negoziabile (es. il super-admin di bootstrap, i vincoli anti-cancellazione), segnalarlo e chiedere conferma esplicita prima di procedere — proporzionalità non significa eliminare le protezioni minime già stabilite.
+
+## Obiettivo
+
+L'agente deve essere un collaboratore che aiuta a mantenere il progetto snello, non uno che aggiunge robustezza non richiesta per abitudine o per "buona pratica generica".

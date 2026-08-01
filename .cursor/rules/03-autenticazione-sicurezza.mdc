@@ -1,0 +1,31 @@
+---
+description: Invarianti di autenticazione e sicurezza per login Google e locale
+globs: ["**/auth/**", "**/collections/users*", "**/*oauth*", "**/(payload)/**"]
+alwaysApply: false
+---
+
+# Invarianti di autenticazione e sicurezza
+
+Queste regole si applicano a qualunque file che tocchi login, sessione, collection `users`, o configurazione OAuth. Sono vincoli **non negoziabili** emersi dalla progettazione e dalla verifica del codice sorgente del plugin OAuth scelto.
+
+## Regole vincolanti
+
+- **Separazione netta tra i due flussi di login**:
+  - Il flusso Google **non deve mai** leggere, confrontare o toccare il campo `password`, anche quando il record ha anche una password locale impostata.
+  - Il flusso locale **non deve mai** bypassare il confronto password, nemmeno quando l'email corrisponde a un utente valido anche per Google.
+- **Messaggio di rifiuto identico**: qualunque motivo di rifiuto login (dominio non autorizzato, utente non censito, utente inattivo, password errata) deve produrre **esattamente lo stesso messaggio generico** lato utente. Non differenziare mai il messaggio in base alla causa reale, nemmeno per "aiutare" l'utente.
+- **Nessun autoprovisioning**: un utente deve esistere come record nella collection `users`, creato in anticipo da un Admin, prima di poter effettuare il primo login. Appartenere a un dominio autorizzato non è mai sufficiente da solo.
+- **Validazione dominio (`hd`) sempre lato server**:
+  - Mai fidarsi del parametro `hd` letto lato client.
+  - La verifica va fatta decodificando l'`id_token` **dentro l'hook `getToken`** del plugin OAuth, non basandosi sul solo endpoint REST `userinfo` di Google.
+- **`getUserInfo` del plugin OAuth deve restituire solo `email` e `sub`**: qualunque campo aggiuntivo restituito rischia di sovrascrivere `roles`/`adminRole`/`appRole`/`active` ad ogni login.
+- **Due istanze del plugin OAuth (Admin e App)** devono avere `strategyName`, `authorizePath` e `callbackPath` distinti, per non entrare in conflitto sulla stessa collection `users`.
+- **Login Admin standard** (`/admin/login`) mostra solo il bottone Google. Il form locale del super-admin di bootstrap vive esclusivamente sulla route separata e non linkata prevista dalla specifica — non va reso raggiungibile da nessun link o menu visibile.
+- **Guardrail non rimovibili senza conferma esplicita dell'umano**:
+  - Non deve essere possibile eliminare o disattivare l'ultimo super-admin locale rimasto.
+  - Non deve essere possibile salvare l'allow-list domini se risulterebbe vuota.
+  - Nessun utente Admin diverso dal/dai super-admin di bootstrap può avere credenziali locali.
+
+## Se un task sembra richiedere di violare una di queste regole
+
+Fermarsi e chiedere conferma esplicita, spiegando quale invariante verrebbe violata. Non procedere per inerzia solo perché il task lo chiede in modo implicito.

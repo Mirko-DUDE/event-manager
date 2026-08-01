@@ -1,0 +1,24 @@
+---
+description: Stack tecnico e convenzioni di stile del codice
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: false
+---
+
+# Stack e stile del codice
+
+## Stack di riferimento
+
+- Next.js (App Router) + PayloadCMS v3, un solo progetto.
+- Tailwind CSS per lo styling.
+- MongoDB Atlas come database.
+- Deploy su Google Cloud Run.
+
+## Regole vincolanti
+
+- **TypeScript strict**: non introdurre `any` senza una motivazione esplicita commentata nel codice; preferire tipi derivati da Payload (tipi generati) dove disponibili.
+- **Styling**: usare Tailwind. Non introdurre CSS-in-JS, moduli CSS paralleli, o librerie di componenti UI aggiuntive senza che sia una scelta discussa e confermata.
+- **Lingua**:
+  - Nomi di variabili, funzioni, tipi, file → **inglese**.
+  - Commenti nel codice, messaggi di log, testo destinato all'interfaccia utente (UI) → **italiano**, coerente con la lingua di lavoro del progetto.
+- **Coerenza con le decisioni già prese**: prima di introdurre una libreria o un pattern nuovo non previsto nella documentazione di progetto, verificare se esiste già una decisione equivalente presa altrove (es. provider email, plugin OAuth) ed evitare soluzioni parallele per lo stesso problema.
+- **Niente logica duplicata**: se una regola di autorizzazione, validazione o normalizzazione esiste già in un punto del codice (es. `canAccessSection`, validazione dominio), riusarla — non reimplementarla localmente in un altro file.
