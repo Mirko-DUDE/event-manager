@@ -37,11 +37,12 @@ Placeholder di riferimento in `.env.example` (senza valori reali).
   | Ambiente | Area | Redirect URI |
   |---|---|---|
   | locale | Admin | `http://localhost:3000/api/users/oauth/google-admin/callback` ✅ registrato e testato |
-  | locale | App (§ 2.5) | `http://localhost:3000/api/users/oauth/google-app/callback` |
+  | locale | App (§ 2.5) | `http://localhost:3000/api/users/oauth/google-app/callback` — registrare prima del test |
   | staging/prod | Admin | `{SERVER_URL}/api/users/oauth/google-admin/callback` |
   | staging/prod | App | `{SERVER_URL}/api/users/oauth/google-app/callback` |
 
   Avvio OAuth Admin: `GET /api/users/oauth/google-admin` (bottone su `/admin/login`).
+  Avvio OAuth App: `GET /api/users/oauth/google-app` (bottone su `/app/login`).
 
 - I path esatti (`authorizePath` / `callbackPath`) sono in `auth/constants.ts` (`GOOGLE_ADMIN_OAUTH`, `GOOGLE_APP_OAUTH`).
 
@@ -63,8 +64,9 @@ Il Client ID può restare lo stesso; se si crea un client del tutto nuovo, aggio
 ## Prerequisiti per il test del login Google
 
 - Variabili valorizzate in `.env`.
-- Plugin `payload-oauth2` configurato (§ 2.4 Admin ✅, § 2.5 App da fare).
+- Plugin `payload-oauth2` configurato (§ 2.4 Admin ✅, § 2.5 App ✅).
 - Redirect URI Admin registrato su Google Cloud Console.
+- Redirect URI App: registrare `http://localhost:3000/api/users/oauth/google-app/callback` prima del test § 2.10.
 - Utente censito in collection `users` con `loginMethod = google`, email del dominio whitelisted e `adminRole = admin` (o super-admin).
 - Almeno un dominio in Global Settings con `allowAdmin` / `allowApp` appropriati.
 

@@ -97,7 +97,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Credenziali OAuth 2.0 create su Google Cloud Console (consent screen Internal, client Web application).
 - `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` valorizzate in `.env` locale; placeholder in `.env.example`.
 - Nota operativa: `docs/operativo/google-oauth.md`.
-- Redirect URI Admin registrato su Google Cloud Console: `http://localhost:3000/api/users/oauth/google-admin/callback`. Redirect URI App (§ 2.5): da registrare quando implementato.
+- Redirect URI Admin registrato su Google Cloud Console: `http://localhost:3000/api/users/oauth/google-admin/callback`. Redirect URI App (§ 2.5): `http://localhost:3000/api/users/oauth/google-app/callback` — registrare su Google Cloud Console prima del test.
 
 ---
 
@@ -132,7 +132,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.5 — Plugin `payload-oauth2` — istanza App
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 **Riferimento**: specifica 2.7 (caso a), 2.10
 
 **Obiettivo**: login Google funzionante su `/app`, stessa logica dell'istanza Admin ma su strategyName/path distinti.
@@ -141,6 +141,15 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Configurare una seconda istanza del plugin, dedicata all'Area App, con `strategyName`, `authorizePath`, `callbackPath` distinti da quelli dell'istanza Admin.
 - Riusare la stessa logica di validazione `hd` e lo stesso `getUserInfo` ristretto — non duplicare la logica scrivendola due volte: estrarla in un punto condiviso se il plugin lo consente, altrimenti documentare chiaramente che le due configurazioni devono restare allineate manualmente.
 - Verificare che il bottone Google sulla pagina di login custom dell'App usi questa istanza e non quella Admin.
+
+**Note di esecuzione** (2026-08-02):
+- Istanza App in `plugins/googleAppOAuth.ts` (`strategyName: google-app`, path `/oauth/google-app`); registrata in `payload.config.ts` accanto all'istanza Admin.
+- Logica condivisa riusata da `auth/google/`: `createGoogleGetToken` (area `app`, validazione `hd` via `id_token`), `fetchGoogleUserInfo` (solo `email`/`sub`), `validateDomainForArea` con `allowApp`.
+- `onUserNotFoundBehavior: "error"`; hook `beforeLogin` (`guardLoginAccess`) verifica `active` e `appRole !== none`.
+- Pagina login custom `/app/login` con bottone Google (`components/app/GoogleAppLoginButton` → `GET /api/users/oauth/google-app`); form locale rimandato a § 2.6.
+- Redirect post-login: successo → `/app`; fallimento → `/app/login?error=unauthorized` (messaggio generico `Accesso non autorizzato`).
+- **Redirect URI App (locale)**: `http://localhost:3000/api/users/oauth/google-app/callback` — va registrato su Google Cloud Console prima del test (vedi `docs/operativo/google-oauth.md`).
+- **Test dev App Google**: non ancora eseguito in questa sessione — richiede redirect URI registrato + utente App censito con `loginMethod = google` e dominio whitelisted (`allowApp`).
 
 ---
 

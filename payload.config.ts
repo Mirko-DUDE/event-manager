@@ -6,6 +6,7 @@ import sharp from 'sharp'
 import { Users } from './collections/Users'
 import { Settings } from './globals/Settings'
 import { googleAdminOAuth } from './plugins/googleAdminOAuth'
+import { googleAppOAuth } from './plugins/googleAppOAuth'
 
 export default buildConfig({
   admin: {
@@ -28,6 +29,6 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
   }),
-  plugins: [googleAdminOAuth],
+  plugins: [googleAdminOAuth, googleAppOAuth],
   sharp,
 })

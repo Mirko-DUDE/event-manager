@@ -1,6 +1,9 @@
 /** Messaggio generico condiviso tra tutti i percorsi di rifiuto login (Google e locale). */
 export const LOGIN_FAILURE_MESSAGE = 'Accesso non autorizzato'
 
+/** Pagina login Area App (Google in § 2.5, form locale in § 2.6). */
+export const APP_LOGIN_PATH = '/app/login'
+
 /** Route Admin non linkata — login locale super-admin di bootstrap (§ 2.7). */
 export const ADMIN_LOCAL_LOGIN_PATH = '/admin/login/local'
 
