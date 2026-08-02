@@ -1,0 +1,34 @@
+---
+description: Validazione del codice ad ogni passaggio e test in ambiente dev solo su funzionalità testabili
+globs:
+alwaysApply: true
+---
+
+# Validazione e testing
+
+Due livelli distinti, da non confondere: la **validazione di codice** (sempre, ad ogni passaggio) e il **test in ambiente di sviluppo con l'umano** (solo quando c'è una funzionalità concreta da verificare a runtime).
+
+## Validazione di codice — ad ogni passaggio, senza eccezioni
+
+Dopo aver implementato un passaggio (anche piccolo: una checklist item di una sottofase, non necessariamente l'intera sottofase), prima di dichiararlo concluso:
+
+- Rileggere il codice scritto, non limitarsi a "l'ho scritto quindi va bene".
+- Verificare la coerenza con le regole di progetto (in particolare `01-architettura.mdc`, `03-autenticazione-sicurezza.mdc`, `04-convenzioni-payload.mdc`).
+- Se disponibili, eseguire type-check/lint/build del progetto per intercettare errori evidenti prima di procedere al passaggio successivo.
+- Verificare che il passaggio non abbia introdotto una violazione di un guardrail già stabilito altrove (es. un campo che bypassa la validazione password, un accesso non ristretto per ruolo).
+- Se la validazione rivela un problema, risolverlo o segnalarlo esplicitamente prima di andare avanti — non accumulare passaggi su una base che si sa già essere difettosa.
+
+Questo livello **non richiede il coinvolgimento dell'umano** per essere eseguito: è una responsabilità dell'agente, ad ogni passaggio, sempre.
+
+## Test in ambiente dev con l'umano — solo su funzionalità testabili
+
+Diverso dalla validazione di codice: qui si tratta di avviare davvero l'applicazione e verificare un comportamento a runtime, cosa che richiede la partecipazione dell'umano (osservare, cliccare, confermare).
+
+- **Non proporre un test in ambiente dev ad ogni micro-passaggio**: sarebbe dispersivo e interromperebbe inutilmente il flusso di lavoro.
+- **Proporlo quando si è completato un pezzo di funzionalità concretamente testabile** — tipicamente quando l'obiettivo di una sottofase (o di un gruppo di sottofasi correlate) è raggiunto, non ad ogni singola riga o singolo file. I file di fase (`fase-1-setup.md`, `fase-2-login.md`) indicano già, nelle sottofasi con voci come "primo avvio locale", "verifica di raggiungibilità", "spike end-to-end", dove un test con l'umano è naturale.
+- Quando si propone un test, fornire sempre una **checklist concreta e puntuale** di cosa verificare e come (es. "apri questo URL, dovresti vedere X, prova questa azione, il risultato atteso è Y") — non limitarsi a dire genericamente "prova ad avviare l'app e vedi se funziona".
+- Se il test in ambiente dev rivela un problema, tornare al livello di validazione codice per la correzione, poi ripetere il test mirato solo sulla parte corretta, non necessariamente tutto da capo.
+
+## Perché la distinzione conta
+
+Confondere i due livelli porta a due rischi opposti: interrompere continuamente l'umano per verifiche che l'agente può fare da solo (validazione codice), oppure dichiarare "fatto" un pezzo di funzionalità senza che nessuno l'abbia mai visto funzionare davvero a runtime (mancato test dev). Tenerli separati evita entrambi.

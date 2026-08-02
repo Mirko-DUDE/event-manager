@@ -10,7 +10,7 @@ alwaysApply: false
 
 - Next.js (App Router) + PayloadCMS v3, un solo progetto.
 - Tailwind CSS per lo styling.
-- MongoDB Atlas come database.
+- MongoDB: **Community Server locale** in sviluppo; **MongoDB Atlas** al deploy (M0 iniziale, tier a pagamento prima dell'uso reale — vedi `docs/piano-sviluppo/fase-1-setup.md` § 1.3 e futuro `fase-3-deploy.md`). Connection string sempre in `DATABASE_URL` (variabile d'ambiente, mai hardcoded).
 - Deploy su Google Cloud Run.
 
 ## Regole vincolanti

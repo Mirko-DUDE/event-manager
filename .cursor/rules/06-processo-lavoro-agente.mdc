@@ -28,7 +28,8 @@ alwaysApply: true
 ## Passaggi esterni all'ambiente di sviluppo
 
 Quando un passo del piano richiede un'azione **fuori da Cursor/dal codice** — ad esempio:
-- creazione/configurazione del cluster MongoDB Atlas;
+- installazione/avvio di **MongoDB Community Server** in locale (Fase 1 § 1.3);
+- creazione/configurazione del cluster **MongoDB Atlas** al deploy (non in Fase 1 — vedi futuro `fase-3-deploy.md`);
 - creazione di credenziali OAuth su Google Cloud Console (Client ID/Secret, redirect URI, consent screen);
 - configurazione di variabili d'ambiente o segreti su Google Cloud Run;
 - configurazione DNS o dominio;
