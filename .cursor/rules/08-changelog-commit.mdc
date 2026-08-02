@@ -1,0 +1,33 @@
+---
+description: Changelog obbligatorio e controllo di coerenza documentale prima di ogni commit
+globs:
+alwaysApply: true
+---
+
+# Changelog e controllo pre-commit
+
+Questa regola integra (non sostituisce) `06-processo-lavoro-agente.mdc` (documentazione obbligatoria) e `07-validazione-testing.mdc` (validazione codice/test): qui il focus è specificamente il changelog e cosa verificare **subito prima** di fare un commit.
+
+## Changelog — `docs/piano-sviluppo/CHANGELOG.md`
+
+- Il progetto mantiene un changelog in formato Keep a Changelog, con versionamento semplificato legato alle fasi (vedi header del file stesso per la convenzione MINOR/PATCH).
+- **Ogni commit che chiude un passaggio significativo** (una sottofase, o una correzione rilevante) deve avere una voce corrispondente sotto `[Unreleased]`, nella sottosezione appropriata (Added/Changed/Fixed/Tests).
+- Le voci **Tests** devono riportare anche gli esiti negativi o parziali, non solo i successi: se un test rivela che un guardrail non è ancora implementato, o che un comportamento non è quello atteso, va scritto — il changelog non è un elenco di sole buone notizie, è uno storico fedele.
+- Le voci vanno scritte in modo che siano comprensibili **senza il contesto della chat che le ha prodotte**: non "sistemato il bug di prima", ma cosa esattamente era il problema e cosa è cambiato.
+- Quando tutte le sottofasi di una fase risultano ✅ in `00-piano-generale.md`, la sezione `[Unreleased]` va convertita nella nuova versione (incremento MINOR, data del giorno) — non lasciarla accumulata indefinitamente sotto Unreleased dopo che una fase è chiusa.
+
+## Controllo pre-commit — checklist obbligatoria
+
+Prima di eseguire un commit (fermo restando che il push resta manuale, vedi `00-come-eseguire-il-piano.md`), verificare in ordine:
+
+1. **Stato piano aggiornato**: la sottofase appena completata risulta ✅ sia nel file di fase (`fase-1-setup.md`/`fase-2-login.md`) sia in `00-piano-generale.md`. Se il lavoro è parziale, lo stato riflette la realtà (es. 🔶 in corso), non viene marcato ✅ per ottimismo.
+2. **Changelog aggiornato**: esiste una voce in `[Unreleased]` che descrive cosa è stato fatto in questo commit, inclusi eventuali esiti di test (positivi o negativi) e deviazioni dal piano emerse durante l'implementazione.
+3. **Nessuna documentazione "dimenticata"**: se durante la sessione sono emerse decisioni non previste nei file di piano (es. una scelta tecnica diversa da quella originariamente scritta), sono state riportate nel file di fase pertinente, non lasciate solo nella cronologia della chat.
+4. **Validazione di codice già eseguita** (rimando a `07-validazione-testing.mdc`): non eseguire questo controllo come sostituto della validazione di codice, è un controllo aggiuntivo sulla documentazione, non sul codice.
+
+Se uno di questi punti manca, **completarlo prima di fare il commit**, non dopo — un commit senza changelog o senza stato aggiornato è un punto di ripristino con informazioni incomplete, che vanifica parte dello scopo di avere un piano scritto.
+
+## Cosa non fare
+
+- Non scrivere voci di changelog generiche ("varie ed eventuali", "piccole modifiche") che non permettono di capire cosa è cambiato senza rileggere il diff.
+- Non accumulare più sottofasi non correlate in una singola voce di changelog, se già si è deciso di fare commit separati per sottofase (vedi policy commit in `00-come-eseguire-il-piano.md`): la granularità del changelog segue quella dei commit.
