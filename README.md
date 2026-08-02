@@ -53,4 +53,5 @@ docs/                                   → specifica e piano di sviluppo
 ## Documentazione di sviluppo
 
 - Piano generale: `docs/piano-sviluppo/00-piano-generale.md`
-- Fase corrente: `docs/piano-sviluppo/fase-1-setup.md`
+- Fase completata: `docs/piano-sviluppo/fase-1-setup.md`
+- Fase corrente: `docs/piano-sviluppo/fase-2-login.md`

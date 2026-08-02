@@ -20,6 +20,10 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 **Se qualcosa non si installa**: fermarsi e seguire la regola sui problemi di installazione (`06-processo-lavoro-agente.mdc`) — riportare l'errore esatto e le istruzioni per risolverlo, senza forzare versioni o workaround non concordati.
 
+**Note di esecuzione** (2026-08-02):
+- Next.js **16.2.12**, App Router, TypeScript, React 19.2.4.
+- Progetto creato con `create-next-app`; Tailwind e Payload non installati in questo passo (isolamento problemi).
+
 ---
 
 ## 1.2 — Installazione e configurazione PayloadCMS v3
@@ -36,6 +40,10 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Il "secret" dell'applicazione (usato da Payload per firmare la sessione) va gestito come variabile d'ambiente, mai hardcoded nel codice.
 
 **Passaggio da confermare con l'umano**: se l'installazione richiede la generazione di un secret casuale, generarlo e chiedere conferma su dove salvarlo (variabile d'ambiente locale `.env`, da non committare — verificare che `.gitignore` lo escluda già).
+
+**Note di esecuzione** (2026-08-02):
+- PayloadCMS **3.87.0** (`payload`, `@payloadcms/next`, `@payloadcms/db-mongodb`, `@payloadcms/richtext-lexical`).
+- Route group `(payload)/` generato in `app/(payload)/`; `payload.config.ts` alla root con `collections: []`, secret da `PAYLOAD_SECRET`.
 
 ---
 
@@ -155,7 +163,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - [x] Aggiornare lo stato a ✅ per tutte le sottofasi completate, sia in questo file sia in `00-piano-generale.md`.
 
 **Note di esecuzione** (2026-08-02):
-- Commit presenti per 1.1–1.3 (`97d24a1`), 1.4 (`836ee2e`), 1.5 (`453494f`); migrazione pnpm (`4b1c444`) pushata dall'umano.
+- Commit presenti per 1.1–1.3 (`97d24a1`), 1.4 (`836ee2e`), 1.5 (`453494f`), migrazione pnpm (`4b1c444`), fix layout e chiusura fase (`cbb9192`) — tutti pushati su `origin/main`.
 - `.gitignore`: `.env*`, `node_modules`, `.next/`, `out/`, `package-lock.json` — OK.
 - Nessun segreto in file tracciati; `.env` esiste solo in locale, non in Git.
 - Fix layout hydration (1.6) validato con `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` e test dev su `/`, `/app`, `/admin`.
@@ -165,7 +173,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 ## Note di chiusura fase
 
 Al termine della Fase 1, prima di iniziare `fase-2-login.md`:
-- Confermare con l'umano che l'ambiente di sviluppo è stabile (nessun errore bloccante al riavvio).
-- Segnalare esplicitamente qualunque deviazione da questo piano avvenuta durante l'esecuzione (es. una versione di libreria diversa da quella prevista, un passaggio saltato), così da tenerne conto in Fase 2.
+- [x] Confermare con l'umano che l'ambiente di sviluppo è stabile (nessun errore bloccante al riavvio) — confermato 2026-08-02 (dev server su `:3000`, route `/`, `/app`, `/admin` OK).
+- [x] Segnalare esplicitamente qualunque deviazione da questo piano avvenuta durante l'esecuzione (es. una versione di libreria diversa da quella prevista, un passaggio saltato), così da tenerne conto in Fase 2.
 
 **Deviazione registrata** (2026-08-02): package manager migrato da **npm** a **pnpm** (v11.18.0) dopo la sottofase 1.4. Lockfile: `pnpm-lock.yaml` + `pnpm-workspace.yaml` (`allowBuilds` per sharp/esbuild/unrs-resolver). `package-lock.json` rimosso e ignorato in `.gitignore`.

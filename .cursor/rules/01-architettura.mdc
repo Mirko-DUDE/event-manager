@@ -12,11 +12,12 @@ Non è, e non deve mai diventare, "due applicazioni" da far comunicare a distanz
 ## Regole vincolanti
 
 - **Non modificare a mano** i file del route group `(payload)` dentro `/app` (cartella di progetto Next.js App Router): sono auto-generati da Payload e contengono il pannello Admin e le API REST/GraphQL.
-- Il codice custom dell'Area App vive in un **route group separato**, accanto a `(payload)`, nella stessa cartella `/app` del progetto.
+- Il codice custom dell'Area App vive in un **route group separato** `(app)`, accanto a `(payload)` e `(frontend)`, nella stessa cartella `/app` del progetto.
+- **Layout root pass-through**: `app/layout.tsx` non renderizza `<html>` né `<body>` — restituisce solo `children`. Ogni route group gestisce il proprio documento html/body (`(frontend)/` per la vetrina, `(app)/` per l'Area App, `(payload)/` per Payload). Pattern richiesto da Payload per evitare hydration error su `/admin` (html annidati).
 - Mappa delle URL pubbliche da rispettare sempre:
-  - `/` → sito vetrina, pubblico, nessun login
-  - `/app` → Area App, utenti autenticati
-  - `/admin` → Area Admin, pannello Payload, utenti autenticati con ruolo idoneo
+  - `/` → sito vetrina, pubblico, nessun login (route group `(frontend)/`)
+  - `/app` → Area App, utenti autenticati (route group `(app)/`)
+  - `/admin` → Area Admin, pannello Payload, utenti autenticati con ruolo idoneo (route group `(payload)/`)
 - **Stessa origine, stesso server, stesso build**: Admin e App sono due percorsi della stessa applicazione.
 - **Conseguenza diretta, da non violare mai**:
   - Nessuna configurazione CORS.
