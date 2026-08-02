@@ -95,15 +95,22 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 1.5 — Verifica struttura cartelle secondo l'architettura decisa
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 
 **Obiettivo**: confermare che la struttura fisica del progetto rispecchi l'architettura di `01-architettura.mdc` prima di costruire qualunque funzionalità sopra.
 
 **Checklist**:
-- Verificare che dentro `/app` esistano, come cartelle separate e riconoscibili: il route group `(payload)` (auto-generato, non toccato) e il route group custom dell'Area App.
-- Verificare che non esista alcuna configurazione CORS, alcun secondo progetto, alcun deploy separato: un solo `package.json`, un solo processo di build.
-- Verificare che la cartella `/app` di progetto non venga confusa, in nessun file di configurazione o commento, con il path URL `/app` dell'Area App (sono due cose distinte, vedi specifica 1.1).
-- Documentare in breve (commento o nota nel `README.md` del progetto) dove si trova cosa, per chi arriverà dopo.
+- [x] Verificare che dentro `/app` esistano, come cartelle separate e riconoscibili: il route group `(payload)` (auto-generato, non toccato) e il route group custom dell'Area App.
+- [x] Verificare che non esista alcuna configurazione CORS, alcun secondo progetto, alcun deploy separato: un solo `package.json`, un solo processo di build.
+- [x] Verificare che la cartella `/app` di progetto non venga confusa, in nessun file di configurazione o commento, con il path URL `/app` dell'Area App (sono due cose distinte, vedi specifica 1.1).
+- [x] Documentare in breve (commento o nota nel `README.md` del progetto) dove si trova cosa, per chi arriverà dopo.
+
+**Note di esecuzione** (2026-08-02):
+- Route group `(payload)` presente in `app/(payload)/` (admin + API REST/GraphQL) — file Payload, non modificati manualmente.
+- Route group `(app)` presente in `app/(app)/` con pagina placeholder su URL `/app` (`app/(app)/app/page.tsx`).
+- Vetrina pubblica su URL `/` in `app/page.tsx` (root del router, fuori dai route group).
+- Un solo `package.json` e `next.config.ts` senza CORS, Bearer token o deploy separato.
+- `README.md` aggiornato con mappa URL, struttura cartelle e nota esplicita cartella `app/` vs URL `/app`.
 
 ---
 

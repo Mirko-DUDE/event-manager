@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Event Manager
 
-## Getting Started
+SaaS interno per la gestione di eventi corporate. Un solo progetto **Next.js + PayloadCMS v3**, same-origin.
 
-First, run the development server:
+## Avvio in locale
 
 ```bash
+cp .env.example .env   # poi valorizzare PAYLOAD_SECRET e DATABASE_URL
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Richiede **MongoDB Community Server** in esecuzione su `localhost:27017`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Mappa URL pubbliche
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| URL | Area | Descrizione |
+|---|---|---|
+| `/` | Vetrina | Pubblica, nessun login |
+| `/app` | Area App | Riservata agli utenti autenticati (Fase 2+) |
+| `/admin` | Area Admin | Pannello Payload, utenti con ruolo idoneo |
 
-## Learn More
+## Struttura cartelle
 
-To learn more about Next.js, take a look at the following resources:
+> **Attenzione:** la cartella di progetto `app/` (convenzione Next.js App Router) **non** coincide con l'URL `/app`. Sono due cose distinte.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/
+├── layout.tsx, page.tsx, globals.css   → URL /  (vetrina pubblica)
+├── (payload)/                          → URL /admin, /api/*  (Payload — non modificare a mano)
+│   ├── admin/[[...segments]]/
+│   └── api/
+└── (app)/                              → route group Area App (nome non compare nell'URL)
+    ├── layout.tsx, app.css             → Tailwind solo qui
+    └── app/page.tsx                    → URL /app  (placeholder)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+payload.config.ts                       → configurazione Payload (root)
+docs/                                   → specifica e piano di sviluppo
+.cursor/rules/                          → regole per agente Cursor
+```
 
-## Deploy on Vercel
+## Architettura
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Un solo** `package.json`, **un solo** build, **nessun** CORS.
+- Admin e App comunicano same-origin: Local API lato server, REST/GraphQL lato client.
+- Dettaglio completo: `docs/specifica-login-payloadcms.md` e `.cursor/rules/01-architettura.mdc`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Documentazione di sviluppo
+
+- Piano generale: `docs/piano-sviluppo/00-piano-generale.md`
+- Fase corrente: `docs/piano-sviluppo/fase-1-setup.md`
