@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+
+/* Scan solo il route group App (e futuri componenti condivisi), non (payload) */
+@source './**/*.{js,ts,jsx,tsx}';
+@source '../../components/**/*.{js,ts,jsx,tsx}';

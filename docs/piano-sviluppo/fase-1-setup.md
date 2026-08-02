@@ -74,15 +74,22 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 1.4 — Installazione e configurazione Tailwind CSS
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 
 **Obiettivo**: Tailwind disponibile per lo styling del route group App (l'Area Admin ha già il proprio styling nativo da Payload e non va toccata).
 
 **Checklist**:
-- Installare Tailwind seguendo il percorso di integrazione standard per Next.js App Router.
-- Configurare i percorsi di scan (`content`) in modo da includere il route group App e i componenti condivisi, **escludendo** la necessità di toccare i file auto-generati di `(payload)`.
-- Verificare che una classe Tailwind di prova, applicata in una pagina placeholder del route group App, produca l'effetto atteso in locale.
-- Non introdurre altre librerie di componenti UI in questo passo, salvo diversa conferma (coerente con `05-stack-stile-codice.mdc`).
+- [x] Installare Tailwind seguendo il percorso di integrazione standard per Next.js App Router.
+- [x] Configurare i percorsi di scan (`content`) in modo da includere il route group App e i componenti condivisi, **escludendo** la necessità di toccare i file auto-generati di `(payload)`.
+- [x] Verificare che una classe Tailwind di prova, applicata in una pagina placeholder del route group App, produca l'effetto atteso in locale.
+- [x] Non introdurre altre librerie di componenti UI in questo passo, salvo diversa conferma (coerente con `05-stack-stile-codice.mdc`).
+
+**Note di esecuzione** (2026-08-02):
+- Tailwind CSS v4 installato con `@tailwindcss/postcss` e `postcss.config.mjs` alla root.
+- Tailwind importato solo in `app/(app)/app.css` (layout del route group App), **non** in `globals.css` — il pannello Payload in `(payload)` resta indipendente.
+- `@source` limitato a `app/(app)/**` e futura cartella `components/`, escluso `(payload)`.
+- Pagina placeholder creata in `app/(app)/app/page.tsx` (URL `/app`) con classi di prova (`bg-blue-600`, `text-2xl`, ecc.).
+- Verificato: `/app` risponde 200, CSS chunk dedicato generato, `npm run build` OK.
 
 ---
 

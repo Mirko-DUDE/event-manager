@@ -14,7 +14,7 @@
 
 | Fase | Descrizione | Stato | File di dettaglio |
 |---|---|---|---|
-| Fase 1 | Setup progetto: Next.js, PayloadCMS, Tailwind, MongoDB locale, dipendenze base | 🔶 in corso (1.1 ✅, 1.2 ✅, 1.3 ✅) | `fase-1-setup.md` |
+| Fase 1 | Setup progetto: Next.js, PayloadCMS, Tailwind, MongoDB locale, dipendenze base | 🔶 in corso (1.1 ✅, 1.2 ✅, 1.3 ✅, 1.4 ✅) | `fase-1-setup.md` |
 | Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | 🔲 da fare | `fase-2-login.md` |
 
 ## Fase 1 — Setup, panoramica sottofasi
