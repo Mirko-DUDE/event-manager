@@ -22,6 +22,7 @@ alwaysApply: true
 ## Problemi di installazione o dipendenze
 
 - Se un pacchetto non si installa, genera conflitti di versione, o richiede configurazione a livello di sistema operativo (variabili d'ambiente, permessi, strumenti mancanti): **fermarsi**.
+- **Package manager**: usare sempre **pnpm** (`pnpm install`, `pnpm dev`, …). Non mescolare npm/yarn nello stesso progetto — genera `node_modules` inconsistenti e lockfile paralleli.
 - Non tentare workaround silenziosi (downgrade non concordati, patch improvvisate, dipendenze alternative non previste).
 - Riportare all'umano il problema esatto (messaggio d'errore, causa probabile) e le istruzioni precise per risolverlo, lasciando a lui l'azione se richiede permessi o strumenti fuori dal controllo dell'agente.
 

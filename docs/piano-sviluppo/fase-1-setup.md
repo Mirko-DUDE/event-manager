@@ -89,7 +89,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Tailwind importato solo in `app/(app)/app.css` (layout del route group App), **non** in `globals.css` — il pannello Payload in `(payload)` resta indipendente.
 - `@source` limitato a `app/(app)/**` e futura cartella `components/`, escluso `(payload)`.
 - Pagina placeholder creata in `app/(app)/app/page.tsx` (URL `/app`) con classi di prova (`bg-blue-600`, `text-2xl`, ecc.).
-- Verificato: `/app` risponde 200, CSS chunk dedicato generato, `npm run build` OK.
+- Verificato: `/app` risponde 200, CSS chunk dedicato generato, `pnpm build` OK.
 
 ---
 
@@ -116,16 +116,27 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 1.6 — Primo avvio locale e verifica di raggiungibilità
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 
 **Obiettivo**: avere una conferma concreta, non solo teorica, che l'installazione funziona end-to-end prima di chiudere la fase.
 
 **Checklist**:
-- Avviare il progetto in locale.
-- Verificare che `/admin` sia raggiungibile e mostri il pannello Payload (anche se privo di collection utili — potrebbe chiedere di creare il primo utente Payload di default, cosa attesa a questo stadio e non ancora la collection `users` finale della Fase 2).
-- Verificare che una pagina placeholder del route group App (path `/app`) sia raggiungibile e mostri lo styling Tailwind applicato in 1.4.
-- Verificare che la home page pubblica (`/`) sia raggiungibile.
-- Annotare eventuali warning in console che non bloccano l'avvio, per non perderli, ma non necessariamente risolverli ora se non richiesto per procedere.
+- [x] Avviare il progetto in locale.
+- [x] Verificare che `/admin` sia raggiungibile e mostri il pannello Payload (anche se privo di collection utili — potrebbe chiedere di creare il primo utente Payload di default, cosa attesa a questo stadio e non ancora la collection `users` finale della Fase 2).
+- [x] Verificare che una pagina placeholder del route group App (path `/app`) sia raggiungibile e mostri lo styling Tailwind applicato in 1.4.
+- [x] Verificare che la home page pubblica (`/`) sia raggiungibile.
+- [x] Annotare eventuali warning in console che non bloccano l'avvio, per non perderli, ma non necessariamente risolverli ora se non richiesto per procedere.
+
+**Note di esecuzione** (2026-08-02):
+- Dev server verificato su `http://localhost:3000`.
+- `/` → **200**, pagina vetrina Next.js di default.
+- `/app` → **200**, placeholder Area App con classi Tailwind (`bg-blue-600`, CSS chunk dedicato).
+- `/admin` → **200**, pannello Payload raggiungibile (titolo "Dashboard - Payload", nessuna collection utile ancora).
+- **Warning non bloccanti annotati**:
+  - Payload: `No email adapter provided` — atteso, email Resend in Fase 2 § 2.6.
+  - Next.js: experiment `turbopackServerFastRefresh` disabilitato — informativo.
+  - npm: `Unknown env config "devdir"` — configurazione locale npm, non impatta l'app.
+- **Nota operativa**: se `pnpm dev` segnala "Another next dev server is already running", terminare il processo precedente (`kill <PID>`) prima di riavviare.
 
 ---
 
@@ -149,3 +160,5 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 Al termine della Fase 1, prima di iniziare `fase-2-login.md`:
 - Confermare con l'umano che l'ambiente di sviluppo è stabile (nessun errore bloccante al riavvio).
 - Segnalare esplicitamente qualunque deviazione da questo piano avvenuta durante l'esecuzione (es. una versione di libreria diversa da quella prevista, un passaggio saltato), così da tenerne conto in Fase 2.
+
+**Deviazione registrata** (2026-08-02): package manager migrato da **npm** a **pnpm** (v11.18.0) dopo la sottofase 1.4. Lockfile: `pnpm-lock.yaml` + `pnpm-workspace.yaml` (`allowBuilds` per sharp/esbuild/unrs-resolver). `package-lock.json` rimosso e ignorato in `.gitignore`.

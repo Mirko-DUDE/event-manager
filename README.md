@@ -6,11 +6,13 @@ SaaS interno per la gestione di eventi corporate. Un solo progetto **Next.js + P
 
 ```bash
 cp .env.example .env   # poi valorizzare PAYLOAD_SECRET e DATABASE_URL
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
-Richiede **MongoDB Community Server** in esecuzione su `localhost:27017`.
+Richiede **MongoDB Community Server** in esecuzione su `localhost:27017` e **pnpm** (v11+, via Corepack: `corepack enable`).
+
+Comandi utili: `pnpm dev`, `pnpm build`, `pnpm lint`.
 
 ## Mappa URL pubbliche
 

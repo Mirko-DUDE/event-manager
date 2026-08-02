@@ -1,0 +1,9 @@
+# Configurazione pnpm v11 (single-package: nessun campo `packages` = solo root)
+# https://pnpm.io/settings
+
+strict-peer-dependencies: false
+
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
