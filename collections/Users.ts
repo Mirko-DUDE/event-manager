@@ -17,13 +17,14 @@ import {
 import { guardLoginAccess } from './users/guardLoginAccess'
 import { guardSuperAdminAssignment } from './users/guardSuperAdminAssignment'
 import { hashLocalCredentials } from './users/hashLocalCredentials'
-import { guardLoginMethod } from './users/loginMethod'
+import { guardLoginMethod, inferLoginMethod } from './users/loginMethod'
 import { sendLocalUserVerificationEmail } from './users/localUserEmails'
 import { skipNativeVerificationEmail } from './users/skipNativeVerificationEmail'
 import {
   isPasswordComplexEnough,
   PASSWORD_VALIDATION_MESSAGE,
 } from './users/passwordValidation'
+import { validateLocalPasswordConfirmation } from './users/validateLocalPasswordConfirmation'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -84,8 +85,19 @@ export const Users: CollectionConfig = {
       name: 'localPasswordFields',
       type: 'ui',
       admin: {
-        condition: (_data, siblingData, { operation }) =>
-          operation === 'create' && siblingData?.loginMethod === 'local',
+        condition: (_data, siblingData, { operation }) => {
+          if (!siblingData || (operation !== 'create' && operation !== 'update')) {
+            return false
+          }
+          const method = inferLoginMethod({
+            loginMethod: siblingData.loginMethod as 'google' | 'local' | undefined,
+            hash: typeof siblingData.hash === 'string' ? siblingData.hash : null,
+          })
+          if (method !== 'local' || siblingData.adminRole === 'super-admin') {
+            return false
+          }
+          return true
+        },
         components: {
           Field: '@/components/admin/UsersLocalPasswordFields',
         },
@@ -179,8 +191,10 @@ export const Users: CollectionConfig = {
     beforeLogin: [guardLoginAccess],
     beforeValidate: [
       guardLoginMethod,
-      ({ data }) => {
+      ({ data, operation, originalDoc }) => {
         if (!data) return data
+
+        validateLocalPasswordConfirmation({ data, operation, originalDoc })
 
         const password = data.password
         const hasPassword = typeof password === 'string' && password.length > 0

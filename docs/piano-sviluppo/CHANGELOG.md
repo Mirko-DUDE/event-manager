@@ -49,6 +49,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **§ 2.6 — Schermata post-attivazione**: redirect di successo finiva nel `catch` (Next.js `redirect()` lancia un'eccezione) → messaggio errore fuorviante; ora pagina dedicata con conferma e pulsante «Vai al login».
 - **§ 2.6 — Email illeggibili**: sostituito HTML grezzo i18n Payload con template `renderAppEmail` (attivazione account e reset password).
 - **§ 2.6 — Create utente bloccato da Resend**: hook `skipNativeVerificationEmail` + try/catch su invio verifica — la create non fallisce se l'email non parte.
+- **§ 2.1 — Cambio password da Admin**: campi password opzionali in modifica utente App locale; super-admin escluso (guard server-side in `hashLocalCredentials`); validazione coincidenza password/conferma in `validateLocalPasswordConfirmation` (create e update); messaggi condivisi client/server in `auth/passwordMessages.ts`.
 
 ### Tests
 

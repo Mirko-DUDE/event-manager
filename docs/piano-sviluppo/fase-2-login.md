@@ -40,7 +40,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
   - Utente App → Google o locale; se locale → `adminRole = Nessuno`, App Role obbligatorio, password obbligatoria.
   - `Super Admin` non selezionabile da UI (solo `pnpm seed:super-admin`).
 - `auth.disableLocalStrategy: { enableFields: true }` — email in create senza password obbligatoria; hash PBKDF2 in `collections/users/hashLocalCredentials.ts` (Payload non hasha più in automatico).
-- Componenti Admin: `UsersCredentialsFormSync` (sync ruoli), `UsersLocalPasswordFields` (password custom — il blocco Auth Payload non le mostra con disableLocalStrategy), `UsersLoginMethodDisplay` (sola lettura in modifica).
+- Componenti Admin: `UsersCredentialsFormSync` (sync ruoli), `UsersLocalPasswordFields` (password custom — il blocco Auth Payload non le mostra con disableLocalStrategy; in modifica opzionale per utenti App locali), `UsersLoginMethodDisplay` (sola lettura in modifica).
 - Validazione server: `collections/users/loginMethod.ts` (`guardLoginMethod`); blocco promozione super-admin da UI: `guardSuperAdminAssignment.ts`.
 - Campo `sub` (ID Google OAuth): nascosto in Admin, valorizzato automaticamente al primo login Google.
 - **Effetto collaterale**: login locale standard su `/admin/login` disabilitato — route emergenza in § 2.7 (`/admin/login/local`).
@@ -180,6 +180,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - **Protezione route `/app/*`**: middleware (`payload-token` assente → redirect `/app/login`) + layout server `(protected)` con `payload.auth` e controllo `appRole`.
 - **Token expiration (verifica codice Payload 3.87)**: reset password usa default `forgotPassword.expiration` = **3600000 ms (1 ora)**, non 24 h — la specifica (2.4) cita 24 h come default Payload; su questa versione il reset è 1 h, i token di verifica email (`verifyEmail`) **non hanno scadenza lato server**. Nessuna configurazione custom aggiunta (proporzionalità).
 - **Test dev (2026-08-02)**: reset password → OK; create utente locale → OK (mittente Resend: `noreply@services.dude.it`); email attivazione (template + link) → OK; pagina post-attivazione con conferma e link login → OK; login locale App post-verifica → OK.
+- **Cambio password da Admin (2026-08-02)**: campi «Nuova password» e conferma opzionali in modifica utente App locale (in create rimangono obbligatori); super-admin escluso; validazione server-side coincidenza password/conferma su create e update (`validateLocalPasswordConfirmation`). Testate e funzionanti.
 
 ---
 

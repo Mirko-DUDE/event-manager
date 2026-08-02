@@ -34,11 +34,31 @@ async function hashPassword(password: string): Promise<{ hash: string; salt: str
  * Con disableLocalStrategy + enableFields, Payload non hasha più la password in create/update.
  * Questo hook applica l'hash solo quando canHaveLocalCredentials lo consente.
  */
-export const hashLocalCredentials: CollectionBeforeChangeHook = async ({ data, operation }) => {
+export const hashLocalCredentials: CollectionBeforeChangeHook = async ({
+  data,
+  operation,
+  originalDoc,
+}) => {
   if (!data) return data
 
   const password = data.password
   const hasPassword = typeof password === 'string' && password.length > 0
+
+  if (
+    operation === 'update' &&
+    originalDoc?.adminRole === 'super-admin' &&
+    hasPassword
+  ) {
+    throw new ValidationError({
+      collection: 'users',
+      errors: [
+        {
+          message: 'La password del super-admin non può essere modificata da qui.',
+          path: 'password',
+        },
+      ],
+    })
+  }
 
   if (!canHaveLocalCredentials(data)) {
     delete data.password
