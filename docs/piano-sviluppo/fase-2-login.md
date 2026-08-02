@@ -148,8 +148,9 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - `onUserNotFoundBehavior: "error"`; hook `beforeLogin` (`guardLoginAccess`) verifica `active` e `appRole !== none`.
 - Pagina login custom `/app/login` con bottone Google (`components/app/GoogleAppLoginButton` → `GET /api/users/oauth/google-app`); form locale rimandato a § 2.6.
 - Redirect post-login: successo → `/app`; fallimento → `/app/login?error=unauthorized` (messaggio generico `Accesso non autorizzato`).
-- **Redirect URI App (locale)**: `http://localhost:3000/api/users/oauth/google-app/callback` — va registrato su Google Cloud Console prima del test (vedi `docs/operativo/google-oauth.md`).
-- **Test dev App Google**: non ancora eseguito in questa sessione — richiede redirect URI registrato + utente App censito con `loginMethod = google` e dominio whitelisted (`allowApp`).
+- **Redirect URI App (locale)**: `http://localhost:3000/api/users/oauth/google-app/callback` — registrato su Google Cloud Console.
+- **Test dev App Google (2026-08-02)**: utente censito con dominio whitelisted (`allowApp`) → login OK, redirect su `/app`. Account Gmail personale (fuori Workspace) → KO: blocco lato Google consent screen Internal (messaggio *«Accesso bloccato: l'app DUDE Services può essere usata soltanto all'interno della relativa organizzazione»* — atteso; vedi `docs/operativo/google-oauth.md` § Internal → External).
+- **Limite attuale — route `/app` non protette**: le pagine sotto `/app` (es. `/app` placeholder) sono raggiungibili anche senza sessione; il flusso OAuth crea la sessione ma non c'è ancora middleware/guard sul route group App. Da implementare prima di considerare l'Area App effettivamente riservata (probabile insieme a § 2.6 o alla prima sezione App reale).
 
 ---
 
@@ -244,7 +245,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.10 — Spike di test end-to-end con credenziali Google reali
 
-**Stato**: 🔶 parziale (Admin Google OK in locale — 2026-08-02)
+**Stato**: 🔶 parziale (Admin + App Google OK in locale — 2026-08-02; login locale App e staging Cloud Run ancora da fare)
 **Riferimento**: specifica 2.10
 
 **Obiettivo**: conferma pratica, non solo di codice, che il flusso Google funziona davvero nell'ambiente reale.
@@ -255,9 +256,9 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 1. Avviare l'app in locale con le due istanze del plugin configurate (Admin e App).
 2. Creare un record utente in `users` con email aziendale reale, ruolo admin o super-admin (o richiedere all'umano di indicarne uno esistente).
 3. Login Google su `/admin`: verificare autenticazione riuscita e che il cookie autentichi anche una chiamata REST (es. endpoint utente corrente). — ✅ fatto in dev (2026-08-02).
-4. Ripetere lo stesso su `/app` (istanza Google separata).
+4. Ripetere lo stesso su `/app` (istanza Google separata). — ✅ fatto in dev (2026-08-02): utente App censito, dominio whitelisted → OK.
 5. Login locale su `/app` con un utente locale di test.
-6. Tentativo con email di dominio non whitelisted (anche rimuovendo temporaneamente il dominio dall'allow-list) → verificare rifiuto con messaggio generico. — ✅ verificato indirettamente (utente non censito / dominio errato → messaggio generico).
+6. Tentativo con email di dominio non whitelisted (anche rimuovendo temporaneamente il dominio dall'allow-list) → verificare rifiuto con messaggio generico. — ✅ verificato indirettamente (utente non censito / dominio errato → messaggio generico su `/app/login`). Account Gmail fuori Workspace → blocco Google Internal prima del callback app (non passa dal nostro messaggio generico).
 7. Ripetere i punti rilevanti su un ambiente di staging su Cloud Run, per verificare il comportamento del cookie httpOnly su HTTPS dietro proxy/load balancer, prima del rilascio definitivo.
 
 **Non serve** un framework di test automatizzato per questo spike: è manuale, una tantum, in fase di sviluppo — non va rimandato al deploy né trasformato in un'infrastruttura di test permanente (coerente con `02-proporzionalita.mdc`).
@@ -270,3 +271,4 @@ Al termine della Fase 2:
 - Aggiornare lo stato a ✅ per tutte le sottofasi completate, sia in questo file sia in `00-piano-generale.md`.
 - Verificare che nessuna delle checklist qui sopra sia stata "saltata silenziosamente": se qualcosa è stato rimandato, annotarlo esplicitamente qui, non lasciarlo solo nella memoria della sessione di lavoro.
 - Ricordare cosa resta esplicitamente fuori scope per questa fase (già segnalato nella specifica): enforcement permessi per singola sezione App, offboarding automatico da Google Workspace, evoluzione a External, eventType di `activityLog` diversi da login.
+- **Aperto emerso in dev (2026-08-02)**: protezione route `/app/*` (redirect a login se non autenticati) — non ancora implementata; va chiusa prima del rilascio dell'Area App, non è coperta da § 2.5 da solo.

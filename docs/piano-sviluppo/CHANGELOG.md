@@ -45,7 +45,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **§ 2.4 — Login Google Admin (dev, 2026-08-02)**: login su `/admin` con utente censito (`adminRole = admin`) → OK; creazione utenti Admin Google e utente App locale da pannello → OK.
 - **§ 2.7 — Login locale super-admin (dev, 2026-08-02)**: logout → `/admin/login/local` → credenziali seed → accesso pannello → OK (dopo fix parsing body).
 - **§ 2.8 — Seed e guardrail (dev, pre-OAuth)**: seed idempotente, Global Settings, guardrail lista vuota → OK; post § 2.4 login locale su `/admin/login` non più disponibile (atteso).
-- **§ 2.10 — Spike parziale (dev, 2026-08-02)**: login Google Admin OK; rifiuto utente non censito / dominio errato con messaggio generico → OK. **Non ancora verificato**: login Google App (§ 2.5 — codice pronto, serve redirect URI registrato su Google Cloud Console), login locale App (§ 2.6), staging Cloud Run.
+- **§ 2.5 — Login Google App (dev, 2026-08-02)**: utente censito con dominio whitelisted → OK, redirect `/app`. Account Gmail personale → KO lato Google consent screen Internal (*«Accesso bloccato: l'app DUDE Services può essere usata soltanto all'interno della relativa organizzazione»* — atteso, documentato in `docs/operativo/google-oauth.md`).
+- **§ 2.10 — Spike parziale (dev, 2026-08-02)**: login Google Admin OK; login Google App OK (dominio whitelisted); rifiuto utente non censito / dominio errato con messaggio generico → OK. **Non ancora verificato**: login locale App (§ 2.6), staging Cloud Run. **Gap emerso**: route `/app/*` raggiungibili senza autenticazione (protezione route non ancora implementata).
 
 ---
 

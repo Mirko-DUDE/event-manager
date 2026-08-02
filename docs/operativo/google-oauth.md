@@ -37,7 +37,7 @@ Placeholder di riferimento in `.env.example` (senza valori reali).
   | Ambiente | Area | Redirect URI |
   |---|---|---|
   | locale | Admin | `http://localhost:3000/api/users/oauth/google-admin/callback` ✅ registrato e testato |
-  | locale | App (§ 2.5) | `http://localhost:3000/api/users/oauth/google-app/callback` — registrare prima del test |
+  | locale | App (§ 2.5) | `http://localhost:3000/api/users/oauth/google-app/callback` ✅ registrato e testato |
   | staging/prod | Admin | `{SERVER_URL}/api/users/oauth/google-admin/callback` |
   | staging/prod | App | `{SERVER_URL}/api/users/oauth/google-app/callback` |
 
@@ -49,6 +49,18 @@ Placeholder di riferimento in `.env.example` (senza valori reali).
 ## Evoluzione Internal → External
 
 Il passaggio a OAuth **External** (accesso fuori dal Workspace) non richiede refactoring nel codice: Client ID, Secret, redirect URI e scope restano gli stessi. Cambia solo la configurazione del consent screen su Google Cloud (branding, homepage, privacy policy, dominio verificato). Vedi `docs/specifica-login-payloadcms.md` § 2.1.
+
+### Comportamento atteso in fase Internal (riferimento per il passaggio a External)
+
+Con consent screen **Internal**, Google blocca già lato proprio chi non appartiene all'organizzazione Workspace del progetto GCP — **prima** che la richiesta arrivi al callback dell'app. L'utente vede un messaggio del tipo:
+
+> *Accesso bloccato: l'app DUDE Services può essere usata soltanto all'interno della relativa organizzazione*
+
+(esempio osservato in dev, 2026-08-02, tentativo login con account Gmail personale su `/app/login`).
+
+- **Non è un errore dell'app**: non passa dal nostro `failureRedirect` né dal messaggio generico `Accesso non autorizzato`.
+- **In fase Internal è ridondante** rispetto alla validazione dominio lato app (§ 2.2), ma normale.
+- **Al passaggio a External** questo blocco Google scompare: chiunque potrà avviare il flusso OAuth; l'autorizzazione effettiva resterà **solo** responsabilità dell'app (allow-list + utente censito). Verificare in quel momento che il messaggio generico dell'app copra tutti i casi di rifiuto post-callback.
 
 ## Rigenerazione credenziali
 
@@ -66,8 +78,7 @@ Il Client ID può restare lo stesso; se si crea un client del tutto nuovo, aggio
 - Variabili valorizzate in `.env`.
 - Plugin `payload-oauth2` configurato (§ 2.4 Admin ✅, § 2.5 App ✅).
 - Redirect URI Admin registrato su Google Cloud Console.
-- Redirect URI App: registrare `http://localhost:3000/api/users/oauth/google-app/callback` prima del test § 2.10.
-- Utente censito in collection `users` con `loginMethod = google`, email del dominio whitelisted e `adminRole = admin` (o super-admin).
-- Almeno un dominio in Global Settings con `allowAdmin` / `allowApp` appropriati.
+- Utente censito in collection `users` con email del dominio whitelisted (`allowAdmin` / `allowApp` a seconda dell'area) e ruolo idoneo (`adminRole` per Admin, `appRole` ≠ none per App).
+- Almeno un dominio in Global Settings con flag area appropriati.
 
-Test Admin in dev: OK (2026-08-02). Spike completo: § 2.10.
+Test Admin Google in dev: OK (2026-08-02). Test App Google in dev: OK con utente Workspace censito (2026-08-02). Account Gmail personale: blocco Google Internal (atteso). Spike completo: § 2.10.
