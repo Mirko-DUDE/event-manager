@@ -62,6 +62,7 @@ await payload.create({
   data: {
     email,
     password,
+    loginMethod: 'local',
     adminRole: 'super-admin',
     appRole: 'none',
     active: true,

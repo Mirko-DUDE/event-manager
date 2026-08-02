@@ -126,17 +126,22 @@ export interface UserAuthOperations {
 export interface User {
   id: string;
   /**
-   * Accesso al pannello Admin. Un solo valore per area — non cumulabile con altri ruoli Admin.
+   * Admin del pannello → Google Login. Utenti App → Google o locale. Il super-admin si crea solo via seed.
+   */
+  loginMethod?: ('google' | 'local') | null;
+  /**
+   * Admin: accesso pannello via Google Login. Con accesso locale deve restare Nessuno.
    */
   adminRole: 'none' | 'admin' | 'super-admin';
   /**
-   * Accesso all'Area App. Un solo valore per area — hostess e manager coprono sezioni diverse.
+   * Accesso all'Area App. Obbligatorio con accesso locale; opzionale se Admin Role = Admin.
    */
   appRole: 'none' | 'hostess' | 'manager' | 'full-access';
   /**
    * Disattivazione senza cancellare il record.
    */
   active?: boolean | null;
+  sub?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -230,9 +235,11 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  loginMethod?: T;
   adminRole?: T;
   appRole?: T;
   active?: T;
+  sub?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

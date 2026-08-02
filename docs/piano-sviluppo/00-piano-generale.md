@@ -15,7 +15,7 @@
 | Fase | Descrizione | Stato | File di dettaglio |
 |---|---|---|---|
 | Fase 1 | Setup progetto: Next.js, PayloadCMS, Tailwind, MongoDB locale, dipendenze base | ✅ fatto (1.1–1.7) | `fase-1-setup.md` |
-| Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | 🔶 in corso (2.1, 2.2, 2.8 ✅) | `fase-2-login.md` |
+| Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | 🔶 in corso (2.1–2.4, 2.8 ✅; 2.10 parziale) | `fase-2-login.md` |
 
 ## Fase 1 — Setup, panoramica sottofasi
 
@@ -35,17 +35,18 @@ Dettaglio completo in `fase-2-login.md`. Nota: l'ordine pratico consigliato eseg
 
 1. Collection `users` (schema, ruoli `adminRole`/`appRole`, campo `active`) — ✅ include stub `canAccessSection`, con collocazione fisica del file ancora da decidere (punto esplicitamente aperto, vedi `fase-2-login.md` § 2.1)
 2. Global "Settings" — allow-list domini — ✅
-3. Setup credenziali Google OAuth (passaggio esterno, Google Cloud Console)
-4. Integrazione plugin `payload-oauth2` — istanza Admin
+3. Setup credenziali Google OAuth (passaggio esterno, Google Cloud Console) — ✅
+4. Integrazione plugin `payload-oauth2` — istanza Admin — ✅
 5. Integrazione plugin `payload-oauth2` — istanza App
 6. Login locale (form App, provider email Resend, password policy)
 7. Route locale di emergenza per super-admin (`/admin/login/local`)
 8. Script di seed super-admin + guardrail (anti-cancellazione ultimo super-admin, anti lista domini vuota) — ✅
 9. Collection `activityLog` (solo eventType `login` per ora)
-10. Spike di test end-to-end con credenziali Google reali
+10. Spike di test end-to-end con credenziali Google reali — 🔶 parziale (Admin Google OK in dev)
 
 ## Prossimi passi
 
-- Prossimo passo: § 2.3 credenziali Google OAuth (passaggio esterno) oppure § 2.7 route login locale emergenza.
+- Prossimo passo: § 2.7 route login locale emergenza super-admin (urgente se il super-admin potrebbe fare logout) oppure § 2.5 istanza OAuth App.
+- Test login locale utenti App: dopo § 2.6 (form su `/app`).
 - Aggiornare questo indice e il file di fase corrispondente a ogni sottofase completata.
 - **Nuovo file da scrivere a fine Fase 2**: `fase-3-deploy.md` (o nome equivalente), con le istruzioni per il deploy su Cloud Run e il setup di MongoDB Atlas (creazione cluster M0, utente, IP access list, connection string, e successiva migrazione da M0 a tier a pagamento quando il progetto sarà finito e testato). Deciso in Fase 1 § 1.3: sviluppo su MongoDB locale, Atlas rimandato al deploy. Bootstrap super-admin al primo deploy: vedi `docs/operativo/seed-super-admin.md` (già documentato).

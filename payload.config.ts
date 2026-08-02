@@ -5,10 +5,14 @@ import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Settings } from './globals/Settings'
+import { googleAdminOAuth } from './plugins/googleAdminOAuth'
 
 export default buildConfig({
   admin: {
     user: Users.slug,
+    components: {
+      beforeLogin: ['@/components/admin/GoogleAdminLoginButton'],
+    },
   },
   collections: [Users],
   globals: [Settings],
@@ -17,5 +21,6 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
   }),
+  plugins: [googleAdminOAuth],
   sharp,
 })

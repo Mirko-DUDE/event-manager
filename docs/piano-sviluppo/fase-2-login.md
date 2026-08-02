@@ -30,11 +30,20 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 **Note di esecuzione** (2026-08-02):
 - Collection `users` in `collections/Users.ts` con auth Payload nativa, campi `adminRole`, `appRole`, `active` (email gestita da auth).
 - Validazione password custom in `collections/users/passwordValidation.ts` + hook `beforeValidate` (min 8 car., alfanumerico + speciale).
-- Access control: pannello Admin solo per `admin`/`super-admin`; credenziali locali consentite solo per `super-admin` o utenti App puri (`adminRole = none`, `appRole !== none`) — un `admin` con anche `appRole` usa Google per entrambe le aree.
+- Access control: pannello Admin solo per `admin`/`super-admin`; credenziali locali consentite solo con `loginMethod = local` (super-admin via seed, utenti App) oppure `adminRole = super-admin` — gli Admin pannello (`adminRole = admin`) usano sempre Google Login.
 - Stub `canAccessSection` in `collections/users/canAccessSection.ts` (collocazione definitiva ancora aperta).
 - `payload.config.ts` aggiornato con `admin.user` e collection registrata; tipi rigenerati.
 - Campo `active`: nascosto nei form di creazione (incluso first-register) via `admin.condition`; default `true`. Compare solo in modifica utente esistente, dove serve per disattivare senza cancellare.
 - Messaggi di validazione password: versione breve per i tooltip nativi Payload (i testi lunghi vengono troncati); requisito completo in `PASSWORD_REQUIREMENTS_FULL` nel codice.
+- **Form creazione utenti (2026-08-02)**: campo `loginMethod` (radio, primo nel form visivo) — **Google Login** o **Accesso locale**. Regole:
+  - Admin pannello → Google + `adminRole = Admin` (nessuna password).
+  - Utente App → Google o locale; se locale → `adminRole = Nessuno`, App Role obbligatorio, password obbligatoria.
+  - `Super Admin` non selezionabile da UI (solo `pnpm seed:super-admin`).
+- `auth.disableLocalStrategy: { enableFields: true }` — email in create senza password obbligatoria; hash PBKDF2 in `collections/users/hashLocalCredentials.ts` (Payload non hasha più in automatico).
+- Componenti Admin: `UsersCredentialsFormSync` (sync ruoli), `UsersLocalPasswordFields` (password custom — il blocco Auth Payload non le mostra con disableLocalStrategy), `UsersLoginMethodDisplay` (sola lettura in modifica).
+- Validazione server: `collections/users/loginMethod.ts` (`guardLoginMethod`); blocco promozione super-admin da UI: `guardSuperAdminAssignment.ts`.
+- Campo `sub` (ID Google OAuth): nascosto in Admin, valorizzato automaticamente al primo login Google.
+- **Effetto collaterale**: login locale standard su `/admin/login` disabilitato — serve § 2.7 prima che il super-admin faccia logout.
 
 ---
 
@@ -62,7 +71,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.3 — Setup credenziali Google OAuth
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 **Riferimento**: specifica 2.1
 
 **Questo è un passaggio esterno a Cursor.** Seguire la regola dedicata in `06-processo-lavoro-agente.mdc`: non assumere che sia già stato fatto, fermarsi e attendere conferma.
@@ -84,11 +93,17 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 **Nota**: il codice deve essere scritto in modo da funzionare identicamente se in futuro il progetto Google Cloud passerà a **External**, senza refactoring — Client ID, Secret, redirect URI, scope restano gli stessi tra le due fasi. Il lavoro di branding per External (homepage separata, privacy policy, dominio verificato) è esplicitamente rimandato e non va affrontato ora.
 
+**Note di esecuzione** (2026-08-02):
+- Credenziali OAuth 2.0 create su Google Cloud Console (consent screen Internal, client Web application).
+- `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` valorizzate in `.env` locale; placeholder in `.env.example`.
+- Nota operativa: `docs/operativo/google-oauth.md`.
+- Redirect URI Admin registrato su Google Cloud Console: `http://localhost:3000/api/users/oauth/google-admin/callback`. Redirect URI App (§ 2.5): da registrare quando implementato.
+
 ---
 
 ## 2.4 — Plugin `payload-oauth2` — istanza Admin
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 **Riferimento**: specifica 2.7 (caso a), 2.10
 
 **Obiettivo**: login Google funzionante su `/admin`, con validazione dominio e whitelist-per-record.
@@ -102,6 +117,16 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Un errore lanciato nell'hook deve produrre lo stesso `failureRedirect` generico già previsto per tutti gli altri casi di rifiuto.
 - Configurare la login view nativa di `/admin/login` in modo che mostri **solo** il bottone Google (nessun form locale visibile qui).
 - Verificare che il flusso non tocchi mai il campo `password` del record.
+
+**Note di esecuzione** (2026-08-02):
+- Plugin `payload-oauth2` installato; istanza Admin in `plugins/googleAdminOAuth.ts` (`strategyName: google-admin`, path `/oauth/google-admin`).
+- Validazione dominio via decodifica `id_token` in `getToken` (`auth/google/`); allow-list da Global Settings con `allowAdmin`.
+- `getUserInfo` restituisce solo `email` e `sub`; `onUserNotFoundBehavior: "error"`.
+- Hook `beforeLogin` (`guardLoginAccess`): verifica `active` e ruolo Admin idoneo.
+- Login `/admin/login`: bottone Google via `beforeLogin` component; form locale nascosto (CSS — route emergenza in § 2.7).
+- Messaggio rifiuto generico: `Accesso non autorizzato` (`auth/constants.ts`).
+- **Redirect URI Admin (locale)**: `http://localhost:3000/api/users/oauth/google-admin/callback` — registrato su Google Cloud Console.
+- **Test dev Admin (2026-08-02)**: login Google su `/admin` con utente censito (`adminRole = admin`) → OK. Creazione utenti Admin Google e App locale da pannello → OK. Login locale App e spike completo → § 2.6 / § 2.10.
 
 ---
 
@@ -142,7 +167,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.7 — Route locale di emergenza per super-admin
 
-**Stato**: 🔲 da fare
+**Stato**: 🔲 da fare — **priorità alta**: con `disableLocalStrategy` il super-admin non può più fare login locale su `/admin/login` (form nascosto).
 **Riferimento**: specifica 2.3.5
 
 **Obiettivo**: via di accesso locale riservata al super-admin di bootstrap, non raggiungibile da alcun link visibile.
@@ -174,9 +199,10 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Nota operativa: `docs/operativo/seed-super-admin.md`.
 - Guardrail ultimo super-admin locale: hook `beforeChange`/`beforeDelete` in `collections/users/localSuperAdminGuard.ts` (conteggio per `adminRole = super-admin` + `hash` presente).
 - Guardrail lista domini vuota: hook `beforeChange` su Global `settings`.
-- Vincolo credenziali locali Admin: già in `canHaveLocalCredentials` + `beforeValidate` (§ 2.1); super-admin e utenti App puri ammessi, `admin` no.
+- Vincolo credenziali locali: `canHaveLocalCredentials` in `collections/users/access.ts` — solo `loginMethod = local` o `adminRole = super-admin`; hook `guardLoginMethod` + `hashLocalCredentials`.
+- Seed imposta `loginMethod: 'local'` sul super-admin creato.
 - Global Settings creato come prerequisito (§ 2.2 completato nello stesso passaggio).
-- Test dev confermato: seed, login locale su `/admin`, Global Settings con domini funzionanti.
+- Test dev (pre-OAuth): seed, login locale su `/admin`, Global Settings funzionanti. **Post § 2.4**: login locale su `/admin/login` non più disponibile fino a § 2.7.
 - Istruzioni seed vs create-first-user (dev e deploy): `docs/operativo/seed-super-admin.md`.
 
 ---
@@ -199,7 +225,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.10 — Spike di test end-to-end con credenziali Google reali
 
-**Stato**: 🔲 da fare
+**Stato**: 🔶 parziale (Admin Google OK in locale — 2026-08-02)
 **Riferimento**: specifica 2.10
 
 **Obiettivo**: conferma pratica, non solo di codice, che il flusso Google funziona davvero nell'ambiente reale.
@@ -209,10 +235,10 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 **Checklist**:
 1. Avviare l'app in locale con le due istanze del plugin configurate (Admin e App).
 2. Creare un record utente in `users` con email aziendale reale, ruolo admin o super-admin (o richiedere all'umano di indicarne uno esistente).
-3. Login Google su `/admin`: verificare autenticazione riuscita e che il cookie autentichi anche una chiamata REST (es. endpoint utente corrente).
+3. Login Google su `/admin`: verificare autenticazione riuscita e che il cookie autentichi anche una chiamata REST (es. endpoint utente corrente). — ✅ fatto in dev (2026-08-02).
 4. Ripetere lo stesso su `/app` (istanza Google separata).
 5. Login locale su `/app` con un utente locale di test.
-6. Tentativo con email di dominio non whitelisted (anche rimuovendo temporaneamente il dominio dall'allow-list) → verificare rifiuto con messaggio generico.
+6. Tentativo con email di dominio non whitelisted (anche rimuovendo temporaneamente il dominio dall'allow-list) → verificare rifiuto con messaggio generico. — ✅ verificato indirettamente (utente non censito / dominio errato → messaggio generico).
 7. Ripetere i punti rilevanti su un ambiente di staging su Cloud Run, per verificare il comportamento del cookie httpOnly su HTTPS dietro proxy/load balancer, prima del rilascio definitivo.
 
 **Non serve** un framework di test automatizzato per questo spike: è manuale, una tantum, in fase di sviluppo — non va rimandato al deploy né trasformato in un'infrastruttura di test permanente (coerente con `02-proporzionalita.mdc`).

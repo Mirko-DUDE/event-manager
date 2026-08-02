@@ -1,10 +1,13 @@
 import type { Access } from 'payload'
 
+import type { LoginMethod } from './loginMethod'
+
 export type AdminRole = 'none' | 'admin' | 'super-admin'
 
 type UserWithRoles = {
   adminRole?: AdminRole | null
   appRole?: string | null
+  loginMethod?: LoginMethod | null
 }
 
 export function hasAdminPanelAccess(user: UserWithRoles | null | undefined): boolean {
@@ -14,16 +17,13 @@ export function hasAdminPanelAccess(user: UserWithRoles | null | undefined): boo
 /**
  * Credenziali locali consentite solo per:
  * - super-admin di bootstrap (login locale di emergenza su Admin)
- * - utenti App puri (adminRole = none, appRole impostato)
+ * - utenti App con loginMethod = local
  *
- * Un admin "normale" (adminRole = admin) usa esclusivamente Google Login,
- * anche se ha contemporaneamente un appRole — vedi 03-autenticazione-sicurezza.mdc.
+ * Admin del pannello (adminRole = admin) e utenti App Google usano OAuth.
  */
 export function canHaveLocalCredentials(data: UserWithRoles): boolean {
   if (data.adminRole === 'super-admin') return true
-  if (data.adminRole === 'admin') return false
-  if (data.appRole && data.appRole !== 'none') return true
-  return false
+  return data.loginMethod === 'local'
 }
 
 export const adminPanelAccess = ({ req: { user } }: { req: { user: UserWithRoles | null } }): boolean =>

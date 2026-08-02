@@ -9,6 +9,8 @@ Crea l'unico account Admin autorizzato alle credenziali locali (email + password
 - accedere al pannello `/admin` prima che Google OAuth sia configurato;
 - login di emergenza se Google Login o l'allow-list non sono disponibili (route `/admin/login/local`, da implementare in § 2.7).
 
+> **Nota post § 2.4**: il form locale su `/admin/login` non è più disponibile (`disableLocalStrategy`). Il super-admin seedato resta valido ma va usato su `/admin/login/local` (§ 2.7) — finché non implementata, evitare logout dal pannello Admin.
+
 ## Prerequisiti
 
 - MongoDB in esecuzione e `DATABASE_URL` valorizzata in `.env`.
@@ -33,7 +35,7 @@ pnpm seed:super-admin
 
 Comportamento:
 
-- Se non esiste alcun utente con quella email → crea super-admin con credenziali locali.
+- Se non esiste alcun utente con quella email → crea super-admin con credenziali locali (`loginMethod: local`).
 - Se esiste già un super-admin locale con la stessa email → termina senza modifiche (idempotente).
 - Se esiste un utente con la stessa email ma ruolo diverso → errore; risolvere manualmente.
 
@@ -68,5 +70,6 @@ Formato dominio: **solo il nome host**, senza protocollo — es. `dude.it`, non 
 ## Guardrail collegati
 
 - Non è possibile eliminare o disattivare l'ultimo super-admin con credenziali locali rimasto.
-- Nessun altro utente con `adminRole = admin` può avere password (solo Google Login).
+- Utenti con `adminRole = admin` usano Google Login (`loginMethod = google`); nessuna password.
+- Utenti App possono essere Google o locali (`loginMethod` scelto in creazione).
 - La allow-list domini (Global Settings) non può essere salvata vuota.

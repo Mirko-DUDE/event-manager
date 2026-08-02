@@ -10,23 +10,27 @@ import {
   guardLastLocalSuperAdminOnChange,
   guardLastLocalSuperAdminOnDelete,
 } from './users/localSuperAdminGuard'
+import { guardLoginAccess } from './users/guardLoginAccess'
+import { guardSuperAdminAssignment } from './users/guardSuperAdminAssignment'
+import { hashLocalCredentials } from './users/hashLocalCredentials'
+import { guardLoginMethod } from './users/loginMethod'
 import {
   isPasswordComplexEnough,
   PASSWORD_VALIDATION_MESSAGE,
 } from './users/passwordValidation'
 
-/** Tooltip breve: Payload tronca messaggi lunghi sul campo password. */
-const LOCAL_CREDENTIALS_DENIED_MESSAGE =
-  'Password non consentita per questo ruolo.'
-
 export const Users: CollectionConfig = {
   slug: 'users',
   auth: {
+    // Password opzionale in create per utenti Google; hash gestito in hashLocalCredentials.
+    disableLocalStrategy: {
+      enableFields: true,
+    },
     tokenExpiration: 7200,
   },
   admin: {
     useAsTitle: 'email',
-    defaultColumns: ['email', 'adminRole', 'appRole', 'active'],
+    defaultColumns: ['email', 'loginMethod', 'adminRole', 'appRole', 'active'],
   },
   access: {
     admin: adminPanelAccess,
@@ -37,6 +41,53 @@ export const Users: CollectionConfig = {
   },
   fields: [
     {
+      name: 'loginMethod',
+      type: 'radio',
+      required: true,
+      defaultValue: 'google',
+      options: [
+        { label: 'Google Login', value: 'google' },
+        { label: 'Accesso locale (email + password)', value: 'local' },
+      ],
+      admin: {
+        layout: 'horizontal',
+        condition: (_data, _siblingData, { operation }) => operation === 'create',
+        description:
+          'Admin del pannello → Google Login. Utenti App → Google o locale. Il super-admin si crea solo via seed.',
+      },
+    },
+    {
+      name: 'credentialsFormSync',
+      type: 'ui',
+      admin: {
+        condition: (_data, _siblingData, { operation }) => operation === 'create',
+        components: {
+          Field: '@/components/admin/UsersCredentialsFormSync',
+        },
+      },
+    },
+    {
+      name: 'localPasswordFields',
+      type: 'ui',
+      admin: {
+        condition: (_data, siblingData, { operation }) =>
+          operation === 'create' && siblingData?.loginMethod === 'local',
+        components: {
+          Field: '@/components/admin/UsersLocalPasswordFields',
+        },
+      },
+    },
+    {
+      name: 'loginMethodDisplay',
+      type: 'ui',
+      admin: {
+        condition: (_data, _siblingData, { operation }) => operation === 'update',
+        components: {
+          Field: '@/components/admin/UsersLoginMethodDisplay',
+        },
+      },
+    },
+    {
       name: 'adminRole',
       type: 'select',
       required: true,
@@ -46,9 +97,20 @@ export const Users: CollectionConfig = {
         { label: 'Admin', value: 'admin' },
         { label: 'Super Admin', value: 'super-admin' },
       ],
+      filterOptions: ({ options, siblingData }) => {
+        const optionValue = (option: (typeof options)[number]) =>
+          typeof option === 'object' && option !== null && 'value' in option
+            ? String(option.value)
+            : String(option)
+
+        if (siblingData?.loginMethod === 'local') {
+          return options.filter((option) => optionValue(option) === 'none')
+        }
+        return options.filter((option) => optionValue(option) !== 'super-admin')
+      },
       admin: {
         description:
-          'Accesso al pannello Admin. Un solo valore per area — non cumulabile con altri ruoli Admin.',
+          'Admin: accesso pannello via Google Login. Con accesso locale deve restare Nessuno.',
       },
     },
     {
@@ -64,7 +126,7 @@ export const Users: CollectionConfig = {
       ],
       admin: {
         description:
-          'Accesso all\'Area App. Un solo valore per area — hostess e manager coprono sezioni diverse.',
+          'Accesso all\'Area App. Obbligatorio con accesso locale; opzionale se Admin Role = Admin.',
       },
     },
     {
@@ -72,16 +134,35 @@ export const Users: CollectionConfig = {
       type: 'checkbox',
       defaultValue: true,
       admin: {
-        // Visibile solo in modifica: in creazione (incluso first-register) resta true via defaultValue.
         condition: (_data, _siblingData, { operation }) => operation === 'update',
         description: 'Disattivazione senza cancellare il record.',
       },
     },
+    {
+      // ID Google OAuth: impostato automaticamente al primo login Google (plugin payload-oauth2).
+      name: 'sub',
+      type: 'text',
+      index: true,
+      admin: {
+        hidden: true,
+      },
+      access: {
+        read: () => true,
+        create: () => false,
+        update: () => false,
+      },
+    },
   ],
   hooks: {
-    beforeChange: [guardLastLocalSuperAdminOnChange],
+    beforeChange: [
+      guardSuperAdminAssignment,
+      hashLocalCredentials,
+      guardLastLocalSuperAdminOnChange,
+    ],
     beforeDelete: [guardLastLocalSuperAdminOnDelete],
+    beforeLogin: [guardLoginAccess],
     beforeValidate: [
+      guardLoginMethod,
       ({ data }) => {
         if (!data) return data
 
@@ -89,15 +170,11 @@ export const Users: CollectionConfig = {
         const hasPassword = typeof password === 'string' && password.length > 0
 
         if (hasPassword && !canHaveLocalCredentials(data)) {
-          throw new ValidationError({
-            collection: 'users',
-            errors: [
-              {
-                message: LOCAL_CREDENTIALS_DENIED_MESSAGE,
-                path: 'password',
-              },
-            ],
-          })
+          delete data.password
+          if ('confirm-password' in data) {
+            delete data['confirm-password']
+          }
+          return data
         }
 
         if (hasPassword && !isPasswordComplexEnough(password)) {
