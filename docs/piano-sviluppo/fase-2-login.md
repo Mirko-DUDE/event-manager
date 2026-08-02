@@ -238,7 +238,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.9 — Collection `activityLog`
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 **Riferimento**: specifica 2.11
 
 **Obiettivo**: log applicativo unico e condiviso tra Admin e App, con solo l'evento di login implementato per ora.
@@ -249,6 +249,13 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Popolare `activityLog` dall'hook `afterLogin` della collection `users` — si attiva indipendentemente da quale istanza/area ha autenticato, perché vive sulla collection e non sulla singola istanza del plugin.
 - `area` e `method` derivano dal contesto della strategia che ha autenticato (lo `strategyName` distinto tra le istanze, 2.4/2.5, fornisce già questa informazione).
 - Non aggiungere campi generici per collegare l'evento a un record modificato (es. `targetRecord`, `previousValue`/`newValue`): emergeranno quando si progetteranno in dettaglio gli altri eventType, non vanno indovinati ora.
+
+**Note di esecuzione** (2026-08-02):
+- Collection `activityLog` in `collections/ActivityLog.ts`: sola lettura in Admin (`admin`/`super-admin`); create/update/delete disabilitati lato UI — scrittura solo via hook con `overrideAccess`.
+- Hook `logLoginActivity` in `collections/users/logLoginActivity.ts`, registrato come `afterLogin` su `users`.
+- Derivation contesto: `req.context.oauthArea` (Google Admin/App), `req.context.localLoginArea` (login locale App), fallback su `user._strategy` (`google-admin`, `google-app`, `local-jwt` → super-admin locale = area `admin`, method `local`).
+- Login locale custom (`performLocalLogin`) invoca esplicitamente gli hook `afterLogin` (il plugin OAuth li invoca già nativamente).
+- **Test dev**: verificare record in Admin → Log attività dopo login Google Admin, Google App, locale App, super-admin locale su `/admin/login/local`.
 
 ---
 

@@ -4,6 +4,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
+import { ActivityLog } from './collections/ActivityLog'
 import { Users } from './collections/Users'
 import { Settings } from './globals/Settings'
 import { googleAdminOAuth } from './plugins/googleAdminOAuth'
@@ -24,7 +25,7 @@ export default buildConfig({
       },
     },
   },
-  collections: [Users],
+  collections: [Users, ActivityLog],
   globals: [Settings],
   email: resendAdapter({
     apiKey: process.env.RESEND_API_KEY || '',

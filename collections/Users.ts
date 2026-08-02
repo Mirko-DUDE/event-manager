@@ -15,6 +15,7 @@ import {
   guardLastLocalSuperAdminOnDelete,
 } from './users/localSuperAdminGuard'
 import { guardLoginAccess } from './users/guardLoginAccess'
+import { logLoginActivity } from './users/logLoginActivity'
 import { guardSuperAdminAssignment } from './users/guardSuperAdminAssignment'
 import { hashLocalCredentials } from './users/hashLocalCredentials'
 import { guardLoginMethod, inferLoginMethod } from './users/loginMethod'
@@ -189,6 +190,7 @@ export const Users: CollectionConfig = {
     afterChange: [sendLocalUserVerificationEmail],
     beforeDelete: [guardLastLocalSuperAdminOnDelete],
     beforeLogin: [guardLoginAccess],
+    afterLogin: [logLoginActivity],
     beforeValidate: [
       guardLoginMethod,
       ({ data, operation, originalDoc }) => {

@@ -152,5 +152,17 @@ export async function performLocalLogin(args: {
 
   req.user = user!
 
+  if (collectionConfig.hooks?.afterLogin?.length) {
+    for (const hook of collectionConfig.hooks.afterLogin) {
+      user = ((await hook({
+        collection: collectionConfig,
+        context: req.context,
+        req,
+        token,
+        user: user!,
+      })) || user!) as LocalLoginUser
+    }
+  }
+
   return { exp, token, user: user! }
 }

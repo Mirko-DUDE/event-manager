@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    activityLog: ActivityLog;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -75,6 +76,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    activityLog: ActivityLogSelect<false> | ActivityLogSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -118,6 +120,18 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activityLog".
+ */
+export interface ActivityLog {
+  id: string;
+  user: string | User;
+  timestamp: string;
+  area?: ('admin' | 'app') | null;
+  eventType: 'login' | 'hubspotSync' | 'csvUpload' | 'checkIn';
+  method?: ('google' | 'local') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -186,10 +200,15 @@ export interface PayloadKv {
  */
 export interface PayloadLockedDocument {
   id: string;
-  document?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
+  document?:
+    | ({
+        relationTo: 'activityLog';
+        value: string | ActivityLog;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
@@ -231,6 +250,17 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activityLog_select".
+ */
+export interface ActivityLogSelect<T extends boolean = true> {
+  user?: T;
+  timestamp?: T;
+  area?: T;
+  eventType?: T;
+  method?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

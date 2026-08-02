@@ -16,7 +16,7 @@
 | Fase | Descrizione | Stato | File di dettaglio |
 |---|---|---|---|
 | Fase 1 | Setup progetto: Next.js, PayloadCMS, Tailwind, MongoDB locale, dipendenze base | ✅ fatto (1.1–1.7) | `fase-1-setup.md` |
-| Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | 🔶 in corso (2.1–2.8 ✅; 2.10 parziale — manca staging Cloud Run) | `fase-2-login.md` |
+| Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | 🔶 in corso (2.1–2.9 ✅; 2.10 parziale — manca staging Cloud Run) | `fase-2-login.md` |
 
 ## Fase 1 — Setup, panoramica sottofasi
 
@@ -42,12 +42,12 @@ Dettaglio completo in `fase-2-login.md`. Nota: l'ordine pratico consigliato eseg
 6. Login locale (form App, provider email Resend, password policy) — ✅
 7. Route locale di emergenza per super-admin (`/admin/login/local`) — ✅
 8. Script di seed super-admin + guardrail (anti-cancellazione ultimo super-admin, anti lista domini vuota) — ✅
-9. Collection `activityLog` (solo eventType `login` per ora)
+9. Collection `activityLog` (solo eventType `login` per ora) — ✅
 10. Spike di test end-to-end con credenziali Google reali — 🔶 parziale (Admin + App Google + login locale App OK in dev; manca staging Cloud Run)
 
 ## Prossimi passi
 
-- Prossimo passo: § 2.9 collection `activityLog` (o spike § 2.10 su staging Cloud Run).
+- Prossimo passo: spike § 2.10 su staging Cloud Run (o chiusura Fase 2 se si rimanda lo staging).
 - ~~Protezione route `/app/*`~~ Chiusa in § 2.6.
 - ~~Test login locale App~~ OK in dev (2026-08-02); vedi § 2.6 / § 2.10 in `fase-2-login.md`.
 - Test login Google App: OK in dev (2026-08-02); vedi § 2.10 in `fase-2-login.md`.
