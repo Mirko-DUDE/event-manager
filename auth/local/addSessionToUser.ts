@@ -24,8 +24,16 @@ export async function addSessionToUser(args: {
     expiresAt: expiresAt.toISOString(),
   }
 
-  const sessions = user.sessions?.length
-    ? [...user.sessions.filter(({ expiresAt: expiry }) => new Date(expiry) > now), session]
+  type UserSession = { id: string; createdAt: string; expiresAt: string }
+  const existingSessions = Array.isArray(user.sessions)
+    ? (user.sessions as UserSession[])
+    : []
+
+  const sessions = existingSessions.length
+    ? [
+        ...existingSessions.filter(({ expiresAt: expiry }) => new Date(expiry) > now),
+        session,
+      ]
     : [session]
 
   user.sessions = sessions

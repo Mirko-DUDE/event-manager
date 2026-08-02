@@ -127,6 +127,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Messaggio rifiuto generico: `Accesso non autorizzato` (`auth/constants.ts`).
 - **Redirect URI Admin (locale)**: `http://localhost:3000/api/users/oauth/google-admin/callback` — registrato su Google Cloud Console.
 - **Test dev Admin (2026-08-02)**: login Google su `/admin` con utente censito (`adminRole = admin`) → OK. Creazione utenti Admin Google e App locale da pannello → OK. Login locale App e spike completo → § 2.6 / § 2.10.
+- **Callback OAuth custom (2026-08-02, con § 2.5 fix)**: endpoint callback Admin registrato su `users` prima del plugin (`googleAdminOAuthCallbackOptions.ts`), stessa implementazione condivisa di § 2.5 — `jwtSign` Payload al posto del callback predefinito del plugin.
 
 ---
 
@@ -150,6 +151,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Redirect post-login: successo → `/app`; fallimento → `/app/login?error=unauthorized` (messaggio generico `Accesso non autorizzato`).
 - **Redirect URI App (locale)**: `http://localhost:3000/api/users/oauth/google-app/callback` — registrato su Google Cloud Console.
 - **Test dev App Google (2026-08-02)**: utente censito con dominio whitelisted (`allowApp`) → login OK, redirect su `/app`. Account Gmail personale (fuori Workspace) → KO: blocco lato Google consent screen Internal (messaggio *«Accesso bloccato: l'app DUDE Services può essere usata soltanto all'interno della relativa organizzazione»* — atteso; vedi `docs/operativo/google-oauth.md` § Internal → External).
+- **Fix redirect post-OAuth App (2026-08-02)**: dopo § 2.6 il login Google creava il record in `activityLog` ma il redirect finiva su `/app/login` (`GET /app` → 307). Cause: (1) callback del plugin `payload-oauth2` firma il JWT con `jose.SignJWT`, diverso da `jwtSign` Payload usato dal login locale; (2) il layout `(protected)` chiamava `payload.auth({ headers })` senza passare il token in modo compatibile con le RSC Next.js (gate CSRF/`Sec-Fetch-Site` di `extractJWT` sul cookie). Soluzione: callback OAuth custom registrato su `users` prima del plugin (`auth/google/createGoogleOAuthCallbackEndpoint.ts`, opzioni in `collections/users/googleAppOAuthCallbackOptions.ts` e Admin analogo) con `jwtSign` nativo; auth App in layout via `auth/app/getAuthenticatedAppUser.ts` (cookie Next.js + `Authorization: Bearer`); `useSessions: false` su `users` (il plugin non crea sessioni con `disableLocalStrategy` attivo). **Test dev post-fix**: login Google App → `/app` 200 OK.
 - **Limite attuale — route `/app` non protette**: ~~le pagine sotto `/app` (es. `/app` placeholder) sono raggiungibili anche senza sessione~~ **Risolto in § 2.6**: middleware + layout `(protected)`.
 
 ---
@@ -177,7 +179,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Reset password App: `POST /api/users/forgot-password/app`, `POST /api/users/reset-password/app`; pagine `/app/login/forgot-password` e `/app/login/reset-password`.
 - **Verifica email App (fix post-test dev)**: link attivazione → `/app/login/verify?token=…` (`verifyAppLocalEmail`), non `/admin/users/verify/…` (bloccato con `disableLocalStrategy`); template email condiviso `auth/email/renderAppEmail.ts`; hook `skipNativeVerificationEmail` evita invio nativo duplicato al create; pagina esito `AppVerifyEmailResult` con conferma e pulsante «Vai al login».
 - **`performLocalLogin`**: controllo `_verified` solo per gate App (§ 2.6); super-admin (§ 2.7) escluso da verifica email e da hook `sendLocalUserVerificationEmail`.
-- **Protezione route `/app/*`**: middleware (`payload-token` assente → redirect `/app/login`) + layout server `(protected)` con `payload.auth` e controllo `appRole`.
+- **Protezione route `/app/*`**: middleware (`payload-token` assente → redirect `/app/login`) + layout server `(protected)` con `getAuthenticatedAppUser()` (`auth/app/getAuthenticatedAppUser.ts`: cookie via `cookies()` + `payload.auth` con header `Authorization: Bearer`) e controllo `appRole`.
 - **Token expiration (verifica codice Payload 3.87)**: reset password usa default `forgotPassword.expiration` = **3600000 ms (1 ora)**, non 24 h — la specifica (2.4) cita 24 h come default Payload; su questa versione il reset è 1 h, i token di verifica email (`verifyEmail`) **non hanno scadenza lato server**. Nessuna configurazione custom aggiunta (proporzionalità).
 - **Test dev (2026-08-02)**: reset password → OK; create utente locale → OK (mittente Resend: `noreply@services.dude.it`); email attivazione (template + link) → OK; pagina post-attivazione con conferma e link login → OK; login locale App post-verifica → OK.
 - **Cambio password da Admin (2026-08-02)**: campi «Nuova password» e conferma opzionali in modifica utente App locale (in create rimangono obbligatori); super-admin escluso; validazione server-side coincidenza password/conferma su create e update (`validateLocalPasswordConfirmation`). Testate e funzionanti.
@@ -256,6 +258,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Derivation contesto: `req.context.oauthArea` (Google Admin/App), `req.context.localLoginArea` (login locale App), fallback su `user._strategy` (`google-admin`, `google-app`, `local-jwt` → super-admin locale = area `admin`, method `local`).
 - Login locale custom (`performLocalLogin`) invoca esplicitamente gli hook `afterLogin` (il plugin OAuth li invoca già nativamente).
 - **Test dev**: verificare record in Admin → Log attività dopo login Google Admin, Google App, locale App, super-admin locale su `/admin/login/local`.
+- **Nota scope attuale**: solo eventi `login` — logout e tentativi di accesso negati non sono ancora tracciati (emergeranno se/quando esteso lo schema `eventType`).
 
 ---
 
@@ -272,7 +275,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 1. Avviare l'app in locale con le due istanze del plugin configurate (Admin e App).
 2. Creare un record utente in `users` con email aziendale reale, ruolo admin o super-admin (o richiedere all'umano di indicarne uno esistente).
 3. Login Google su `/admin`: verificare autenticazione riuscita e che il cookie autentichi anche una chiamata REST (es. endpoint utente corrente). — ✅ fatto in dev (2026-08-02).
-4. Ripetere lo stesso su `/app` (istanza Google separata). — ✅ fatto in dev (2026-08-02): utente App censito, dominio whitelisted → OK.
+4. Ripetere lo stesso su `/app` (istanza Google separata). — ✅ fatto in dev (2026-08-02), confermato post-fix callback OAuth custom (§ 2.5 note 2026-08-02): utente App censito, dominio whitelisted → redirect `/app` OK.
 5. Login locale su `/app` con un utente locale di test. — ✅ fatto in dev (2026-08-02): create, email attivazione, verifica, login → OK (§ 2.6).
 6. Tentativo con email di dominio non whitelisted (anche rimuovendo temporaneamente il dominio dall'allow-list) → verificare rifiuto con messaggio generico. — ✅ verificato indirettamente (utente non censito / dominio errato → messaggio generico su `/app/login`). Account Gmail fuori Workspace → blocco Google Internal prima del callback app (non passa dal nostro messaggio generico).
 7. Ripetere i punti rilevanti su un ambiente di staging su Cloud Run, per verificare il comportamento del cookie httpOnly su HTTPS dietro proxy/load balancer, prima del rilascio definitivo.

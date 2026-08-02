@@ -81,4 +81,13 @@ Il Client ID può restare lo stesso; se si crea un client del tutto nuovo, aggio
 - Utente censito in collection `users` con email del dominio whitelisted (`allowAdmin` / `allowApp` a seconda dell'area) e ruolo idoneo (`adminRole` per Admin, `appRole` ≠ none per App).
 - Almeno un dominio in Global Settings con flag area appropriati.
 
-Test Admin Google in dev: OK (2026-08-02). Test App Google in dev: OK con utente Workspace censito (2026-08-02). Account Gmail personale: blocco Google Internal (atteso). Spike completo: § 2.10.
+Test Admin Google in dev: OK (2026-08-02). Test App Google in dev: OK con utente Workspace censito (2026-08-02); confermato post-fix callback OAuth custom (vedi `fase-2-login.md` § 2.5). Account Gmail personale: blocco Google Internal (atteso). Spike completo: § 2.10.
+
+## Implementazione callback OAuth (nota tecnica)
+
+Il plugin `payload-oauth2` registra di default un callback che firma il JWT con `jose.SignJWT`. In questo progetto i callback Admin e App sono **sostituiti** da endpoint custom sulla collection `users` (registrati prima del plugin, che non duplica lo stesso path):
+
+- Factory: `auth/google/createGoogleOAuthCallbackEndpoint.ts` — usa `jwtSign` Payload (stesso formato del login locale App).
+- Opzioni: `collections/users/googleAdminOAuthCallbackOptions.ts`, `collections/users/googleAppOAuthCallbackOptions.ts`.
+
+Il plugin resta in uso per authorize path, strategie OAuth e configurazione; solo il callback POST-login è custom. Motivo: allineamento JWT/cookie e compatibilità con il layout protetto App (`getAuthenticatedAppUser`).

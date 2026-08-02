@@ -6,6 +6,7 @@ import {
   adminPanelAccess,
   canHaveLocalCredentials,
 } from './users/access'
+import { createGoogleOAuthCallbackEndpoint } from '../auth/google/createGoogleOAuthCallbackEndpoint'
 import { superAdminLocalLoginEndpoint } from './users/endpoints/superAdminLocalLogin'
 import { appLocalLoginEndpoint } from './users/endpoints/appLocalLogin'
 import { appForgotPasswordEndpoint } from './users/endpoints/appForgotPassword'
@@ -26,10 +27,18 @@ import {
   PASSWORD_VALIDATION_MESSAGE,
 } from './users/passwordValidation'
 import { validateLocalPasswordConfirmation } from './users/validateLocalPasswordConfirmation'
+import { googleAdminOAuthCallbackOptions } from './users/googleAdminOAuthCallbackOptions'
+import { googleAppOAuthCallbackOptions } from './users/googleAppOAuthCallbackOptions'
+
+const googleOAuthCallbackEndpoints = [
+  ...createGoogleOAuthCallbackEndpoint(googleAdminOAuthCallbackOptions),
+  ...createGoogleOAuthCallbackEndpoint(googleAppOAuthCallbackOptions),
+]
 
 export const Users: CollectionConfig = {
   slug: 'users',
   endpoints: [
+    ...googleOAuthCallbackEndpoints,
     superAdminLocalLoginEndpoint,
     appLocalLoginEndpoint,
     appForgotPasswordEndpoint,
@@ -40,6 +49,9 @@ export const Users: CollectionConfig = {
     disableLocalStrategy: {
       enableFields: true,
     },
+    // OAuth (payload-oauth2) non crea sessioni quando disableLocalStrategy è attivo;
+    // useSessions: true farebbe fallire payload.auth sul JWT senza sid (redirect /app → /app/login).
+    useSessions: false,
     // Email attivazione al create (hook sendLocalUserVerificationEmail); reset via endpoint App custom.
     verify: true,
     tokenExpiration: 7200,

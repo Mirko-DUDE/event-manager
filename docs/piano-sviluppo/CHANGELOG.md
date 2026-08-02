@@ -34,6 +34,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 - **§ 2.8 — Seed super-admin e guardrail**: script `scripts/seed-super-admin.ts` (`pnpm seed:super-admin`), credenziali da `SEED_SUPER_ADMIN_EMAIL` / `SEED_SUPER_ADMIN_PASSWORD`; guardrail ultimo super-admin locale in `localSuperAdminGuard.ts`; guardrail lista domini vuota su Global `settings`; vincolo credenziali locali in `canHaveLocalCredentials`; nota operativa `docs/operativo/seed-super-admin.md`.
 - **§ 2.9 — Collection `activityLog`**: schema in `collections/ActivityLog.ts` (`user`, `timestamp`, `area`, `eventType`, `method`); enum `eventType` include hubspotSync/csvUpload/checkIn non ancora implementati; popolamento login via hook `afterLogin` `logLoginActivity` su `users`; `area`/`method` da `req.context` (OAuth/local) o `user._strategy`; login locale custom invoca `afterLogin` in `performLocalLogin`.
+- **§ 2.5/2.4 — Callback OAuth custom**: `auth/google/createGoogleOAuthCallbackEndpoint.ts` sostituisce il callback predefinito del plugin (registrato su `users` prima del merge plugin); firma JWT con `jwtSign` Payload; opzioni in `collections/users/googleAppOAuthCallbackOptions.ts` e `googleAdminOAuthCallbackOptions.ts`.
+- **§ 2.6 — Auth layout App**: `auth/app/getAuthenticatedAppUser.ts` — token da `cookies()` Next.js, `payload.auth` via header `Authorization: Bearer` (evita gate cookie/CSRF su RSC).
 
 ### Changed
 
@@ -42,6 +44,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **§ 2.6 — Refactor login locale**: `performSuperAdminLocalLogin` delega a `performLocalLogin` condiviso; `addSessionToUser` estratto in modulo dedicato.
 - **§ 2.6 — `guardLoginAccess`**: supporto `localLoginArea` (oltre a `oauthArea`) per controlli post-auth sul login locale App.
 - **§ 2.6 — `performLocalLogin`**: controllo `_verified` limitato al gate App; super-admin escluso da verifica email obbligatoria; invocazione hook `afterLogin` (§ 2.9) allineata al flusso nativo Payload.
+- **§ 2.5 — Auth `users`**: `useSessions: false` — con `disableLocalStrategy` attivo il plugin OAuth non crea sessioni server-side; evita JWT senza `sid` incompatibile con `payload.auth` quando `useSessions` è true (default Payload).
 
 ### Fixed
 
@@ -51,6 +54,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **§ 2.6 — Email illeggibili**: sostituito HTML grezzo i18n Payload con template `renderAppEmail` (attivazione account e reset password).
 - **§ 2.6 — Create utente bloccato da Resend**: hook `skipNativeVerificationEmail` + try/catch su invio verifica — la create non fallisce se l'email non parte.
 - **§ 2.1 — Cambio password da Admin**: campi password opzionali in modifica utente App locale; super-admin escluso (guard server-side in `hashLocalCredentials`); validazione coincidenza password/conferma in `validateLocalPasswordConfirmation` (create e update); messaggi condivisi client/server in `auth/passwordMessages.ts`.
+- **§ 2.5 — Redirect OAuth Google App → login**: login riusciva (record `activityLog` + cookie) ma `GET /app` redirect 307 a `/app/login` — JWT OAuth del plugin non allineato al login locale e auth layout insufficiente su RSC; risolto con callback custom (`jwtSign`), `getAuthenticatedAppUser` (Bearer) e `useSessions: false`.
 
 ### Tests
 
@@ -62,6 +66,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **§ 2.6 — Validazione codice (2026-08-02)**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` → OK. **Test dev login locale App e invio email Resend**: non eseguiti in questa sessione — richiedono `RESEND_API_KEY` in `.env` e utente App locale già censito; token reset Payload default verificato a **1 h** (non 24 h come in specifica 2.4).
 - **§ 2.6 — Test dev email/login locale (2026-08-02)**: reset password App → OK; create utente App locale → OK (`RESEND_FROM_ADDRESS=noreply@services.dude.it`); email attivazione (template HTML + link `/app/login/verify`) → OK; pagina post-attivazione (conferma + «Vai al login») → OK; login locale App post-verifica → OK.
 - **§ 2.9 — Validazione codice (2026-08-02)**: `pnpm generate:types`, `pnpm exec tsc --noEmit`, `pnpm lint` → OK. **Test dev activityLog**: non eseguiti in questa sessione — richiedono login su ciascun percorso (Google Admin/App, locale App, super-admin locale) e verifica record in Admin → Log attività.
+- **§ 2.5 — Fix redirect OAuth App (dev, 2026-08-02)**: post-fix callback custom + auth layout — login Google App → `/app` 200 OK (prima: callback 302 OK ma `/app` 307 → `/app/login` nonostante cookie e record activityLog).
 
 ---
 
