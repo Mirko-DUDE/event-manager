@@ -1,5 +1,5 @@
 import type { Endpoint } from 'payload'
-import { generatePayloadCookie, headersWithCors } from 'payload'
+import { addDataAndFileToRequest, generatePayloadCookie, headersWithCors } from 'payload'
 
 import { LOGIN_FAILURE_MESSAGE } from '../../../auth/constants'
 import { performSuperAdminLocalLogin } from '../../../auth/local/performSuperAdminLocalLogin'
@@ -9,6 +9,9 @@ export const superAdminLocalLoginEndpoint: Endpoint = {
   path: '/login/local',
   method: 'post',
   handler: async (req) => {
+    // Gli endpoint custom non passano da wrapInternalEndpoints: il Form Payload invia multipart con _payload.
+    await addDataAndFileToRequest(req)
+
     const collection = req.payload.collections.users
     const email = typeof req.data?.email === 'string' ? req.data.email : ''
     const password = typeof req.data?.password === 'string' ? req.data.password : ''

@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import React from 'react'
 
 import { Form, FormSubmit, EmailField, PasswordField, useAuth, useConfig, useTranslation } from '@payloadcms/ui'
-import { formatAdminURL, getSafeRedirect } from 'payload/shared'
+import { email, formatAdminURL, getSafeRedirect } from 'payload/shared'
 
 import {
   LOGIN_FAILURE_MESSAGE,
@@ -41,8 +41,8 @@ export default function LocalAdminLoginForm() {
         className="login__form"
         disableSuccessStatus
         initialState={{
-          email: { initialValue: '', valid: false, value: '' },
-          password: { initialValue: '', valid: false, value: '' },
+          email: { initialValue: '', valid: true, value: '' },
+          password: { initialValue: '', valid: true, value: '' },
         }}
         method="POST"
         onSuccess={(data) => {
@@ -58,10 +58,14 @@ export default function LocalAdminLoginForm() {
           <EmailField
             field={{
               name: 'email',
+              admin: {
+                autoComplete: 'email',
+              },
               label: t('general:email'),
               required: true,
             }}
             path="email"
+            validate={email}
           />
           <PasswordField
             field={{

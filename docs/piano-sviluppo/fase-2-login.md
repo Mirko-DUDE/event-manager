@@ -182,9 +182,11 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Custom view Admin `LocalAdminLoginView` su `/admin/login/local` (`payload.config.ts` → `admin.components.views.localLogin`).
 - Form client `LocalAdminLoginForm` → `POST /api/users/login/local` (endpoint collection `superAdminLocalLoginEndpoint`).
 - Logica login in `auth/local/performSuperAdminLocalLogin.ts`: verifica PBKDF2 nativa Payload, sessione JWT/cookie identici al login standard; solo `adminRole = super-admin` con hash locale.
+- Endpoint custom: `addDataAndFileToRequest(req)` obbligatorio (il Form Payload invia multipart `_payload`; senza parsing, email/password risultano vuote).
+- Form client allineato al `LoginForm` nativo (`valid: true` in initialState, `validate={email}` su EmailField).
 - `/admin/login` resta Google-only (form nascosto via CSS + `disableLocalStrategy`); nessun link verso `/admin/login/local`.
 - Nota operativa: `docs/operativo/admin-login-local.md`.
-- **Test dev consigliato**: logout da `/admin`, aprire `/admin/login/local`, login con credenziali seed → accesso pannello OK.
+- **Test dev (2026-08-02)**: logout → `/admin/login/local` → login credenziali seed → accesso pannello OK.
 
 ---
 

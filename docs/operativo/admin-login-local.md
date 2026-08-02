@@ -34,7 +34,7 @@ Vedi anche `docs/operativo/seed-super-admin.md`.
 ## Comportamento
 
 - Form email + password; stesso algoritmo di verifica password e stesso cookie di sessione Payload del login locale nativo.
-- Endpoint dedicato: `POST /api/users/login/local` (il login standard `/api/users/login` resta disabilitato da `disableLocalStrategy`).
+- Endpoint dedicato: `POST /api/users/login/local` (il login standard `/api/users/login` resta disabilitato da `disableLocalStrategy`). L'handler chiama esplicitamente `addDataAndFileToRequest`: gli endpoint custom della collection non passano da `wrapInternalEndpoints`, quindi il body multipart inviato dal Form Payload (`_payload`) va parsato a mano.
 - Solo utenti con `adminRole = super-admin` e credenziali locali (hash presente) possono autenticarsi su questa route.
 - Qualunque errore (email errata, password errata, utente non super-admin) → messaggio generico **«Accesso non autorizzato»** (come tutti gli altri flussi di login).
 - Dopo login riuscito → redirect a `/admin`.
