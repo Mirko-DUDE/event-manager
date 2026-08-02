@@ -7,7 +7,7 @@
 - Composer **non legge questi file automaticamente**: vanno indicati esplicitamente all'inizio di ogni sessione di lavoro (es. "leggi `fase-1-setup.md`, sottofase 1.3, e procedi").
 - **Procedimento dettagliato su come condurre le sessioni** (struttura delle chat, prerequisiti, documenti da allegare, quando fare test in ambiente dev): vedi `00-come-eseguire-il-piano.md`.
 - Le regole di comportamento dell'agente (`.cursor/rules/*.mdc`) si applicano sempre, indipendentemente da quale fase/file di piano è in lavorazione: in particolare, fermarsi su installazioni problematiche e su passaggi esterni a Cursor (vedi `06-processo-lavoro-agente.mdc`), distinguere validazione di codice da test in ambiente dev (vedi `07-validazione-testing.mdc`), e mantenere aggiornato il changelog prima di ogni commit (vedi `08-changelog-commit.mdc`).
-- **Cronologia delle modifiche**: `docs/piano-sviluppo/CHANGELOG.md`, formato Keep a Changelog — distinto dai file di fase (che indicano cosa fare e lo stato attuale), il changelog è uno storico append-only di cosa è stato effettivamente fatto, sessione per sessione, inclusi gli esiti dei test.
+- **Cronologia delle modifiche**: `docs/piano-sviluppo/CHANGELOG.md`, formato Keep a Changelog — distinto dai file di fase (che indicano cosa fare e lo stato attuale), il changelog è uno storico append-only di cosa è stato effettivamente fatto, sessione per sessione, inclusi esiti dei test.
 - Ogni sottofase ha uno stato: 🔲 da fare — 🔶 in corso — ✅ fatto. Aggiornare questo indice (e il file di dettaglio) subito dopo il completamento, non a posteriori.
 - Riferimento di contesto per tutte le decisioni di prodotto/architettura: `../specifica-login-payloadcms.md` (path relativo a questo indice: `docs/specifica-login-payloadcms.md` nella root del progetto). I file di piano traducono quella specifica in passi operativi; non la sostituiscono. In caso di conflitto tra un file di piano e la specifica, vince la specifica — segnalare la discrepanza invece di scegliere in autonomia.
 
@@ -16,7 +16,8 @@
 | Fase | Descrizione | Stato | File di dettaglio |
 |---|---|---|---|
 | Fase 1 | Setup progetto: Next.js, PayloadCMS, Tailwind, MongoDB locale, dipendenze base | ✅ fatto (1.1–1.7) | `fase-1-setup.md` |
-| Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | 🔶 in corso (2.1–2.9 ✅; 2.10 parziale — manca staging Cloud Run) | `fase-2-login.md` |
+| Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | ✅ fatto (2.1–2.10; spike staging Cloud Run → Fase 3) | `fase-2-login.md` |
+| Fase 3 | Deploy: Cloud Run, MongoDB Atlas, OAuth staging, bootstrap | 🔲 da fare | `fase-3-deploy.md` |
 
 ## Fase 1 — Setup, panoramica sottofasi
 
@@ -42,14 +43,22 @@ Dettaglio completo in `fase-2-login.md`. Nota: l'ordine pratico consigliato eseg
 6. Login locale (form App, provider email Resend, password policy) — ✅
 7. Route locale di emergenza per super-admin (`/admin/login/local`) — ✅
 8. Script di seed super-admin + guardrail (anti-cancellazione ultimo super-admin, anti lista domini vuota) — ✅
-9. Collection `activityLog` (solo eventType `login` per ora) — ✅
-10. Spike di test end-to-end con credenziali Google reali — 🔶 parziale (Admin + App Google + login locale App OK in dev; manca staging Cloud Run)
+9. Collection `activityLog` (eventi auth: login, logout, accessDenied) — ✅
+10. Spike di test end-to-end con credenziali Google reali — ✅ in dev locale; **punto 7 staging Cloud Run rimandato a Fase 3** § 3.3
+
+## Fase 3 — Deploy, panoramica sottofasi
+
+Dettaglio completo in `fase-3-deploy.md` (bozza iniziale, 2026-08-02).
+
+1. MongoDB Atlas (cluster M0) — 🔲
+2. Build container e deploy Cloud Run — 🔲
+3. OAuth Google e redirect URI staging (+ spike ex § 2.10 punto 7) — 🔲
+4. Bootstrap super-admin e dati iniziali — 🔲
+5. Verifica chiusura fase — 🔲
 
 ## Prossimi passi
 
-- Prossimo passo: spike § 2.10 su staging Cloud Run (o chiusura Fase 2 se si rimanda lo staging).
-- ~~Protezione route `/app/*`~~ Chiusa in § 2.6.
-- ~~Test login locale App~~ OK in dev (2026-08-02); vedi § 2.6 / § 2.10 in `fase-2-login.md`.
-- Test login Google App: OK in dev (2026-08-02); vedi § 2.10 in `fase-2-login.md`.
+- **Prossimo passo**: Fase 3 — deploy su Cloud Run + MongoDB Atlas (`fase-3-deploy.md` § 3.1).
+- Spike HTTPS login Google (ex § 2.10 punto 7): in Fase 3 § 3.3, non bloccante per Fase 2.
+- Test dev pendenti § 2.9 (logout / accessDenied in activityLog): opzionali in locale prima di Fase 3 — vedi note di chiusura in `fase-2-login.md`.
 - Aggiornare questo indice e il file di fase corrispondente a ogni sottofase completata.
-- **Nuovo file da scrivere a fine Fase 2**: `fase-3-deploy.md` (o nome equivalente), con le istruzioni per il deploy su Cloud Run e il setup di MongoDB Atlas (creazione cluster M0, utente, IP access list, connection string, e successiva migrazione da M0 a tier a pagamento quando il progetto sarà finito e testato). Deciso in Fase 1 § 1.3: sviluppo su MongoDB locale, Atlas rimandato al deploy. Bootstrap super-admin al primo deploy: vedi `docs/operativo/seed-super-admin.md` (già documentato).

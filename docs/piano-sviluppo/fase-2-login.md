@@ -267,7 +267,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.10 — Spike di test end-to-end con credenziali Google reali
 
-**Stato**: 🔶 parziale (Admin + App Google + login locale App OK in locale — 2026-08-02; staging Cloud Run ancora da fare)
+**Stato**: ✅ fatto (dev locale completo — 2026-08-02; **punto 7 staging Cloud Run rimandato a Fase 3** § 3.3)
 **Riferimento**: specifica 2.10
 
 **Obiettivo**: conferma pratica, non solo di codice, che il flusso Google funziona davvero nell'ambiente reale.
@@ -281,7 +281,9 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 4. Ripetere lo stesso su `/app` (istanza Google separata). — ✅ fatto in dev (2026-08-02), confermato post-fix callback OAuth custom (§ 2.5 note 2026-08-02): utente App censito, dominio whitelisted → redirect `/app` OK.
 5. Login locale su `/app` con un utente locale di test. — ✅ fatto in dev (2026-08-02): create, email attivazione, verifica, login → OK (§ 2.6).
 6. Tentativo con email di dominio non whitelisted (anche rimuovendo temporaneamente il dominio dall'allow-list) → verificare rifiuto con messaggio generico. — ✅ verificato indirettamente (utente non censito / dominio errato → messaggio generico su `/app/login`). Account Gmail fuori Workspace → blocco Google Internal prima del callback app (non passa dal nostro messaggio generico).
-7. Ripetere i punti rilevanti su un ambiente di staging su Cloud Run, per verificare il comportamento del cookie httpOnly su HTTPS dietro proxy/load balancer, prima del rilascio definitivo.
+7. Ripetere i punti rilevanti su un ambiente di staging su Cloud Run, per verificare il comportamento del cookie httpOnly su HTTPS dietro proxy/load balancer, prima del rilascio definitivo. — ⏭️ **Rimandato a Fase 3** (`fase-3-deploy.md` § 3.3) — decisione chiusura Fase 2 (2026-08-02): dev locale sufficiente per considerare il flusso login implementato; spike HTTPS non bloccante per proseguire.
+
+**Nota chiusura (2026-08-02)**: spike considerato soddisfatto in **ambiente locale** (punti 1–6). Staging Cloud Run non ancora disponibile — non bloccante per chiudere Fase 2; checklist ripresa in `fase-3-deploy.md`.
 
 **Non serve** un framework di test automatizzato per questo spike: è manuale, una tantum, in fase di sviluppo — non va rimandato al deploy né trasformato in un'infrastruttura di test permanente (coerente con `02-proporzionalita.mdc`).
 
@@ -289,8 +291,15 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## Note di chiusura fase
 
-Al termine della Fase 2:
-- Aggiornare lo stato a ✅ per tutte le sottofasi completate, sia in questo file sia in `00-piano-generale.md`.
-- Verificare che nessuna delle checklist qui sopra sia stata "saltata silenziosamente": se qualcosa è stato rimandato, annotarlo esplicitamente qui, non lasciarlo solo nella memoria della sessione di lavoro.
-- Ricordare cosa resta esplicitamente fuori scope per questa fase (già segnalato nella specifica): enforcement permessi per singola sezione App, offboarding automatico da Google Workspace, evoluzione a External, eventType di `activityLog` diversi da login.
+**Chiusura Fase 2 — 2026-08-02** (staging Cloud Run rimandato a Fase 3).
+
+- [x] Sottofasi 2.1–2.10 marcate ✅ in questo file e in `00-piano-generale.md` (2.10: dev OK, punto 7 esplicitamente rimandato).
+- [x] Rimando documentato: spike HTTPS/staging → `fase-3-deploy.md` § 3.3.
+- [x] Bozza Fase 3 creata: `fase-3-deploy.md`.
+- [ ] **Test dev pendenti** (non bloccanti per chiusura fase, da eseguire quando comodo):
+  - § 2.9 — logout Admin → record `logout` in Log attività
+  - § 2.9 — password errata / utente disattivato → record `accessDenied`
+  - § 2.9 — verifica record login su tutti i percorsi se non già fatto manualmente
+- Fuori scope Fase 2 (invariato): enforcement permessi per singola sezione App, offboarding Google Workspace, evoluzione OAuth External, `eventType` activityLog `hubspotSync`/`csvUpload`/`checkIn`.
 - **Aperto emerso in dev (2026-08-02)**: ~~protezione route `/app/*`~~ **Chiuso in § 2.6** (middleware + layout server).
+- **Deviazione registrata**: callback OAuth custom (non previsto nel piano originale § 2.4/2.5) — documentato in `fase-2-login.md` § 2.5 e `docs/operativo/google-oauth.md`.

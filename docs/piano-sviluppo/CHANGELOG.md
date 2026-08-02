@@ -19,6 +19,12 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ## [Unreleased]
 
+---
+
+## [0.2.0] — 2026-08-02
+
+Chiusura **Fase 2 — Login** (sottofasi 2.1–2.10). Spike end-to-end completato in **dev locale**; verifica cookie su **staging Cloud Run** rimandata a **Fase 3** (`fase-3-deploy.md` § 3.3).
+
 ### Added
 
 - **Changelog di progetto**: regola Cursor `08-changelog-commit.mdc`, file `docs/piano-sviluppo/CHANGELOG.md` con storico retroattivo (Fase 1 → v0.1.0, lavoro Fase 2 sotto Unreleased); riferimenti aggiornati in `00-piano-generale.md` e `00-come-eseguire-il-piano.md`.
@@ -63,12 +69,13 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **§ 2.7 — Login locale super-admin (dev, 2026-08-02)**: logout → `/admin/login/local` → credenziali seed → accesso pannello → OK (dopo fix parsing body).
 - **§ 2.8 — Seed e guardrail (dev, pre-OAuth)**: seed idempotente, Global Settings, guardrail lista vuota → OK; post § 2.4 login locale su `/admin/login` non più disponibile (atteso).
 - **§ 2.5 — Login Google App (dev, 2026-08-02)**: utente censito con dominio whitelisted → OK, redirect `/app`. Account Gmail personale → KO lato Google consent screen Internal (*«Accesso bloccato: l'app DUDE Services può essere usata soltanto all'interno della relativa organizzazione»* — atteso, documentato in `docs/operativo/google-oauth.md`).
-- **§ 2.10 — Spike parziale (dev, 2026-08-02)**: login Google Admin OK; login Google App OK (dominio whitelisted); login locale App OK (create, email, attivazione, login post-verifica); rifiuto utente non censito / dominio errato con messaggio generico → OK. **Non ancora verificato**: staging Cloud Run.
+- **§ 2.10 — Spike parziale (dev, 2026-08-02)**: login Google Admin OK; login Google App OK (dominio whitelisted); login locale App OK (create, email, attivazione, login post-verifica); rifiuto utente non censito / dominio errato con messaggio generico → OK. **Staging Cloud Run**: rimandato a Fase 3 § 3.3 (chiusura Fase 2 2026-08-02).
 - **§ 2.6 — Validazione codice (2026-08-02)**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` → OK. **Test dev login locale App e invio email Resend**: non eseguiti in questa sessione — richiedono `RESEND_API_KEY` in `.env` e utente App locale già censito; token reset Payload default verificato a **1 h** (non 24 h come in specifica 2.4).
 - **§ 2.6 — Test dev email/login locale (2026-08-02)**: reset password App → OK; create utente App locale → OK (`RESEND_FROM_ADDRESS=noreply@services.dude.it`); email attivazione (template HTML + link `/app/login/verify`) → OK; pagina post-attivazione (conferma + «Vai al login») → OK; login locale App post-verifica → OK.
 - **§ 2.9 — Validazione codice (2026-08-02)**: `pnpm generate:types`, `pnpm exec tsc --noEmit`, `pnpm lint` → OK. **Test dev activityLog**: non eseguiti in questa sessione — richiedono login su ciascun percorso (Google Admin/App, locale App, super-admin locale) e verifica record in Admin → Log attività.
 - **§ 2.9 — activityLog logout/accessDenied (2026-08-02)**: `pnpm generate:types`, `pnpm exec tsc --noEmit`, `pnpm lint` → OK. **Test dev**: non eseguiti in questa sessione — richiedono logout Admin, login con password errata/utente disattivato e verifica record `logout`/`accessDenied` in Log attività.
 - **§ 2.5 — Fix redirect OAuth App (dev, 2026-08-02)**: post-fix callback custom + auth layout — login Google App → `/app` 200 OK (prima: callback 302 OK ma `/app` 307 → `/app/login` nonostante cookie e record activityLog).
+- **Chiusura Fase 2 (2026-08-02)**: `fase-3-deploy.md` (bozza); `00-piano-generale.md` e `fase-2-login.md` aggiornati; spike § 2.10 punto 7 (Cloud Run) esplicitamente rimandato. **Test dev activityLog logout/accessDenied**: ancora da eseguire manualmente (checklist in `fase-2-login.md` note di chiusura).
 
 ---
 
