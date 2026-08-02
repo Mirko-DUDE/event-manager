@@ -20,7 +20,12 @@ export const APP_RESET_PASSWORD_API = '/users/reset-password/app'
 /** Pagina reset password Area App (link nelle email di reset). */
 export const APP_RESET_PASSWORD_PATH = '/app/login/reset-password'
 
+/** Pagina verifica email Area App (link nelle email di attivazione). */
+export const APP_VERIFY_EMAIL_PATH = '/app/login/verify'
+
 export const LOGIN_FAILURE_QUERY = 'unauthorized'
+
+export const LOGIN_VERIFIED_QUERY = 'verified'
 
 export function loginFailureRedirect(loginPath: string): string {
   const separator = loginPath.includes('?') ? '&' : '?'

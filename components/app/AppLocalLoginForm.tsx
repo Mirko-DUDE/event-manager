@@ -1,25 +1,18 @@
 'use client'
 
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import React, { useState } from 'react'
 
-import {
-  APP_LOCAL_LOGIN_API,
-  LOGIN_FAILURE_MESSAGE,
-  LOGIN_FAILURE_QUERY,
-} from '@/auth/constants'
+import { APP_LOCAL_LOGIN_API, LOGIN_FAILURE_MESSAGE } from '@/auth/constants'
 
 export default function AppLocalLoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') ?? '/app'
-  const showQueryError = searchParams.get('error') === LOGIN_FAILURE_QUERY
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [showError, setShowError] = useState(showQueryError)
+  const [showError, setShowError] = useState(false)
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -35,8 +28,7 @@ export default function AppLocalLoginForm() {
       })
 
       if (response.ok) {
-        router.push(redirectTo.startsWith('/app') ? redirectTo : '/app')
-        router.refresh()
+        window.location.href = redirectTo.startsWith('/app') ? redirectTo : '/app'
         return
       }
 
@@ -98,9 +90,9 @@ export default function AppLocalLoginForm() {
         </button>
       </form>
       <p className="text-center text-sm text-slate-600">
-        <Link className="text-blue-600 hover:underline" href="/app/login/forgot-password">
+        <a className="text-blue-600 hover:underline" href="/app/login/forgot-password">
           Password dimenticata?
-        </Link>
+        </a>
       </p>
     </div>
   )

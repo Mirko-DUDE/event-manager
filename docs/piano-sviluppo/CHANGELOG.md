@@ -30,6 +30,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **§ 2.5 — Plugin `payload-oauth2` — istanza App**: configurazione in `plugins/googleAppOAuth.ts` (`strategyName: google-app`, path `/oauth/google-app`); stessa logica condivisa in `auth/google/` con `allowApp`; pagina login custom `/app/login` con bottone Google (`components/app/GoogleAppLoginButton`); successo → `/app`, fallimento → messaggio generico su `/app/login`.
 - **§ 2.7 — Route emergenza super-admin**: custom view `LocalAdminLoginView` su `/admin/login/local`; endpoint `POST /api/users/login/local` (`superAdminLocalLoginEndpoint`); logica in `performSuperAdminLocalLogin.ts` (PBKDF2 nativo Payload, sessione JWT/cookie identica al login standard); nota operativa `docs/operativo/admin-login-local.md`.
 - **§ 2.6 — Login locale App + Resend + protezione route**: form email/password su `/app/login` (`AppLocalLoginForm`); endpoint `POST /api/users/login/app` con `performLocalLogin` condiviso; `@payloadcms/email-resend` in `payload.config.ts`; `auth.verify: true` + hook `sendLocalUserVerificationEmail`; reset password App (`forgot-password/app`, `reset-password/app`, pagine sotto `/app/login/`); middleware + layout `(protected)` per `/app/*`.
+- **§ 2.6 — Verifica email App custom**: pagina `/app/login/verify?token=…` con `verifyAppLocalEmail` (bypass `verifyEmailOperation` bloccata da `disableLocalStrategy`); template email HTML condiviso `renderAppEmail` per attivazione e reset; hook `skipNativeVerificationEmail` per evitare doppio invio/403 Resend al create utente.
 
 - **§ 2.8 — Seed super-admin e guardrail**: script `scripts/seed-super-admin.ts` (`pnpm seed:super-admin`), credenziali da `SEED_SUPER_ADMIN_EMAIL` / `SEED_SUPER_ADMIN_PASSWORD`; guardrail ultimo super-admin locale in `localSuperAdminGuard.ts`; guardrail lista domini vuota su Global `settings`; vincolo credenziali locali in `canHaveLocalCredentials`; nota operativa `docs/operativo/seed-super-admin.md`.
 
@@ -39,10 +40,15 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - Messaggio di rifiuto accesso unificato: `Accesso non autorizzato` (`auth/constants.ts`).
 - **§ 2.6 — Refactor login locale**: `performSuperAdminLocalLogin` delega a `performLocalLogin` condiviso; `addSessionToUser` estratto in modulo dedicato.
 - **§ 2.6 — `guardLoginAccess`**: supporto `localLoginArea` (oltre a `oauthArea`) per controlli post-auth sul login locale App.
+- **§ 2.6 — `performLocalLogin`**: controllo `_verified` limitato al gate App; super-admin escluso da verifica email obbligatoria.
 
 ### Fixed
 
 - **§ 2.7 — Parsing body endpoint custom**: gli endpoint custom non ricevevano email/password dal Form Payload (multipart `_payload`); aggiunto `addDataAndFileToRequest(req)` e allineamento form client al `LoginForm` nativo (`valid: true` in initialState, `validate={email}` su EmailField).
+- **§ 2.6 — Link attivazione "Unable to Verify"**: il link email puntava a `/admin/users/verify/{token}` (operazione nativa bloccata con `disableLocalStrategy`); ora punta a `/app/login/verify?token=…` con verifica custom.
+- **§ 2.6 — Schermata post-attivazione**: redirect di successo finiva nel `catch` (Next.js `redirect()` lancia un'eccezione) → messaggio errore fuorviante; ora pagina dedicata con conferma e pulsante «Vai al login».
+- **§ 2.6 — Email illeggibili**: sostituito HTML grezzo i18n Payload con template `renderAppEmail` (attivazione account e reset password).
+- **§ 2.6 — Create utente bloccato da Resend**: hook `skipNativeVerificationEmail` + try/catch su invio verifica — la create non fallisce se l'email non parte.
 
 ### Tests
 
@@ -50,8 +56,9 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **§ 2.7 — Login locale super-admin (dev, 2026-08-02)**: logout → `/admin/login/local` → credenziali seed → accesso pannello → OK (dopo fix parsing body).
 - **§ 2.8 — Seed e guardrail (dev, pre-OAuth)**: seed idempotente, Global Settings, guardrail lista vuota → OK; post § 2.4 login locale su `/admin/login` non più disponibile (atteso).
 - **§ 2.5 — Login Google App (dev, 2026-08-02)**: utente censito con dominio whitelisted → OK, redirect `/app`. Account Gmail personale → KO lato Google consent screen Internal (*«Accesso bloccato: l'app DUDE Services può essere usata soltanto all'interno della relativa organizzazione»* — atteso, documentato in `docs/operativo/google-oauth.md`).
-- **§ 2.10 — Spike parziale (dev, 2026-08-02)**: login Google Admin OK; login Google App OK (dominio whitelisted); rifiuto utente non censito / dominio errato con messaggio generico → OK. **Non ancora verificato**: login locale App (§ 2.6), staging Cloud Run. **Gap route `/app/*`**: chiuso in § 2.6 (middleware + layout).
+- **§ 2.10 — Spike parziale (dev, 2026-08-02)**: login Google Admin OK; login Google App OK (dominio whitelisted); login locale App OK (create, email, attivazione, login post-verifica); rifiuto utente non censito / dominio errato con messaggio generico → OK. **Non ancora verificato**: staging Cloud Run.
 - **§ 2.6 — Validazione codice (2026-08-02)**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` → OK. **Test dev login locale App e invio email Resend**: non eseguiti in questa sessione — richiedono `RESEND_API_KEY` in `.env` e utente App locale già censito; token reset Payload default verificato a **1 h** (non 24 h come in specifica 2.4).
+- **§ 2.6 — Test dev email/login locale (2026-08-02)**: reset password App → OK; create utente App locale → OK (`RESEND_FROM_ADDRESS=noreply@services.dude.it`); email attivazione (template HTML + link `/app/login/verify`) → OK; pagina post-attivazione (conferma + «Vai al login») → OK; login locale App post-verifica → OK.
 
 ---
 

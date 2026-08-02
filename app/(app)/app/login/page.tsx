@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 
 import AppLocalLoginForm from '@/components/app/AppLocalLoginForm'
+import AppLoginAlerts from '@/components/app/AppLoginAlerts'
 import GoogleAppLoginButton from '@/components/app/GoogleAppLoginButton'
 
 export default function AppLoginPage() {
@@ -12,6 +13,9 @@ export default function AppLoginPage() {
           Accedi con Google o con email e password
         </p>
         <div className="mt-8 flex flex-col gap-6">
+          <Suspense fallback={null}>
+            <AppLoginAlerts />
+          </Suspense>
           <Suspense fallback={null}>
             <GoogleAppLoginButton />
           </Suspense>

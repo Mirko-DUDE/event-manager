@@ -175,9 +175,11 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - `@payloadcms/email-resend` in `payload.config.ts`; variabili `RESEND_API_KEY`, `RESEND_FROM_ADDRESS`, `RESEND_FROM_NAME` in `.env.example`.
 - `auth.verify: true` sulla collection `users`; hook `sendLocalUserVerificationEmail` (afterChange al create utente locale) — necessario perché `disableLocalStrategy` impedisce il flusso nativo di attivazione.
 - Reset password App: `POST /api/users/forgot-password/app`, `POST /api/users/reset-password/app`; pagine `/app/login/forgot-password` e `/app/login/reset-password`.
+- **Verifica email App (fix post-test dev)**: link attivazione → `/app/login/verify?token=…` (`verifyAppLocalEmail`), non `/admin/users/verify/…` (bloccato con `disableLocalStrategy`); template email condiviso `auth/email/renderAppEmail.ts`; hook `skipNativeVerificationEmail` evita invio nativo duplicato al create; pagina esito `AppVerifyEmailResult` con conferma e pulsante «Vai al login».
+- **`performLocalLogin`**: controllo `_verified` solo per gate App (§ 2.6); super-admin (§ 2.7) escluso da verifica email e da hook `sendLocalUserVerificationEmail`.
 - **Protezione route `/app/*`**: middleware (`payload-token` assente → redirect `/app/login`) + layout server `(protected)` con `payload.auth` e controllo `appRole`.
 - **Token expiration (verifica codice Payload 3.87)**: reset password usa default `forgotPassword.expiration` = **3600000 ms (1 ora)**, non 24 h — la specifica (2.4) cita 24 h come default Payload; su questa versione il reset è 1 h, i token di verifica email (`verifyEmail`) **non hanno scadenza lato server**. Nessuna configurazione custom aggiunta (proporzionalità).
-- **Test dev login locale App**: da eseguire con utente App `loginMethod = local` già creato in Admin; richiede `RESEND_API_KEY` in `.env` per email attivazione/reset.
+- **Test dev (2026-08-02)**: reset password → OK; create utente locale → OK (mittente Resend: `noreply@services.dude.it`); email attivazione (template + link) → OK; pagina post-attivazione con conferma e link login → OK; login locale App post-verifica → OK.
 
 ---
 
@@ -251,7 +253,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.10 — Spike di test end-to-end con credenziali Google reali
 
-**Stato**: 🔶 parziale (Admin + App Google OK in locale — 2026-08-02; login locale App e staging Cloud Run ancora da fare)
+**Stato**: 🔶 parziale (Admin + App Google + login locale App OK in locale — 2026-08-02; staging Cloud Run ancora da fare)
 **Riferimento**: specifica 2.10
 
 **Obiettivo**: conferma pratica, non solo di codice, che il flusso Google funziona davvero nell'ambiente reale.
@@ -263,7 +265,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 2. Creare un record utente in `users` con email aziendale reale, ruolo admin o super-admin (o richiedere all'umano di indicarne uno esistente).
 3. Login Google su `/admin`: verificare autenticazione riuscita e che il cookie autentichi anche una chiamata REST (es. endpoint utente corrente). — ✅ fatto in dev (2026-08-02).
 4. Ripetere lo stesso su `/app` (istanza Google separata). — ✅ fatto in dev (2026-08-02): utente App censito, dominio whitelisted → OK.
-5. Login locale su `/app` con un utente locale di test.
+5. Login locale su `/app` con un utente locale di test. — ✅ fatto in dev (2026-08-02): create, email attivazione, verifica, login → OK (§ 2.6).
 6. Tentativo con email di dominio non whitelisted (anche rimuovendo temporaneamente il dominio dall'allow-list) → verificare rifiuto con messaggio generico. — ✅ verificato indirettamente (utente non censito / dominio errato → messaggio generico su `/app/login`). Account Gmail fuori Workspace → blocco Google Internal prima del callback app (non passa dal nostro messaggio generico).
 7. Ripetere i punti rilevanti su un ambiente di staging su Cloud Run, per verificare il comportamento del cookie httpOnly su HTTPS dietro proxy/load balancer, prima del rilascio definitivo.
 

@@ -19,6 +19,7 @@ import { guardSuperAdminAssignment } from './users/guardSuperAdminAssignment'
 import { hashLocalCredentials } from './users/hashLocalCredentials'
 import { guardLoginMethod } from './users/loginMethod'
 import { sendLocalUserVerificationEmail } from './users/localUserEmails'
+import { skipNativeVerificationEmail } from './users/skipNativeVerificationEmail'
 import {
   isPasswordComplexEnough,
   PASSWORD_VALIDATION_MESSAGE,
@@ -167,6 +168,7 @@ export const Users: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeOperation: [skipNativeVerificationEmail],
     beforeChange: [
       guardSuperAdminAssignment,
       hashLocalCredentials,

@@ -106,7 +106,8 @@ export async function performLocalLogin(args: {
     loginFailure()
   }
 
-  if (collectionConfig.auth.verify && user._verified === false) {
+  // Verifica email obbligatoria solo per login App locale (§ 2.6), non per super-admin (§ 2.7).
+  if (gate.kind === 'app' && collectionConfig.auth.verify && user._verified === false) {
     loginFailure()
   }
 
