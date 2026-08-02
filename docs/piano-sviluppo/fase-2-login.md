@@ -40,7 +40,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.2 — Global "Settings" — allow-list domini
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 **Riferimento**: specifica 2.2
 
 **Obiettivo**: allow-list dei domini autorizzati, gestita da pannello Admin, pronta a differenziare i permessi per area.
@@ -51,6 +51,12 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Hook `beforeValidate`/`beforeChange`: trim, lowercase, validazione formato dominio, prevenzione duplicati.
 - Access control in scrittura ristretto al solo ruolo `super-admin` (campo `adminRole`).
 - Non implementare ancora il guardrail "non salvabile se vuoto": quello è trattato in 2.8 insieme agli altri guardrail, per tenerli tutti in un unico posto.
+
+**Note di esecuzione** (2026-08-02):
+- Global `settings` in `globals/Settings.ts` con array `authorizedDomains` (domain, allowAdmin, allowApp).
+- Normalizzazione domini in `beforeValidate`; lettura Admin per `admin`/`super-admin`, scrittura solo `super-admin`.
+- Guardrail lista vuota implementato in § 2.8 (`beforeChange` sul Global).
+- Formato dominio verificato in dev: solo hostname senza protocollo (es. `dude.it`, non `https://dude.it`).
 
 ---
 
@@ -151,7 +157,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.8 — Script di seed super-admin + guardrail
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 **Riferimento**: specifica 2.3
 
 **Obiettivo**: primo super-admin creato in modo ripetibile, e i due vincoli minimi di sicurezza attivi.
@@ -162,6 +168,16 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Implementare il vincolo: non è possibile salvare l'allow-list domini (Global, 2.2) se risulterebbe vuota.
 - Implementare il vincolo: nessun altro utente Admin può essere creato con credenziali locali oltre al/ai super-admin di bootstrap — a livello di access control sulla collection.
 - Non implementare nessuno degli elementi esplicitamente scartati nella specifica: procedura "vetro da rompere" fuori applicazione, audit log dedicato per interventi di emergenza, differenziazione di processo tra ambienti per il seed.
+
+**Note di esecuzione** (2026-08-02):
+- Script `scripts/seed-super-admin.ts`, comando `pnpm seed:super-admin`; credenziali da `SEED_SUPER_ADMIN_EMAIL` / `SEED_SUPER_ADMIN_PASSWORD` in `.env`.
+- Nota operativa: `docs/operativo/seed-super-admin.md`.
+- Guardrail ultimo super-admin locale: hook `beforeChange`/`beforeDelete` in `collections/users/localSuperAdminGuard.ts` (conteggio per `adminRole = super-admin` + `hash` presente).
+- Guardrail lista domini vuota: hook `beforeChange` su Global `settings`.
+- Vincolo credenziali locali Admin: già in `canHaveLocalCredentials` + `beforeValidate` (§ 2.1); super-admin e utenti App puri ammessi, `admin` no.
+- Global Settings creato come prerequisito (§ 2.2 completato nello stesso passaggio).
+- Test dev confermato: seed, login locale su `/admin`, Global Settings con domini funzionanti.
+- Istruzioni seed vs create-first-user (dev e deploy): `docs/operativo/seed-super-admin.md`.
 
 ---
 

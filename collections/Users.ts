@@ -7,6 +7,10 @@ import {
   canHaveLocalCredentials,
 } from './users/access'
 import {
+  guardLastLocalSuperAdminOnChange,
+  guardLastLocalSuperAdminOnDelete,
+} from './users/localSuperAdminGuard'
+import {
   isPasswordComplexEnough,
   PASSWORD_VALIDATION_MESSAGE,
 } from './users/passwordValidation'
@@ -75,6 +79,8 @@ export const Users: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeChange: [guardLastLocalSuperAdminOnChange],
+    beforeDelete: [guardLastLocalSuperAdminOnDelete],
     beforeValidate: [
       ({ data }) => {
         if (!data) return data

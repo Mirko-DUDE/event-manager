@@ -4,12 +4,14 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 import { Users } from './collections/Users'
+import { Settings } from './globals/Settings'
 
 export default buildConfig({
   admin: {
     user: Users.slug,
   },
   collections: [Users],
+  globals: [Settings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   db: mongooseAdapter({
