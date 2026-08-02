@@ -1,5 +1,5 @@
 /* § 2.4 — /admin/login mostra solo Google; form locale su /admin/login/local (§ 2.7). */
-.login .login__form {
+.login:not(.login--local) .login__form {
   display: none;
 }
 
@@ -31,6 +31,38 @@
 
 .login .login__oauth-button:hover {
   background: var(--theme-elevation-50);
+}
+
+.login__local-error {
+  color: var(--theme-error-500);
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.login__local-hint {
+  color: var(--theme-elevation-500);
+  font-size: 0.85rem;
+  margin: 1.25rem 0 0;
+  text-align: center;
+}
+
+.login--local .login__form {
+  display: block;
+  margin: 0 auto;
+  max-width: 400px;
+  width: 100%;
+}
+
+.login--local .login__form__inputWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base);
+}
+
+.login--local .login__local {
+  margin: 0 auto;
+  max-width: 400px;
+  width: 100%;
 }
 
 /* Creazione utenti: metodo accesso prima di email/password; nasconde password se Google. */

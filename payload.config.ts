@@ -12,6 +12,13 @@ export default buildConfig({
     user: Users.slug,
     components: {
       beforeLogin: ['@/components/admin/GoogleAdminLoginButton'],
+      views: {
+        localLogin: {
+          Component: '@/components/admin/LocalAdminLoginView',
+          path: '/login/local',
+          exact: true,
+        },
+      },
     },
   },
   collections: [Users],

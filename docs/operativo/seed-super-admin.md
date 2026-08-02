@@ -7,9 +7,9 @@
 Crea l'unico account Admin autorizzato alle credenziali locali (email + password), necessario per:
 
 - accedere al pannello `/admin` prima che Google OAuth sia configurato;
-- login di emergenza se Google Login o l'allow-list non sono disponibili (route `/admin/login/local`, da implementare in § 2.7).
+- login di emergenza se Google Login o l'allow-list non sono disponibili → route `/admin/login/local` (§ 2.7, vedi `docs/operativo/admin-login-local.md`).
 
-> **Nota post § 2.4**: il form locale su `/admin/login` non è più disponibile (`disableLocalStrategy`). Il super-admin seedato resta valido ma va usato su `/admin/login/local` (§ 2.7) — finché non implementata, evitare logout dal pannello Admin.
+> **Nota post § 2.4**: il form locale su `/admin/login` non è più disponibile (`disableLocalStrategy`). Il super-admin seedato va usato su `/admin/login/local`.
 
 ## Prerequisiti
 

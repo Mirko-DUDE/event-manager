@@ -6,6 +6,7 @@ import {
   adminPanelAccess,
   canHaveLocalCredentials,
 } from './users/access'
+import { superAdminLocalLoginEndpoint } from './users/endpoints/superAdminLocalLogin'
 import {
   guardLastLocalSuperAdminOnChange,
   guardLastLocalSuperAdminOnDelete,
@@ -21,6 +22,7 @@ import {
 
 export const Users: CollectionConfig = {
   slug: 'users',
+  endpoints: [superAdminLocalLoginEndpoint],
   auth: {
     // Password opzionale in create per utenti Google; hash gestito in hashLocalCredentials.
     disableLocalStrategy: {

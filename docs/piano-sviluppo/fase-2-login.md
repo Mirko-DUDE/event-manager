@@ -43,7 +43,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Componenti Admin: `UsersCredentialsFormSync` (sync ruoli), `UsersLocalPasswordFields` (password custom — il blocco Auth Payload non le mostra con disableLocalStrategy), `UsersLoginMethodDisplay` (sola lettura in modifica).
 - Validazione server: `collections/users/loginMethod.ts` (`guardLoginMethod`); blocco promozione super-admin da UI: `guardSuperAdminAssignment.ts`.
 - Campo `sub` (ID Google OAuth): nascosto in Admin, valorizzato automaticamente al primo login Google.
-- **Effetto collaterale**: login locale standard su `/admin/login` disabilitato — serve § 2.7 prima che il super-admin faccia logout.
+- **Effetto collaterale**: login locale standard su `/admin/login` disabilitato — route emergenza in § 2.7 (`/admin/login/local`).
 
 ---
 
@@ -167,7 +167,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.7 — Route locale di emergenza per super-admin
 
-**Stato**: 🔲 da fare — **priorità alta**: con `disableLocalStrategy` il super-admin non può più fare login locale su `/admin/login` (form nascosto).
+**Stato**: ✅ fatto
 **Riferimento**: specifica 2.3.5
 
 **Obiettivo**: via di accesso locale riservata al super-admin di bootstrap, non raggiungibile da alcun link visibile.
@@ -177,6 +177,14 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Deve usare la stessa strategia nativa di Payload per il login locale, non un sistema a parte.
 - Verificare che sia accessibile **solo** digitando l'URL direttamente, non tramite navigazione da `/admin/login`.
 - Scrivere la nota operativa interna che documenta l'esistenza e lo scopo di questa route, per chi gestirà il sistema — coerente con la regola di documentazione obbligatoria. Senza questa nota, la route rischia di essere dimenticata proprio nel momento in cui serve davvero.
+
+**Note di esecuzione** (2026-08-02):
+- Custom view Admin `LocalAdminLoginView` su `/admin/login/local` (`payload.config.ts` → `admin.components.views.localLogin`).
+- Form client `LocalAdminLoginForm` → `POST /api/users/login/local` (endpoint collection `superAdminLocalLoginEndpoint`).
+- Logica login in `auth/local/performSuperAdminLocalLogin.ts`: verifica PBKDF2 nativa Payload, sessione JWT/cookie identici al login standard; solo `adminRole = super-admin` con hash locale.
+- `/admin/login` resta Google-only (form nascosto via CSS + `disableLocalStrategy`); nessun link verso `/admin/login/local`.
+- Nota operativa: `docs/operativo/admin-login-local.md`.
+- **Test dev consigliato**: logout da `/admin`, aprire `/admin/login/local`, login con credenziali seed → accesso pannello OK.
 
 ---
 
@@ -202,7 +210,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Vincolo credenziali locali: `canHaveLocalCredentials` in `collections/users/access.ts` — solo `loginMethod = local` o `adminRole = super-admin`; hook `guardLoginMethod` + `hashLocalCredentials`.
 - Seed imposta `loginMethod: 'local'` sul super-admin creato.
 - Global Settings creato come prerequisito (§ 2.2 completato nello stesso passaggio).
-- Test dev (pre-OAuth): seed, login locale su `/admin`, Global Settings funzionanti. **Post § 2.4**: login locale su `/admin/login` non più disponibile fino a § 2.7.
+- Test dev (pre-OAuth): seed, login locale su `/admin`, Global Settings funzionanti. **Post § 2.4**: login locale su `/admin/login` non più disponibile; usare `/admin/login/local` (§ 2.7).
 - Istruzioni seed vs create-first-user (dev e deploy): `docs/operativo/seed-super-admin.md`.
 
 ---
