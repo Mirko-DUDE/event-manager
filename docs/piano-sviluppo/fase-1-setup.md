@@ -108,7 +108,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 **Note di esecuzione** (2026-08-02):
 - Route group `(payload)` presente in `app/(payload)/` (admin + API REST/GraphQL) — file Payload, non modificati manualmente.
 - Route group `(app)` presente in `app/(app)/` con pagina placeholder su URL `/app` (`app/(app)/app/page.tsx`).
-- Vetrina pubblica su URL `/` in `app/page.tsx` (root del router, fuori dai route group).
+- Vetrina pubblica su URL `/` in `app/(frontend)/page.tsx` (route group dedicato con layout html/body proprio).
 - Un solo `package.json` e `next.config.ts` senza CORS, Bearer token o deploy separato.
 - `README.md` aggiornato con mappa URL, struttura cartelle e nota esplicita cartella `app/` vs URL `/app`.
 
@@ -137,21 +137,28 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
   - Next.js: experiment `turbopackServerFastRefresh` disabilitato — informativo.
   - npm: `Unknown env config "devdir"` — configurazione locale npm, non impatta l'app.
 - **Nota operativa**: se `pnpm dev` segnala "Another next dev server is already running", terminare il processo precedente (`kill <PID>`) prima di riavviare.
+- **Fix layout** (2026-08-02): `app/layout.tsx` reso pass-through; vetrina spostata in `(frontend)/` con html/body proprio; `(app)/layout.tsx` e `(payload)/layout.tsx` gestiscono ciascuno il proprio documento — risolve hydration error su `/admin`.
 
 ---
 
 ## 1.7 — Verifica finale di chiusura fase
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 
 **Obiettivo**: verificare che la fase sia effettivamente conclusa e pronta per la Fase 2 — non è più il punto in cui si fa "il commit della fase": ogni sottofase precedente ha già il proprio commit locale (vedi `00-come-eseguire-il-piano.md`, policy commit per sottofase). Questo è un controllo di chiusura, non un'operazione Git a sé.
 
 **Checklist**:
-- Verificare che ogni sottofase da 1.1 a 1.6 abbia effettivamente un commit locale corrispondente — se qualcuna ne è priva, farlo ora prima di considerare la fase chiusa.
-- Verificare che `.gitignore` escluda correttamente `.env`, `node_modules`, cartelle di build.
-- Verificare che nessun segreto (secret Payload, credenziali MongoDB) sia finito per errore in un file tracciato da Git, in nessuno dei commit della fase.
-- Se manca ancora il push dei commit di questa fase, ricordarlo esplicitamente all'umano: il push resta un'azione manuale da GitHub Desktop, l'agente non lo esegue.
-- Aggiornare lo stato a ✅ per tutte le sottofasi completate, sia in questo file sia in `00-piano-generale.md`.
+- [x] Verificare che ogni sottofase da 1.1 a 1.6 abbia effettivamente un commit locale corrispondente — se qualcuna ne è priva, farlo ora prima di considerare la fase chiusa.
+- [x] Verificare che `.gitignore` escluda correttamente `.env`, `node_modules`, cartelle di build.
+- [x] Verificare che nessun segreto (secret Payload, credenziali MongoDB) sia finito per errore in un file tracciato da Git, in nessuno dei commit della fase.
+- [x] Se manca ancora il push dei commit di questa fase, ricordarlo esplicitamente all'umano: il push resta un'azione manuale da GitHub Desktop, l'agente non lo esegue.
+- [x] Aggiornare lo stato a ✅ per tutte le sottofasi completate, sia in questo file sia in `00-piano-generale.md`.
+
+**Note di esecuzione** (2026-08-02):
+- Commit presenti per 1.1–1.3 (`97d24a1`), 1.4 (`836ee2e`), 1.5 (`453494f`); migrazione pnpm (`4b1c444`) pushata dall'umano.
+- `.gitignore`: `.env*`, `node_modules`, `.next/`, `out/`, `package-lock.json` — OK.
+- Nessun segreto in file tracciati; `.env` esiste solo in locale, non in Git.
+- Fix layout hydration (1.6) validato con `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` e test dev su `/`, `/app`, `/admin`.
 
 ---
 

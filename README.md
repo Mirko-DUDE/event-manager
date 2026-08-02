@@ -28,7 +28,10 @@ Comandi utili: `pnpm dev`, `pnpm build`, `pnpm lint`.
 
 ```
 app/
-├── layout.tsx, page.tsx, globals.css   → URL /  (vetrina pubblica)
+├── layout.tsx                          → pass-through (nessun html/body)
+├── (frontend)/                         → URL /  (vetrina pubblica)
+│   ├── layout.tsx, page.tsx
+│   └── page.module.css
 ├── (payload)/                          → URL /admin, /api/*  (Payload — non modificare a mano)
 │   ├── admin/[[...segments]]/
 │   └── api/

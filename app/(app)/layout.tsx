@@ -5,5 +5,9 @@ export default function AppAreaLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return children
+  return (
+    <html lang="it">
+      <body>{children}</body>
+    </html>
+  )
 }

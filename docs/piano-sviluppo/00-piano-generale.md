@@ -14,7 +14,7 @@
 
 | Fase | Descrizione | Stato | File di dettaglio |
 |---|---|---|---|
-| Fase 1 | Setup progetto: Next.js, PayloadCMS, Tailwind, MongoDB locale, dipendenze base | 🔶 in corso (1.1 ✅–1.6 ✅) | `fase-1-setup.md` |
+| Fase 1 | Setup progetto: Next.js, PayloadCMS, Tailwind, MongoDB locale, dipendenze base | ✅ fatto (1.1–1.7) | `fase-1-setup.md` |
 | Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | 🔲 da fare | `fase-2-login.md` |
 
 ## Fase 1 — Setup, panoramica sottofasi
@@ -46,6 +46,6 @@ Dettaglio completo in `fase-2-login.md`. Nota: l'ordine pratico consigliato eseg
 
 ## Prossimi passi
 
-- Iniziare l'esecuzione della Fase 1 con Composer, seguendo `fase-1-setup.md` sottofase per sottofase.
+- Iniziare la **Fase 2** con Composer, seguendo `fase-2-login.md` sottofase per sottofase (partire dalla § 2.1 — collection `users`).
 - Aggiornare questo indice e il file di fase corrispondente a ogni sottofase completata.
 - **Nuovo file da scrivere a fine Fase 2**: `fase-3-deploy.md` (o nome equivalente), con le istruzioni per il deploy su Cloud Run e il setup di MongoDB Atlas (creazione cluster M0, utente, IP access list, connection string, e successiva migrazione da M0 a tier a pagamento quando il progetto sarà finito e testato). Deciso in Fase 1 § 1.3: sviluppo su MongoDB locale, Atlas rimandato al deploy.
