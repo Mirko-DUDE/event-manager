@@ -10,6 +10,16 @@ export const ADMIN_LOCAL_LOGIN_PATH = '/admin/login/local'
 /** Endpoint REST relativo alla collection users. */
 export const SUPER_ADMIN_LOCAL_LOGIN_API = '/users/login/local'
 
+/** Endpoint login locale Area App (§ 2.6). */
+export const APP_LOCAL_LOGIN_API = '/users/login/app'
+
+export const APP_FORGOT_PASSWORD_API = '/users/forgot-password/app'
+
+export const APP_RESET_PASSWORD_API = '/users/reset-password/app'
+
+/** Pagina reset password Area App (link nelle email di reset). */
+export const APP_RESET_PASSWORD_PATH = '/app/login/reset-password'
+
 export const LOGIN_FAILURE_QUERY = 'unauthorized'
 
 export function loginFailureRedirect(loginPath: string): string {

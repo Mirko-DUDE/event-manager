@@ -7,6 +7,9 @@ import {
   canHaveLocalCredentials,
 } from './users/access'
 import { superAdminLocalLoginEndpoint } from './users/endpoints/superAdminLocalLogin'
+import { appLocalLoginEndpoint } from './users/endpoints/appLocalLogin'
+import { appForgotPasswordEndpoint } from './users/endpoints/appForgotPassword'
+import { appResetPasswordEndpoint } from './users/endpoints/appResetPassword'
 import {
   guardLastLocalSuperAdminOnChange,
   guardLastLocalSuperAdminOnDelete,
@@ -15,6 +18,7 @@ import { guardLoginAccess } from './users/guardLoginAccess'
 import { guardSuperAdminAssignment } from './users/guardSuperAdminAssignment'
 import { hashLocalCredentials } from './users/hashLocalCredentials'
 import { guardLoginMethod } from './users/loginMethod'
+import { sendLocalUserVerificationEmail } from './users/localUserEmails'
 import {
   isPasswordComplexEnough,
   PASSWORD_VALIDATION_MESSAGE,
@@ -22,12 +26,19 @@ import {
 
 export const Users: CollectionConfig = {
   slug: 'users',
-  endpoints: [superAdminLocalLoginEndpoint],
+  endpoints: [
+    superAdminLocalLoginEndpoint,
+    appLocalLoginEndpoint,
+    appForgotPasswordEndpoint,
+    appResetPasswordEndpoint,
+  ],
   auth: {
     // Password opzionale in create per utenti Google; hash gestito in hashLocalCredentials.
     disableLocalStrategy: {
       enableFields: true,
     },
+    // Email attivazione al create (hook sendLocalUserVerificationEmail); reset via endpoint App custom.
+    verify: true,
     tokenExpiration: 7200,
   },
   admin: {
@@ -161,6 +172,7 @@ export const Users: CollectionConfig = {
       hashLocalCredentials,
       guardLastLocalSuperAdminOnChange,
     ],
+    afterChange: [sendLocalUserVerificationEmail],
     beforeDelete: [guardLastLocalSuperAdminOnDelete],
     beforeLogin: [guardLoginAccess],
     beforeValidate: [

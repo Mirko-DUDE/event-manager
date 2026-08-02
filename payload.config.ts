@@ -1,4 +1,5 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { resendAdapter } from '@payloadcms/email-resend'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
@@ -24,6 +25,11 @@ export default buildConfig({
   },
   collections: [Users],
   globals: [Settings],
+  email: resendAdapter({
+    apiKey: process.env.RESEND_API_KEY || '',
+    defaultFromAddress: process.env.RESEND_FROM_ADDRESS || 'noreply@example.com',
+    defaultFromName: process.env.RESEND_FROM_NAME || 'Event Manager',
+  }),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   db: mongooseAdapter({

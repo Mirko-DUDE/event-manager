@@ -150,13 +150,13 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Redirect post-login: successo → `/app`; fallimento → `/app/login?error=unauthorized` (messaggio generico `Accesso non autorizzato`).
 - **Redirect URI App (locale)**: `http://localhost:3000/api/users/oauth/google-app/callback` — registrato su Google Cloud Console.
 - **Test dev App Google (2026-08-02)**: utente censito con dominio whitelisted (`allowApp`) → login OK, redirect su `/app`. Account Gmail personale (fuori Workspace) → KO: blocco lato Google consent screen Internal (messaggio *«Accesso bloccato: l'app DUDE Services può essere usata soltanto all'interno della relativa organizzazione»* — atteso; vedi `docs/operativo/google-oauth.md` § Internal → External).
-- **Limite attuale — route `/app` non protette**: le pagine sotto `/app` (es. `/app` placeholder) sono raggiungibili anche senza sessione; il flusso OAuth crea la sessione ma non c'è ancora middleware/guard sul route group App. Da implementare prima di considerare l'Area App effettivamente riservata (probabile insieme a § 2.6 o alla prima sezione App reale).
+- **Limite attuale — route `/app` non protette**: ~~le pagine sotto `/app` (es. `/app` placeholder) sono raggiungibili anche senza sessione~~ **Risolto in § 2.6**: middleware + layout `(protected)`.
 
 ---
 
 ## 2.6 — Login locale (form App)
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 **Riferimento**: specifica 2.4, 2.7 (caso b)
 
 **Obiettivo**: form locale funzionante sotto `/app`, con invio email automatico e password policy.
@@ -169,9 +169,15 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Il controllo dominio (allow-list) **non si applica** al login locale: verificare che non venga richiamato per errore in questo percorso.
 - Messaggio di rifiuto identico a quello del flusso Google in ogni caso di fallimento.
 
-> **Nota — dettaglio non ancora fissato**: il vincolo è che il messaggio sia **testualmente identico** in ogni caso di rifiuto (dominio non autorizzato, utente non censito, utente inattivo, password errata) e condiviso tra flusso Google (2.4/2.5) e flusso locale (qui). La stringa esatta (es. "Accesso non autorizzato" o equivalente) non è decisa in questo piano: va scelta quando si implementa questa sottofase, e poi riusata identica ovunque — non va reinventata per ciascun punto di rifiuto.
-
-**Passaggio esterno da verificare con l'umano**: l'account Resend (API key) va creato/fornito — se non già disponibile, fermarsi e chiedere.
+**Note di esecuzione** (2026-08-02):
+- Form email/password su `/app/login` (`AppLocalLoginForm`) accanto al bottone Google; endpoint `POST /api/users/login/app` con logica condivisa in `auth/local/performLocalLogin.ts` (PBKDF2 nativo Payload, cookie/sessione identici al flusso Google).
+- `guardLoginAccess` esteso con `localLoginArea: 'app'` per verificare `appRole !== none` e `active` sul login locale.
+- `@payloadcms/email-resend` in `payload.config.ts`; variabili `RESEND_API_KEY`, `RESEND_FROM_ADDRESS`, `RESEND_FROM_NAME` in `.env.example`.
+- `auth.verify: true` sulla collection `users`; hook `sendLocalUserVerificationEmail` (afterChange al create utente locale) — necessario perché `disableLocalStrategy` impedisce il flusso nativo di attivazione.
+- Reset password App: `POST /api/users/forgot-password/app`, `POST /api/users/reset-password/app`; pagine `/app/login/forgot-password` e `/app/login/reset-password`.
+- **Protezione route `/app/*`**: middleware (`payload-token` assente → redirect `/app/login`) + layout server `(protected)` con `payload.auth` e controllo `appRole`.
+- **Token expiration (verifica codice Payload 3.87)**: reset password usa default `forgotPassword.expiration` = **3600000 ms (1 ora)**, non 24 h — la specifica (2.4) cita 24 h come default Payload; su questa versione il reset è 1 h, i token di verifica email (`verifyEmail`) **non hanno scadenza lato server**. Nessuna configurazione custom aggiunta (proporzionalità).
+- **Test dev login locale App**: da eseguire con utente App `loginMethod = local` già creato in Admin; richiede `RESEND_API_KEY` in `.env` per email attivazione/reset.
 
 ---
 
@@ -271,4 +277,4 @@ Al termine della Fase 2:
 - Aggiornare lo stato a ✅ per tutte le sottofasi completate, sia in questo file sia in `00-piano-generale.md`.
 - Verificare che nessuna delle checklist qui sopra sia stata "saltata silenziosamente": se qualcosa è stato rimandato, annotarlo esplicitamente qui, non lasciarlo solo nella memoria della sessione di lavoro.
 - Ricordare cosa resta esplicitamente fuori scope per questa fase (già segnalato nella specifica): enforcement permessi per singola sezione App, offboarding automatico da Google Workspace, evoluzione a External, eventType di `activityLog` diversi da login.
-- **Aperto emerso in dev (2026-08-02)**: protezione route `/app/*` (redirect a login se non autenticati) — non ancora implementata; va chiusa prima del rilascio dell'Area App, non è coperta da § 2.5 da solo.
+- **Aperto emerso in dev (2026-08-02)**: ~~protezione route `/app/*`~~ **Chiuso in § 2.6** (middleware + layout server).
