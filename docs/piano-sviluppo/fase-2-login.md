@@ -12,7 +12,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.1 — Collection `users`
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto
 **Riferimento**: specifica 2.5, 2.6, 2.6.1
 
 **Obiettivo**: unica collection `users` con lo schema definitivo dei ruoli, pronta ad accogliere sia utenti Google sia utenti locali.
@@ -26,6 +26,15 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Scrivere comunque, fin da ora, lo stub della funzione centralizzata `canAccessSection` (firma e tabella già decise in specifica 2.6.1), anche se nessuna sezione la richiama ancora.
 - **Percorso fisico del file — punto esplicitamente aperto, non da decidere qui**: la specifica (2.6.1) rimanda la scelta di dove vive il file (es. `lib/permissions.ts` vs esportato dalla collection `users`) al momento in cui si svilupperà la prima sezione App, perché solo allora sarà chiaro da dove verrà importata. In questa sottofase lo stub va scritto come funzione autonoma, in un file temporaneo/di comodo (es. accanto alla collection `users`), senza impegnarsi sulla collocazione definitiva. Quando si arriverà a sviluppare `/lista-inviati` (o le altre sezioni App), decidere lì la collocazione definitiva e documentarla in quel momento — non prima.
 - Access control della collection: la creazione di utenti con credenziali locali va ristretta secondo la regola generale (vedi 2.3/2.8 più sotto) — non ogni utente può avere una password.
+
+**Note di esecuzione** (2026-08-02):
+- Collection `users` in `collections/Users.ts` con auth Payload nativa, campi `adminRole`, `appRole`, `active` (email gestita da auth).
+- Validazione password custom in `collections/users/passwordValidation.ts` + hook `beforeValidate` (min 8 car., alfanumerico + speciale).
+- Access control: pannello Admin solo per `admin`/`super-admin`; credenziali locali consentite solo per `super-admin` o utenti App puri (`adminRole = none`, `appRole !== none`) — un `admin` con anche `appRole` usa Google per entrambe le aree.
+- Stub `canAccessSection` in `collections/users/canAccessSection.ts` (collocazione definitiva ancora aperta).
+- `payload.config.ts` aggiornato con `admin.user` e collection registrata; tipi rigenerati.
+- Campo `active`: nascosto nei form di creazione (incluso first-register) via `admin.condition`; default `true`. Compare solo in modifica utente esistente, dove serve per disattivare senza cancellare.
+- Messaggi di validazione password: versione breve per i tooltip nativi Payload (i testi lunghi vengono troncati); requisito completo in `PASSWORD_REQUIREMENTS_FULL` nel codice.
 
 ---
 

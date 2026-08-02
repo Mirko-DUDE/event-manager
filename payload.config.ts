@@ -3,9 +3,13 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
+import { Users } from './collections/Users'
+
 export default buildConfig({
-  // Collection `users` e altre verranno definite in Fase 2
-  collections: [],
+  admin: {
+    user: Users.slug,
+  },
+  collections: [Users],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   db: mongooseAdapter({
