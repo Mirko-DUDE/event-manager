@@ -53,6 +53,8 @@ export const ActivityLog: CollectionConfig = {
       required: true,
       options: [
         { label: 'Login', value: 'login' },
+        { label: 'Logout', value: 'logout' },
+        { label: 'Accesso negato', value: 'accessDenied' },
         { label: 'Sync HubSpot', value: 'hubspotSync' },
         { label: 'Upload CSV', value: 'csvUpload' },
         { label: 'Check-in', value: 'checkIn' },
@@ -68,7 +70,10 @@ export const ActivityLog: CollectionConfig = {
       ],
       admin: {
         readOnly: true,
-        condition: (_data, siblingData) => siblingData?.eventType === 'login',
+        condition: (_data, siblingData) =>
+          siblingData?.eventType === 'login' ||
+          siblingData?.eventType === 'logout' ||
+          siblingData?.eventType === 'accessDenied',
       },
     },
   ],

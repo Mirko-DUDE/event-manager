@@ -130,7 +130,7 @@ export interface ActivityLog {
   user: string | User;
   timestamp: string;
   area?: ('admin' | 'app') | null;
-  eventType: 'login' | 'hubspotSync' | 'csvUpload' | 'checkIn';
+  eventType: 'login' | 'logout' | 'accessDenied' | 'hubspotSync' | 'csvUpload' | 'checkIn';
   method?: ('google' | 'local') | null;
 }
 /**

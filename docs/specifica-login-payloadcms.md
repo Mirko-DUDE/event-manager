@@ -226,11 +226,11 @@ Verificato leggendo il codice sorgente reale del pacchetto (v1.0.21), non solo l
   - user       (relationship a users)
   - timestamp  (automatico)
   - area       (select: admin / app — opzionale, valorizzato solo se applicabile all'evento; es. login sì, altri eventi non necessariamente)
-  - eventType  (select: login / hubspotSync / csvUpload / checkIn — altri valori aggiunti solo quando servirà davvero)
-  - method     (select: google / local — valorizzato solo se eventType = login; non generalizzato per altri eventi finché non saranno progettati in dettaglio)
+  - eventType  (select: login / logout / accessDenied / hubspotSync / csvUpload / checkIn — altri valori aggiunti solo quando servirà davvero)
+  - method     (select: google / local — valorizzato per gli eventi auth login/logout/accessDenied)
   ```
-- Popolato dall'hook `afterLogin` della collection `users` per gli eventi di login; `area` e `method` derivano dal contesto della strategia che ha autenticato (il `strategyName` distinto tra le istanze del plugin, 2.10, fornisce già questa informazione).
-- **Implementazione attuale**: solo gli eventi di login. Gli altri `eventType` (hubspotSync, csvUpload, checkIn) restano da implementare quando quelle funzionalità verranno sviluppate — lo schema è già pronto ad accoglierli.
+- Popolato dall'hook `afterLogin` della collection `users` per gli eventi di login; logout da `afterLogout`; accesso negato quando esiste un record utente (`guardLoginAccess`, login locale custom). `area` e `method` derivano dal contesto della strategia che ha autenticato (il `strategyName` distinto tra le istanze del plugin, 2.10, fornisce già questa informazione).
+- **Implementazione attuale**: eventi auth (`login`, `logout`, `accessDenied`). Gli altri `eventType` (hubspotSync, csvUpload, checkIn) restano da implementare quando quelle funzionalità verranno sviluppate — lo schema è già pronto ad accoglierli. Tentativi con email non censita o dominio Google rifiutato prima del lookup utente non producono record (`user` obbligatorio).
 
 ## 3. Punti ancora aperti (da decidere prima di implementare)
 

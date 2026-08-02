@@ -2,6 +2,7 @@ import type { CollectionBeforeLoginHook } from 'payload'
 
 import { LOGIN_FAILURE_MESSAGE } from '../../auth/constants'
 import { hasAdminPanelAccess } from './access'
+import { logAccessDeniedActivity } from './logAccessDeniedActivity'
 
 type LoginArea = 'admin' | 'app'
 
@@ -9,8 +10,9 @@ type LoginArea = 'admin' | 'app'
  * Controlli comuni post-autenticazione: active e ruolo idoneo per l'area.
  * `oauthArea` viene impostato in getToken (Google); `localLoginArea` nel login locale App (§ 2.6).
  */
-export const guardLoginAccess: CollectionBeforeLoginHook = ({ req, user }) => {
+export const guardLoginAccess: CollectionBeforeLoginHook = async ({ req, user }) => {
   if (user.active === false) {
+    await logAccessDeniedActivity({ req, user })
     throw new Error(LOGIN_FAILURE_MESSAGE)
   }
 
@@ -19,10 +21,12 @@ export const guardLoginAccess: CollectionBeforeLoginHook = ({ req, user }) => {
     | undefined
 
   if (loginArea === 'admin' && !hasAdminPanelAccess(user)) {
+    await logAccessDeniedActivity({ req, user })
     throw new Error(LOGIN_FAILURE_MESSAGE)
   }
 
   if (loginArea === 'app' && (!user.appRole || user.appRole === 'none')) {
+    await logAccessDeniedActivity({ req, user })
     throw new Error(LOGIN_FAILURE_MESSAGE)
   }
 

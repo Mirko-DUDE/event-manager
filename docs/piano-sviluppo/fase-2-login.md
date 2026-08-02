@@ -243,22 +243,25 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 **Stato**: ✅ fatto
 **Riferimento**: specifica 2.11
 
-**Obiettivo**: log applicativo unico e condiviso tra Admin e App, con solo l'evento di login implementato per ora.
+**Obiettivo**: log applicativo unico e condiviso tra Admin e App; eventi auth implementati: login, logout, accesso negato (con utente identificato).
 
 **Checklist**:
 - Creare la collection `activityLog` (non `loginEvents` — nome scelto per accogliere altri eventi futuri senza migrazione di schema).
-- Campi: `user` (relationship a `users`), `timestamp` (automatico), `area` (select: admin/app, opzionale), `eventType` (select con enum aperto: login/hubspotSync/csvUpload/checkIn — solo `login` implementato ora, gli altri valori esistono nello schema ma non hanno ancora logica applicativa dietro), `method` (select: google/local, valorizzato solo se `eventType = login`).
+- Campi: `user` (relationship a `users`), `timestamp` (automatico), `area` (select: admin/app, opzionale), `eventType` (select: login/logout/accessDenied/hubspotSync/csvUpload/checkIn — hubspotSync/csvUpload/checkIn senza logica applicativa), `method` (select: google/local, per eventi auth).
 - Popolare `activityLog` dall'hook `afterLogin` della collection `users` — si attiva indipendentemente da quale istanza/area ha autenticato, perché vive sulla collection e non sulla singola istanza del plugin.
+- Popolare logout da hook `afterLogout` (`logLogoutActivity`); accessi negati quando l'utente è identificato in `users` (`logAccessDeniedActivity` — `guardLoginAccess`, login locale custom).
 - `area` e `method` derivano dal contesto della strategia che ha autenticato (lo `strategyName` distinto tra le istanze, 2.4/2.5, fornisce già questa informazione).
 - Non aggiungere campi generici per collegare l'evento a un record modificato (es. `targetRecord`, `previousValue`/`newValue`): emergeranno quando si progetteranno in dettaglio gli altri eventType, non vanno indovinati ora.
 
 **Note di esecuzione** (2026-08-02):
 - Collection `activityLog` in `collections/ActivityLog.ts`: sola lettura in Admin (`admin`/`super-admin`); create/update/delete disabilitati lato UI — scrittura solo via hook con `overrideAccess`.
-- Hook `logLoginActivity` in `collections/users/logLoginActivity.ts`, registrato come `afterLogin` su `users`.
-- Derivation contesto: `req.context.oauthArea` (Google Admin/App), `req.context.localLoginArea` (login locale App), fallback su `user._strategy` (`google-admin`, `google-app`, `local-jwt` → super-admin locale = area `admin`, method `local`).
+- Helper condiviso `collections/users/activityLogAuth.ts` (`deriveAuthContext`, `deriveLogoutContext`, `writeActivityLogEntry`).
+- Hook `logLoginActivity` (`afterLogin`), `logLogoutActivity` (`afterLogout`), `logAccessDeniedActivity` (chiamata da `guardLoginAccess` e `performLocalLogin`).
+- Derivation contesto login/accessDenied: `req.context.oauthArea` (Google Admin/App), `req.context.localLoginArea` (login locale App), fallback su `user._strategy` (`google-admin`, `google-app`, `local-jwt` → super-admin locale = area `admin`, method `local`).
+- Derivation contesto logout: header `Referer` (`/admin` vs `/app`), poi ruoli utente, infine stessa logica del login.
 - Login locale custom (`performLocalLogin`) invoca esplicitamente gli hook `afterLogin` (il plugin OAuth li invoca già nativamente).
-- **Test dev**: verificare record in Admin → Log attività dopo login Google Admin, Google App, locale App, super-admin locale su `/admin/login/local`.
-- **Nota scope attuale**: solo eventi `login` — logout e tentativi di accesso negati non sono ancora tracciati (emergeranno se/quando esteso lo schema `eventType`).
+- **Test dev**: verificare record in Admin → Log attività dopo login Google Admin, Google App, locale App, super-admin locale su `/admin/login/local`; logout da Admin; tentativo login con password errata o utente disattivato → `accessDenied`.
+- **Limite attuale**: tentativi con email non censita in `users` non producono record (`user` obbligatorio); dominio Google non whitelisted (prima del lookup utente) idem.
 
 ---
 

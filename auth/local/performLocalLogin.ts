@@ -9,6 +9,7 @@ import {
 
 import { LOGIN_FAILURE_MESSAGE } from '../constants'
 import { addSessionToUser } from './addSessionToUser'
+import { logAccessDeniedActivity } from '../../collections/users/logAccessDeniedActivity'
 import { verifyLocalPassword } from './verifyLocalPassword'
 
 type LocalLoginUser = TypedUser &
@@ -26,6 +27,21 @@ export type LocalLoginGate =
 
 function loginFailure(): never {
   throw new Error(LOGIN_FAILURE_MESSAGE)
+}
+
+async function denyKnownUserLocalLogin(args: {
+  req: PayloadRequest
+  user: LocalLoginUser
+  gate: LocalLoginGate
+}): Promise<never> {
+  const area = args.gate.kind === 'app' ? 'app' : 'admin'
+  await logAccessDeniedActivity({
+    req: args.req,
+    user: args.user,
+    area,
+    method: 'local',
+  })
+  loginFailure()
 }
 
 function isLocalSuperAdmin(user: LocalLoginUser | null | undefined): boolean {
@@ -78,17 +94,23 @@ export async function performLocalLogin(args: {
       user,
     })
   } catch {
-    loginFailure()
+    await denyKnownUserLocalLogin({ req, user, gate })
   }
 
-  if (typeof user.hash !== 'string' || typeof user.salt !== 'string') {
-    loginFailure()
+  const hash = user.hash
+  const salt = user.salt
+  if (typeof hash !== 'string' || typeof salt !== 'string') {
+    await denyKnownUserLocalLogin({ req, user, gate })
   }
 
   user.collection = 'users'
   user._strategy = 'local-jwt'
 
-  const passwordValid = await verifyLocalPassword(password, user.hash, user.salt)
+  const passwordValid = await verifyLocalPassword(
+    password,
+    hash as string,
+    salt as string,
+  )
   const maxLoginAttemptsEnabled = collectionConfig.auth.maxLoginAttempts > 0
 
   if (!passwordValid) {
@@ -99,16 +121,16 @@ export async function performLocalLogin(args: {
         user,
       })
     }
-    loginFailure()
+    await denyKnownUserLocalLogin({ req, user, gate })
   }
 
   if (gate.kind === 'super-admin' && !isLocalSuperAdmin(user)) {
-    loginFailure()
+    await denyKnownUserLocalLogin({ req, user, gate })
   }
 
   // Verifica email obbligatoria solo per login App locale (§ 2.6), non per super-admin (§ 2.7).
   if (gate.kind === 'app' && collectionConfig.auth.verify && user._verified === false) {
-    loginFailure()
+    await denyKnownUserLocalLogin({ req, user, gate })
   }
 
   if (maxLoginAttemptsEnabled) {
