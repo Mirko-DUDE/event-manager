@@ -1,6 +1,7 @@
 # Immagine multi-stage per Cloud Run — Next.js standalone + pnpm.
 # Node 22 LTS (allineato a engines in package.json).
 # allowBuilds (sharp, esbuild, unrs-resolver): vedi pnpm-workspace.yaml.
+# sharp 0.35 / libvips: incluso nel standalone tramite outputFileTracingIncludes in next.config.ts.
 
 FROM node:22-alpine AS base
 RUN apk add --no-cache libc6-compat \
@@ -11,18 +12,6 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
-
-# Next standalone non include le .so di @img/sharp-libvips-linuxmusl-x64 nel file tracing.
-# Estraiamo qui (layer deps), dove il CAS pnpm è presente e i hard link sono validi.
-# tar -ch dereferenzia symlink e copia file reali; evita il problema di busybox cp con hard link.
-RUN set -e; mkdir -p /opt/sharp/@img; \
-    SHARP=$(ls -d node_modules/.pnpm/sharp@0.35.3*/node_modules/sharp | head -1); \
-    IMG=$(ls -d node_modules/.pnpm/@img+sharp-linuxmusl-x64@*/node_modules/@img/sharp-linuxmusl-x64 | head -1); \
-    VIPS=$(ls -d node_modules/.pnpm/@img+sharp-libvips-linuxmusl-x64@*/node_modules/@img/sharp-libvips-linuxmusl-x64 | head -1); \
-    tar -chf - -C "$(dirname "$SHARP")" "$(basename "$SHARP")" | tar -xf - -C /opt/sharp/; \
-    tar -chf - -C "$(dirname "$IMG")" "$(basename "$IMG")" | tar -xf - -C /opt/sharp/@img/; \
-    tar -chf - -C "$(dirname "$VIPS")" "$(basename "$VIPS")" | tar -xf - -C /opt/sharp/@img/; \
-    test -d /opt/sharp/@img/sharp-libvips-linuxmusl-x64/lib
 
 # --- build ---
 FROM base AS builder
@@ -52,8 +41,6 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=deps --chown=nextjs:nodejs /opt/sharp/sharp ./node_modules/sharp
-COPY --from=deps --chown=nextjs:nodejs /opt/sharp/@img ./node_modules/@img
 
 USER nextjs
 EXPOSE 3000
