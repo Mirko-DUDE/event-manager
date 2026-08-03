@@ -68,6 +68,7 @@ await payload.create({
     active: true,
   },
   overrideAccess: true,
+  context: { seed: true },
 })
 
 console.log(`Super-admin locale creato: ${email}`)

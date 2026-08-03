@@ -137,7 +137,10 @@ export const Users: CollectionConfig = {
         { label: 'Admin', value: 'admin' },
         { label: 'Super Admin', value: 'super-admin' },
       ],
-      filterOptions: ({ options, siblingData }) => {
+      filterOptions: ({ options, siblingData, req }) => {
+        // Il seed (context.seed = true) deve poter impostare super-admin: nessun filtro
+        if (req.context?.seed === true) return options
+
         const optionValue = (option: (typeof options)[number]) =>
           typeof option === 'object' && option !== null && 'value' in option
             ? String(option.value)

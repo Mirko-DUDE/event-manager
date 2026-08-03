@@ -182,7 +182,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 
 ## 3.4 — Bootstrap super-admin e dati iniziali
 
-**Stato**: 🔲 da fare
+**Stato**: 🔶 in corso
 
 **Obiettivo**: primo accesso Admin possibile su ambiente deployato, con DB Atlas ancora vuoto.
 
@@ -196,10 +196,14 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
   2. Sovrascrivere temporaneamente in `.env` `DATABASE_URL`, `PAYLOAD_SECRET`, `SEED_SUPER_ADMIN_EMAIL` e `SEED_SUPER_ADMIN_PASSWORD` con i valori di produzione (da Secret Manager, § 3.2 Parte B) — lasciare invariato il resto.
   3. Eseguire `pnpm seed:super-admin`.
   4. **Ripristinare subito `.env`** dalla copia di backup, prima di riprendere a lavorare in locale — per non rischiare di far ripartire per sbaglio il dev server puntato su Atlas di produzione.
-- Verificare **prima in locale/test** che lo script sia effettivamente idempotente, prima di lanciarlo su Atlas (se non già confermato altrove).
-- Verificare il login locale su `/admin/login/local` (route non linkata, vedi `docs/operativo/admin-login-local.md`) in produzione — **richiede che il servizio Cloud Run sia già attivo e raggiungibile** (§ 3.2 Parte C): il seed scrive solo su Atlas e può essere eseguito indipendentemente da Cloud Run, ma verificare il login richiede ovviamente che l'applicazione sia già deployata e in esecuzione.
-- Confermare esplicitamente (non assumere) che non serva alcuna migrazione di dati pregressi: si parte da DB vuoto.
-- Configurare la allow-list domini (Global Settings) subito dopo il seed, accedendo come super-admin appena creato; verificare che il guardrail anti-lista-vuota risulti attivo anche in produzione.
+- [x] Verificare **prima in locale/test** che lo script sia effettivamente idempotente, prima di lanciarlo su Atlas (se non già confermato altrove). *(Confermato: la fix al seed ha richiesto più run, tutti idempotenti.)*
+- [x] Eseguito `pnpm seed:super-admin` con `DATABASE_URL` e `PAYLOAD_SECRET` di produzione → super-admin creato su Atlas (2026-08-03).
+- [ ] Verificare il login locale su `/admin/login/local` (route non linkata, vedi `docs/operativo/admin-login-local.md`) in produzione — **richiede che il servizio Cloud Run sia già attivo e raggiungibile** (§ 3.2 Parte C).
+- [ ] Confermare esplicitamente (non assumere) che non serva alcuna migrazione di dati pregressi: si parte da DB vuoto.
+- [ ] Configurare la allow-list domini (Global Settings) subito dopo il seed, accedendo come super-admin appena creato; verificare che il guardrail anti-lista-vuota risulti attivo anche in produzione.
+
+**Note di esecuzione (2026-08-03)**:
+- Lo script di seed falliva su DB vuoto (caso produzione) per due guardrail che non erano stati testati in questo scenario: `guardSuperAdminAssignment` (`beforeChange`, blocca qualsiasi create con `adminRole: super-admin`) e `filterOptions` del campo `adminRole` (validazione server-side che su `loginMethod: local` filtra le opzioni a `['none']`). In locale i test erano passati perché il record super-admin già esisteva e il seed usciva prima del `create`. Fix: entrambi i guardrail ora controllano `req.context?.seed === true`; il seed script passa `context: { seed: true }` a `payload.create()`.
 
 ---
 

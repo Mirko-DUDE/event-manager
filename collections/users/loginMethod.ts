@@ -43,13 +43,16 @@ export const guardLoginMethod: CollectionBeforeValidateHook = ({ data, operation
   }
 
   if (loginMethod === 'local') {
-    if (data.adminRole && data.adminRole !== 'none') {
+    // super-admin è l'unica eccezione: loginMethod locale + adminRole (rotta di emergenza /admin/login/local)
+    if (data.adminRole && data.adminRole !== 'none' && data.adminRole !== 'super-admin') {
       throw new ValidationError({
         collection: 'users',
         errors: [{ message: LOCAL_ADMIN_ROLE_MESSAGE, path: 'adminRole' }],
       })
     }
-    data.adminRole = 'none'
+    if (data.adminRole !== 'super-admin') {
+      data.adminRole = 'none'
+    }
   }
 
   if (data.adminRole === 'admin' && loginMethod !== 'google') {
@@ -60,7 +63,7 @@ export const guardLoginMethod: CollectionBeforeValidateHook = ({ data, operation
   }
 
   const hasAppAccess = data.appRole && data.appRole !== 'none'
-  const hasAdminAccess = data.adminRole === 'admin'
+  const hasAdminAccess = data.adminRole === 'admin' || data.adminRole === 'super-admin'
 
   if (!hasAppAccess && !hasAdminAccess) {
     throw new ValidationError({
@@ -69,7 +72,7 @@ export const guardLoginMethod: CollectionBeforeValidateHook = ({ data, operation
     })
   }
 
-  if (loginMethod === 'local' && !hasAppAccess) {
+  if (loginMethod === 'local' && !hasAppAccess && data.adminRole !== 'super-admin') {
     throw new ValidationError({
       collection: 'users',
       errors: [{ message: APP_ROLE_REQUIRED_MESSAGE, path: 'appRole' }],

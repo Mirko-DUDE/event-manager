@@ -53,7 +53,7 @@ Dettaglio completo in `fase-3-deploy.md` (decisioni di deploy definite in sessio
 1. MongoDB Atlas (cluster M0) — ✅
 2. Build container e deploy Cloud Run — ✅
 3. OAuth Google e redirect URI produzione (+ spike ex § 2.10 punto 7) — 🔶
-4. Bootstrap super-admin e dati iniziali — 🔲
+4. Bootstrap super-admin e dati iniziali — 🔶
 5. Verifica chiusura fase — 🔲
 
 ## Prossimi passi
