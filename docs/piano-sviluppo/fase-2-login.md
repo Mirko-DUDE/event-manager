@@ -80,9 +80,9 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 - Creare (o riusare) un progetto su Google Cloud Console.
 - Configurare l'OAuth consent screen in modalità **Internal** (limitato all'organizzazione Google Workspace).
 - Creare credenziali OAuth 2.0 (Client ID e Client Secret) di tipo "Web application".
-- Registrare i redirect URI necessari — **attenzione**: serviranno redirect URI distinti per l'istanza Admin e per l'istanza App (vedi 2.4/2.5), sia per l'ambiente locale (`http://localhost:3000/...`) sia, più avanti, per l'ambiente di staging/produzione su Cloud Run.
+- Registrare i redirect URI necessari — **attenzione**: serviranno redirect URI distinti per l'istanza Admin e per l'istanza App (vedi 2.4/2.5), sia per l'ambiente locale (`http://localhost:3000/...`) sia, più avanti, per l'ambiente di produzione su Cloud Run.
 
-> **Nota — dettaglio non ancora fissato**: i path esatti (es. `/admin/oauth/callback` vs `/app/oauth/callback`, o nomi equivalenti) non sono decisi in questo piano. Emergeranno concretamente in 2.4/2.5, quando si configurano `authorizePath`/`callbackPath` delle due istanze del plugin — l'unico vincolo fissato è che siano **distinti tra Admin e App** (requisito tecnico del plugin). Una volta scelti in 2.4/2.5, vanno registrati su Google Cloud Console per ciascun ambiente (locale, staging/Cloud Run) prima di poter testare quell'ambiente.
+> **Nota — risolto in 2.4/2.5** (superata rispetto alla stesura iniziale di questa sottofase): i path esatti sono stati poi fissati in `auth/constants.ts` (`/oauth/google-admin` e `/oauth/google-app`, con relativi callback) — vedi le Note di esecuzione di 2.4/2.5 e `docs/operativo/google-oauth.md`. Vanno registrati su Google Cloud Console per ciascun ambiente (locale, produzione) prima di poter testare quell'ambiente; per la produzione vedi `fase-3-deploy.md` § 3.3 (incluso il nuovo Client OAuth dedicato).
 - Scope richiesti: `openid`, `email`, `profile`.
 - Comunicare all'agente Client ID e Client Secret (da inserire come variabili d'ambiente, mai hardcoded).
 
@@ -267,7 +267,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## 2.10 — Spike di test end-to-end con credenziali Google reali
 
-**Stato**: ✅ fatto (dev locale completo — 2026-08-02; **punto 7 staging Cloud Run rimandato a Fase 3** § 3.3)
+**Stato**: ✅ fatto (dev locale completo — 2026-08-02; **punto 7, produzione Cloud Run, rimandato a Fase 3** § 3.3)
 **Riferimento**: specifica 2.10
 
 **Obiettivo**: conferma pratica, non solo di codice, che il flusso Google funziona davvero nell'ambiente reale.
@@ -281,9 +281,9 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 4. Ripetere lo stesso su `/app` (istanza Google separata). — ✅ fatto in dev (2026-08-02), confermato post-fix callback OAuth custom (§ 2.5 note 2026-08-02): utente App censito, dominio whitelisted → redirect `/app` OK.
 5. Login locale su `/app` con un utente locale di test. — ✅ fatto in dev (2026-08-02): create, email attivazione, verifica, login → OK (§ 2.6).
 6. Tentativo con email di dominio non whitelisted (anche rimuovendo temporaneamente il dominio dall'allow-list) → verificare rifiuto con messaggio generico. — ✅ verificato indirettamente (utente non censito / dominio errato → messaggio generico su `/app/login`). Account Gmail fuori Workspace → blocco Google Internal prima del callback app (non passa dal nostro messaggio generico).
-7. Ripetere i punti rilevanti su un ambiente di staging su Cloud Run, per verificare il comportamento del cookie httpOnly su HTTPS dietro proxy/load balancer, prima del rilascio definitivo. — ⏭️ **Rimandato a Fase 3** (`fase-3-deploy.md` § 3.3) — decisione chiusura Fase 2 (2026-08-02): dev locale sufficiente per considerare il flusso login implementato; spike HTTPS non bloccante per proseguire.
+7. Ripetere i punti rilevanti sull'ambiente di produzione su Cloud Run, per verificare il comportamento del cookie httpOnly su HTTPS dietro proxy/load balancer, prima del rilascio definitivo. — ⏭️ **Rimandato a Fase 3** (`fase-3-deploy.md` § 3.3) — decisione chiusura Fase 2 (2026-08-02): dev locale sufficiente per considerare il flusso login implementato; spike HTTPS non bloccante per proseguire.
 
-**Nota chiusura (2026-08-02)**: spike considerato soddisfatto in **ambiente locale** (punti 1–6). Staging Cloud Run non ancora disponibile — non bloccante per chiudere Fase 2; checklist ripresa in `fase-3-deploy.md`.
+**Nota chiusura (2026-08-02)**: spike considerato soddisfatto in **ambiente locale** (punti 1–6). Ambiente di produzione Cloud Run non ancora disponibile — non bloccante per chiudere Fase 2; checklist ripresa in `fase-3-deploy.md`.
 
 **Non serve** un framework di test automatizzato per questo spike: è manuale, una tantum, in fase di sviluppo — non va rimandato al deploy né trasformato in un'infrastruttura di test permanente (coerente con `02-proporzionalita.mdc`).
 
@@ -291,12 +291,12 @@ Aggiornare lo stato di ogni sottofase qui sotto e nel file indice `00-piano-gene
 
 ## Note di chiusura fase
 
-**Chiusura Fase 2 — 2026-08-02** (staging Cloud Run rimandato a Fase 3).
+**Chiusura Fase 2 — 2026-08-02** (produzione Cloud Run rimandata a Fase 3).
 
 - [x] Sottofasi 2.1–2.10 marcate ✅ in questo file e in `00-piano-generale.md` (2.10: dev OK, punto 7 esplicitamente rimandato).
-- [x] Rimando documentato: spike HTTPS/staging → `fase-3-deploy.md` § 3.3.
+- [x] Rimando documentato: spike HTTPS in produzione → `fase-3-deploy.md` § 3.3.
 - [x] Bozza Fase 3 creata: `fase-3-deploy.md`.
-- [ ] **Test dev pendenti** (non bloccanti per chiusura fase, da eseguire quando comodo):
+- [x] **Test dev pendenti § 2.9** — non più in locale: spostati in `fase-3-deploy.md` § 3.5, da eseguire solo in produzione alla chiusura di Fase 3:
   - § 2.9 — logout Admin → record `logout` in Log attività
   - § 2.9 — password errata / utente disattivato → record `accessDenied`
   - § 2.9 — verifica record login su tutti i percorsi se non già fatto manualmente

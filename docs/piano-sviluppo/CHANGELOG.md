@@ -19,6 +19,36 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ## [Unreleased]
 
+### Added
+
+- **§ 3.1 — MongoDB Atlas (cluster M0)**: passaggio esterno completato (cluster M0, region `europe-west1`, Network Access `0.0.0.0/0`, utente DB `readWrite` sul solo database `event-manager`); `.env.example` aggiornato con commento che indica Atlas come DB di produzione e Secret Manager come destinazione di `DATABASE_URL` (nessuna credenziale reale nel file).
+- **Fase 3 — Decisioni di deploy definite**: `fase-3-deploy.md` aggiornato dalla bozza iniziale con le decisioni complete, mantenendo il formato a sottofasi (Stato/Obiettivo/Checklist) di Fase 1/2.
+  - **§ 3.1 (Atlas)**: tier M0, region `europe-west1`, network access aperto (`0.0.0.0/0`) con TLS + password random come compensazione, utente `readWrite` unico (seed e runtime).
+  - **§ 3.2 (Build/Secret Manager/Cloud Run)**: Dockerfile multi-stage (non Buildpacks), 7 secret in Secret Manager con IAM scoped, service account dedicato, scaling 0-4 istanze, 1 vCPU/512 MiB, pipeline di deploy continuo via wizard Cloud Run su branch `main`.
+  - **§ 3.3 (OAuth produzione)**: registrazione redirect URI dopo assegnazione URL Cloud Run, chiusura spike cookie httpOnly rimandato da Fase 2 § 2.10 punto 7.
+  - **§ 3.4 (Bootstrap)**: procedura seed su Atlas e configurazione allow-list domini in produzione.
+  - **§ 3.5 (Verifica chiusura)**: ripetizione checklist e2e § 2.10 in produzione, verifica logging, decisione su alert minimi.
+
+### Changed
+
+- **Fase 3 — Revisione piano dopo analisi Cursor**: ulteriori decisioni prese, ancora nessuna sottofase eseguita.
+  - **`SERVER_URL` vs `NEXT_PUBLIC_SERVER_URL`**: allineamento a un'unica variabile server-side `SERVER_URL`; rimozione di `NEXT_PUBLIC_SERVER_URL` da `payload.config.ts` e template email — task aggiunto in § 3.2 Parte A, non ancora eseguito in codice.
+  - **Progetto Google Cloud produzione**: stesso progetto GCP di sviluppo, ma con un **Client OAuth dedicato** creato per la produzione (non riusare il Client ID di sviluppo) — § 3.2 Parte B, § 3.3.
+  - **Terminologia**: uniformata "staging" → "produzione" in tutto `00-piano-generale.md` e `fase-2-login.md` (non esiste un ambiente staging separato, un solo deploy Cloud Run).
+  - **Seed super-admin (§ 3.4)**: confermata modalità locale (dal proprio computer, `DATABASE_URL` puntata temporaneamente ad Atlas) — chiarito che Cloud Run Services non espone accesso shell alle istanze, quindi l'alternativa "job one-off" richiederebbe una risorsa Cloud Run Jobs separata, non giustificata per un'operazione una tantum.
+  - **Test pendenti § 2.9** (logout/accessDenied in activityLog): spostati esplicitamente nella checklist di chiusura § 3.5, da eseguire in produzione invece che in locale.
+  - **`fase-2-login.md` § 2.3**: corretta la nota superata sui path OAuth "non ancora decisi" (risolti in § 2.4/2.5), con rimando a `fase-3-deploy.md` § 3.3 per il nuovo Client di produzione.
+  - **`00-come-eseguire-il-piano.md`**: aggiunta riga prerequisiti generali per Fase 3 (account GCP con billing, repo collegabile a Cloud Build, Atlas, credenziali Resend).
+  - **Aperto**: valore di produzione di `RESEND_FROM_ADDRESS` (stesso indirizzo di sviluppo o diverso) — non ancora deciso, annotato in § 3.2 Parte C.
+
+### Fixed
+
+- **Fase 3 — Incongruenze residue dopo la revisione**: rilevate da un secondo controllo, corrette senza nuove decisioni nel merito.
+  - **Test § 2.9**: rimossi gli ultimi riferimenti "legacy" che li davano ancora come opzionali in locale (`00-piano-generale.md`, note di chiusura di `fase-2-login.md`) — ora rimandano esplicitamente a `fase-3-deploy.md` § 3.5.
+  - **Terminologia "staging"**: ultimo residuo in `fase-2-login.md` (nota di chiusura § 2.10) uniformato a "produzione". Lo storico `[0.2.0]` sotto resta invariato (versione già chiusa).
+  - **Cloud Shell**: rimossa come alternativa in § 3.4 — resta solo la modalità locale (dal proprio computer), per non introdurre una seconda opzione non necessaria.
+  - **§ 3.4 — dettagli operativi aggiunti**: uso esplicito di `PAYLOAD_SECRET` di produzione (non quello di sviluppo) durante il seed; mini-procedura di swap `.env` (backup → quattro variabili produzione `DATABASE_URL`, `PAYLOAD_SECRET`, `SEED_SUPER_ADMIN_EMAIL`, `SEED_SUPER_ADMIN_PASSWORD` → seed → ripristino); chiarito che la verifica di `/admin/login/local` richiede il servizio Cloud Run già attivo (§ 3.2 Parte C), mentre il seed in sé dipende solo da Atlas raggiungibile.
+
 ---
 
 ## [0.2.0] — 2026-08-02

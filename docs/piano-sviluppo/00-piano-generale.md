@@ -16,8 +16,8 @@
 | Fase | Descrizione | Stato | File di dettaglio |
 |---|---|---|---|
 | Fase 1 | Setup progetto: Next.js, PayloadCMS, Tailwind, MongoDB locale, dipendenze base | ✅ fatto (1.1–1.7) | `fase-1-setup.md` |
-| Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | ✅ fatto (2.1–2.10; spike staging Cloud Run → Fase 3) | `fase-2-login.md` |
-| Fase 3 | Deploy: Cloud Run, MongoDB Atlas, OAuth staging, bootstrap | 🔲 da fare | `fase-3-deploy.md` |
+| Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | ✅ fatto (2.1–2.10; spike su produzione Cloud Run → Fase 3) | `fase-2-login.md` |
+| Fase 3 | Deploy: Cloud Run, MongoDB Atlas, OAuth produzione, bootstrap | 🔶 in corso (3.1 ✅) | `fase-3-deploy.md` |
 
 ## Fase 1 — Setup, panoramica sottofasi
 
@@ -44,21 +44,21 @@ Dettaglio completo in `fase-2-login.md`. Nota: l'ordine pratico consigliato eseg
 7. Route locale di emergenza per super-admin (`/admin/login/local`) — ✅
 8. Script di seed super-admin + guardrail (anti-cancellazione ultimo super-admin, anti lista domini vuota) — ✅
 9. Collection `activityLog` (eventi auth: login, logout, accessDenied) — ✅
-10. Spike di test end-to-end con credenziali Google reali — ✅ in dev locale; **punto 7 staging Cloud Run rimandato a Fase 3** § 3.3
+10. Spike di test end-to-end con credenziali Google reali — ✅ in dev locale; **punto 7 (produzione Cloud Run) rimandato a Fase 3** § 3.3
 
 ## Fase 3 — Deploy, panoramica sottofasi
 
-Dettaglio completo in `fase-3-deploy.md` (bozza iniziale, 2026-08-02).
+Dettaglio completo in `fase-3-deploy.md` (decisioni di deploy definite in sessione dedicata, 2026-08-02; esecuzione sottofasi in corso).
 
-1. MongoDB Atlas (cluster M0) — 🔲
+1. MongoDB Atlas (cluster M0) — ✅
 2. Build container e deploy Cloud Run — 🔲
-3. OAuth Google e redirect URI staging (+ spike ex § 2.10 punto 7) — 🔲
+3. OAuth Google e redirect URI produzione (+ spike ex § 2.10 punto 7) — 🔲
 4. Bootstrap super-admin e dati iniziali — 🔲
 5. Verifica chiusura fase — 🔲
 
 ## Prossimi passi
 
-- **Prossimo passo**: Fase 3 — deploy su Cloud Run + MongoDB Atlas (`fase-3-deploy.md` § 3.1).
+- **Prossimo passo**: Fase 3 § 3.2 — build container, Secret Manager e deploy Cloud Run (`fase-3-deploy.md`).
 - Spike HTTPS login Google (ex § 2.10 punto 7): in Fase 3 § 3.3, non bloccante per Fase 2.
-- Test dev pendenti § 2.9 (logout / accessDenied in activityLog): opzionali in locale prima di Fase 3 — vedi note di chiusura in `fase-2-login.md`.
+- Test dev pendenti § 2.9 (logout / accessDenied in activityLog): **non più in locale** — spostati in `fase-3-deploy.md` § 3.5, da eseguire solo in produzione alla chiusura di Fase 3.
 - Aggiornare questo indice e il file di fase corrispondente a ogni sottofase completata.
