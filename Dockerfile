@@ -27,10 +27,14 @@ ENV SERVER_URL=http://localhost:3000
 
 RUN pnpm build
 
-# sharp 0.35: libvips (.so) non tracciate da Next standalone — materializza binari linuxmusl per lo stage runner.
-RUN mkdir -p /opt/sharp-runtime/node_modules \
-  && cp -rL node_modules/sharp /opt/sharp-runtime/node_modules/sharp \
-  && cp -rL node_modules/@img /opt/sharp-runtime/node_modules/@img
+# sharp 0.35: libvips (.so) non tracciate da Next standalone — binari linuxmusl dallo store pnpm.
+# pnpm non crea node_modules/@img in root: i pacchetti platform-specific vivono solo in .pnpm.
+RUN set -e; \
+  mkdir -p /opt/sharp-runtime/node_modules/@img; \
+  cp -r node_modules/.pnpm/sharp@0.35.3*/node_modules/sharp /opt/sharp-runtime/node_modules/sharp; \
+  cp -r node_modules/.pnpm/@img+sharp-linuxmusl-x64@*/node_modules/@img/sharp-linuxmusl-x64 /opt/sharp-runtime/node_modules/@img/; \
+  cp -r node_modules/.pnpm/@img+sharp-libvips-linuxmusl-x64@*/node_modules/@img/sharp-libvips-linuxmusl-x64 /opt/sharp-runtime/node_modules/@img/; \
+  test -d /opt/sharp-runtime/node_modules/@img/sharp-libvips-linuxmusl-x64/lib
 
 # --- runtime minimale ---
 FROM base AS runner

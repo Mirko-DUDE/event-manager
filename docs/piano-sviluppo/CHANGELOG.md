@@ -45,7 +45,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Fixed
 
-- **§ 3.3 — Cloud Run 500 su Payload/API**: log `sharp`/`libvips-cpp.so.8.18.3` mancante su Alpine (linuxmusl) — il file tracing di Next standalone non copia le `.so` di `@img/sharp-libvips-linuxmusl-x64`. Fix `Dockerfile`: materializzazione e COPY esplicito di `sharp` + `@img` dallo stage builder. Redeploy su `main` necessario per verifica.
+- **§ 3.3 — Cloud Run 500 su Payload/API**: log `sharp`/`libvips-cpp.so.8.18.3` mancante su Alpine (linuxmusl) — il file tracing di Next standalone non copia le `.so` di `@img/sharp-libvips-linuxmusl-x64`. Fix `Dockerfile`: COPY esplicito di `sharp` + `@img` dallo store pnpm (`.pnpm`, non `node_modules/@img` che pnpm non crea in root). Prima build post-fix fallita su `cp node_modules/@img`; corretto path `.pnpm`. Redeploy su `main` necessario per verifica.
 - **§ 3.2 Parte C — prima build Cloud Build**: prerender di `/app` falliva con `ECONNREFUSED 127.0.0.1:27017` (layout protetto e verify email inizializzavano Payload in fase di build). Aggiunto `dynamic = 'force-dynamic'` su route che richiedono DB a runtime.
 - **Fase 3 — Incongruenze residue dopo la revisione**: rilevate da un secondo controllo, corrette senza nuove decisioni nel merito.
   - **Test § 2.9**: rimossi gli ultimi riferimenti "legacy" che li davano ancora come opzionali in locale (`00-piano-generale.md`, note di chiusura di `fase-2-login.md`) — ora rimandano esplicitamente a `fase-3-deploy.md` § 3.5.
