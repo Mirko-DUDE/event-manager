@@ -49,6 +49,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Fixed
 
+- **§ 3.3 Parte B — Cookie `Secure` mancante in produzione**: spike ha rilevato che il cookie di sessione Payload non aveva il flag `Secure` su Cloud Run (HttpOnly presente, Secure assente). Causa: Payload ha `cookies.secure: false` come default assoluto, non lo auto-imposta in base a NODE_ENV o SERVER_URL. Fix: aggiunto `cookies: { secure: process.env.SERVER_URL?.startsWith('https://') ?? false }` nella auth config della collection Users — differenziazione inevitabile per semantica browser (Secure su HTTP locale rompe il cookie fisicamente).
+
 - **§ 3.4 — Seed super-admin fallisce su DB vuoto**: due guardrail bloccavano la creazione locale di un super-admin quando il DB è vuoto (caso produzione/CI) — in locale il seed era già passato perché il record esisteva da un run precedente e lo script usciva prima del `create`. Fix: (1) `guardSuperAdminAssignment` (`beforeChange`) ora controlla `req.context?.seed === true` e lascia passare il seed script; (2) `filterOptions` del campo `adminRole` (validazione server-side) riceve lo stesso segnale e non filtra le opzioni quando invocata dal seed. Il seed script passa `context: { seed: true }` alla chiamata `payload.create()`.
 
 - **§ 3.3 — Cloud Run 500 Payload/API (sharp)**: `libvips-cpp.so.8.18.3` mancante — Next standalone non segue il `dlopen()` del `.node` verso `@img/sharp-libvips-linuxmusl-x64`. Fix: `outputFileTracingIncludes` in `next.config.ts` con glob `.pnpm/@img+sharp-libvips-linuxmusl-x64@*/**`; il tracer mantiene la struttura `.pnpm` attesa dal RPATH del binario. Dockerfile ripristinato senza copia manuale.

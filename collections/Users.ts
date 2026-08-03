@@ -56,6 +56,11 @@ export const Users: CollectionConfig = {
     // Email attivazione al create (hook sendLocalUserVerificationEmail); reset via endpoint App custom.
     verify: true,
     tokenExpiration: 7200,
+    // Payload ha default secure: false. Secure su HTTP locale rompe il cookie (semantica browser),
+    // quindi si legge SERVER_URL che è già l'unica variabile che distingue dev da produzione.
+    cookies: {
+      secure: process.env.SERVER_URL?.startsWith('https://') ?? false,
+    },
   },
   admin: {
     useAsTitle: 'email',
