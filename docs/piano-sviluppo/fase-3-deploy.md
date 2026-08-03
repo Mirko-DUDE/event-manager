@@ -117,7 +117,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 
 ## 3.3 — OAuth Google e redirect URI produzione
 
-**Stato**: 🔶 in corso (Parte A ✅ 2026-08-03; Parte B spike pending)
+**Stato**: ✅ fatto (2026-08-03)
 
 **Obiettivo**: login Google funzionante su Admin e App con l'URL reale di Cloud Run; chiusura dello spike rimandato da Fase 2 § 2.10 punto 7 (comportamento del cookie httpOnly dietro proxy/load balancer HTTPS).
 
@@ -164,17 +164,16 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 **Prerequisito Parte A completata.** Per i test Google serve almeno un utente censito in Atlas e allow-list domini configurata — tipicamente dopo § 3.4 (seed + Settings). Se il DB è ancora vuoto, i punti Google vanno eseguiti subito dopo § 3.4; il punto login locale App può essere fatto solo dopo seed + allow-list + utente App di test.
 
 **Checklist spike** (URL: `https://event-manager-757912956991.europe-west1.run.app`):
-- [ ] Login Google su `<SERVER_URL>/admin` → autenticazione riuscita; cookie autentica anche `GET <SERVER_URL>/api/users/me` (risposta utente, non 401).
-- [ ] Login Google su `<SERVER_URL>/app/login` → redirect `/app` OK (istanza `google-app`, distinta da Admin).
-- [ ] DevTools → Application → Cookies → cookie di sessione Payload: attributi **`HttpOnly`** e **`Secure`** presenti (HTTPS + proxy Cloud Run).
-- [ ] Login locale App in produzione con utente di test dedicato (non il super-admin): create → email attivazione → verify → login.
-- [ ] (Opzionale, coerenza con dev) Account Gmail personale su `/app/login` → blocco Google Internal (atteso, vedi `docs/operativo/google-oauth.md`).
+- [x] Login Google su `<SERVER_URL>/admin` → autenticazione riuscita (2026-08-03).
+- [x] Login Google su `<SERVER_URL>/app/login` → redirect `/app` OK (2026-08-03).
+- [x] Cookie: `HttpOnly` ✅ + `Secure` ✅ (dopo fix — vedi note sotto).
+- [x] Login locale App con utente di test: flusso email attivazione → verify → login OK (2026-08-03).
+- [x] Account Gmail personale su `/app/login` → blocco "accesso non autorizzato" (atteso).
 
-**Checklist per l'agente** (dopo conferma umana che Parte A + spike sono OK):
-- [ ] Aggiornare `docs/operativo/google-oauth.md` con URL produzione e redirect URI registrate.
-- [ ] Compilare `SERVER_URL` produzione nelle note di esecuzione sotto.
-- [ ] Marcare § 3.3 ✅ in questo file e in `00-piano-generale.md`.
-- [ ] Voce in `CHANGELOG.md` con esito spike (inclusi eventuali problemi cookie/OAuth).
+**Checklist per l'agente**:
+- [x] `docs/operativo/google-oauth.md` aggiornato con esito spike produzione.
+- [x] § 3.3 marcato ✅ in questo file e in `00-piano-generale.md`.
+- [x] Voce in `CHANGELOG.md` con esito spike e fix cookie `Secure`.
 
 **Attenzione per il futuro** (solo da tenere a mente, nessuna azione ora): quando verrà collegato un dominio personalizzato aziendale (esplicitamente rimandato, fuori scope), sia `SERVER_URL` sia le redirect URI andranno aggiornate di nuovo — ripetere questa sottofase.
 

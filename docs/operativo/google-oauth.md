@@ -83,7 +83,9 @@ Il Client ID può restare lo stesso; se si crea un client del tutto nuovo, aggio
 - Utente censito in collection `users` con email del dominio whitelisted (`allowAdmin` / `allowApp` a seconda dell'area) e ruolo idoneo (`adminRole` per Admin, `appRole` ≠ none per App).
 - Almeno un dominio in Global Settings con flag area appropriati.
 
-Test Admin Google in dev: OK (2026-08-02). Test App Google in dev: OK con utente Workspace censito (2026-08-02); confermato post-fix callback OAuth custom (vedi `fase-2-login.md` § 2.5). Account Gmail personale: blocco Google Internal (atteso). Spike completo: § 2.10.
+Test Admin Google in dev: OK (2026-08-02). Test App Google in dev: OK con utente Workspace censito (2026-08-02); confermato post-fix callback OAuth custom (vedi `fase-2-login.md` § 2.5). Account Gmail personale: blocco Google Internal (atteso). Spike completo dev: § 2.10.
+
+**Spike produzione Cloud Run (2026-08-03, § 3.3 Parte B)**: login Google Admin ✅, login Google App ✅, login locale App (flusso email attivazione → verify → login) ✅, blocco dominio non autorizzato ✅. Cookie: `HttpOnly` ✅ presente di default; `Secure` ✅ dopo fix (Payload ha `cookies.secure: false` come default assoluto — aggiunto `cookies.secure` esplicito in auth config Users, letto da `SERVER_URL`).
 
 ## Implementazione callback OAuth (nota tecnica)
 
