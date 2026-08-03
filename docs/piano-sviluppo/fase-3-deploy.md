@@ -49,7 +49,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 
 ## 3.2 — Build container, Secret Manager e deploy Cloud Run
 
-**Stato**: 🔶 in corso
+**Stato**: ✅ fatto
 
 **Obiettivo**: immagine Docker funzionante, secret configurati con accesso IAM scoped, servizio Cloud Run raggiungibile con pipeline di deploy continuo attiva.
 
@@ -90,22 +90,28 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
   **Nota RESEND_FROM_ADDRESS (variabile non-secret, non in questa tabella)**: valore di produzione ancora da confermare — punto lasciato esplicitamente aperto, vedi Parte C.
 
 - [x] `RESEND_FROM_ADDRESS` e `SERVER_URL` **non vanno in Secret Manager** — sono variabili d'ambiente normali su Cloud Run (Parte C).
-- [ ] IAM: assegnare `roles/secretmanager.secretAccessor` al service account runtime (creato in Parte C) **solo sui 7 secret specifici**, non a livello di progetto — evita che il servizio possa leggere secret futuri non pertinenti. *(Eseguito insieme alla creazione del SA in Parte C.)*
+- [x] IAM: assegnare `roles/secretmanager.secretAccessor` al service account runtime (creato in Parte C) **solo sui 7 secret specifici**, non a livello di progetto — evita che il servizio possa leggere secret futuri non pertinenti. *(Eseguito insieme alla creazione del SA in Parte C.)*
 
 ### Parte C — Configurazione e deploy Cloud Run (umano, dipende da Parte A + B)
 
+**Stato**: ✅ fatto (2026-08-03, deploy confermato in sessione)
+
 **Checklist per l'umano**:
-- Creare un **service account dedicato** al servizio (non il default Compute Engine), con solo `secretAccessor` sui 7 secret di cui sopra.
-- Configurare il servizio:
+- [x] Creare un **service account dedicato** al servizio (non il default Compute Engine), con solo `secretAccessor` sui 7 secret di cui sopra.
+- [x] Configurare il servizio:
   - Region **`europe-west1`** (allineata ad Atlas, § 3.1).
   - CPU allocation: "CPU allocata solo durante l'elaborazione delle richieste" (default) — non serve CPU always-on, nessun job in background/cron in questa fase.
   - Scaling: minimo **0** istanze (scale-to-zero, accettato il piccolo ritardo da cold start) — massimo **4** istanze (tetto basso per contenere costi imprevisti senza limitare l'uso normale del team).
   - Risorse: **1 vCPU / 512 MiB** come partenza, regolabile in seguito senza impatto architetturale se emergessero problemi di memoria (OOM) nei log.
   - Collegare tutti e 7 i secret come variabili d'ambiente da Secret Manager (mapping diretto "un secret → una env var", nessun parsing lato app); impostare `RESEND_FROM_ADDRESS` come env var normale — **valore ancora da decidere**: stesso indirizzo di sviluppo (`noreply@services.dude.it`) o uno diverso, verificare dominio Resend verificato per la produzione prima di questo passo; lasciare `SERVER_URL` vuoto/placeholder per ora (va impostato in § 3.3, dopo aver ottenuto l'URL assegnato — è l'unica variabile per l'URL pubblico, vedi allineamento in § 3.2 Parte A).
-- **Modalità di deploy**: pipeline automatica via wizard nativo Cloud Run — **"Continuously deploy from a repository"** — non comando manuale `gcloud run deploy` (decisione rivista rispetto alla prima proposta: l'automazione via wizard resta comunque a basso costo di manutenzione). Collegare il repository GitHub, **branch di trigger: `main`**. Il wizard crea in autonomia il trigger Cloud Build corrispondente, nessuna pipeline scritta a mano.
-- **IAM per il deploy**: il service account **Cloud Build** creato/usato dal wizard riceve `roles/run.admin` + `roles/iam.serviceAccountUser` sul service account runtime dedicato — è lui a eseguire il deploy ad ogni push, non l'account personale. **IAM per configurare il trigger**: l'account Google personale, usato solo per il collegamento iniziale GitHub↔Cloud Build, non per i deploy successivi. Estensione a eventuali collaboratori rimandata a quando servirà.
-- **Rollback**: comportamento nativo di Cloud Run (revision precedenti sempre disponibili, attivabili con `gcloud run services update-traffic --to-revisions=REVISION=100`) — invariato dalla pipeline automatica, nessuna procedura custom da preparare.
-- Verificare con un push di test su `main` che il trigger si attivi, la build parta, e il servizio risponda su una richiesta di base (es. `/`).
+- [x] **Modalità di deploy**: pipeline automatica via wizard nativo Cloud Run — **"Continuously deploy from a repository"** — non comando manuale `gcloud run deploy` (decisione rivista rispetto alla prima proposta: l'automazione via wizard resta comunque a basso costo di manutenzione). Collegare il repository GitHub, **branch di trigger: `main`**. Il wizard crea in autonomia il trigger Cloud Build corrispondente, nessuna pipeline scritta a mano.
+- [x] **IAM per il deploy**: il service account **Cloud Build** creato/usato dal wizard riceve `roles/run.admin` + `roles/iam.serviceAccountUser` sul service account runtime dedicato — è lui a eseguire il deploy ad ogni push, non l'account personale. **IAM per configurare il trigger**: l'account Google personale, usato solo per il collegamento iniziale GitHub↔Cloud Build, non per i deploy successivi. Estensione a eventuali collaboratori rimandata a quando servirà.
+- [x] **Rollback**: comportamento nativo di Cloud Run (revision precedenti sempre disponibili, attivabili con `gcloud run services update-traffic --to-revisions=REVISION=100`) — invariato dalla pipeline automatica, nessuna procedura custom da preparare.
+- [x] Verificare con un push di test su `main` che il trigger si attivi, la build parta, e il servizio risponda su una richiesta di base (es. `/`).
+
+**Note di esecuzione** (2026-08-03):
+- Prima build fallita (prerender `/app` + MongoDB) — fix in commit `6a1db0d` (`force-dynamic` su layout protetto e verify email); seconda build OK.
+- Container port: **8080** (default Cloud Run). `SERVER_URL` ancora placeholder — da impostare con URL reale `*.run.app` in § 3.3.
 
 ---
 
