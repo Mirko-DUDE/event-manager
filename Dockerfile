@@ -27,6 +27,11 @@ ENV SERVER_URL=http://localhost:3000
 
 RUN pnpm build
 
+# sharp 0.35: libvips (.so) non tracciate da Next standalone — materializza binari linuxmusl per lo stage runner.
+RUN mkdir -p /opt/sharp-runtime/node_modules \
+  && cp -rL node_modules/sharp /opt/sharp-runtime/node_modules/sharp \
+  && cp -rL node_modules/@img /opt/sharp-runtime/node_modules/@img
+
 # --- runtime minimale ---
 FROM base AS runner
 ENV NODE_ENV=production
@@ -40,6 +45,8 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /opt/sharp-runtime/node_modules/sharp ./node_modules/sharp
+COPY --from=builder --chown=nextjs:nodejs /opt/sharp-runtime/node_modules/@img ./node_modules/@img
 
 USER nextjs
 EXPOSE 3000

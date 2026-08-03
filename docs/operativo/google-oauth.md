@@ -14,7 +14,7 @@ Il progetto Google Cloud è configurato in modalità **Internal** (solo utenti d
 |---|---|
 | **Sviluppo locale** | File `.env` nella root del progetto (non committato) |
 | **Google Cloud Console** | [APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials) → OAuth 2.0 Client IDs |
-| **Deploy (Cloud Run, futuro)** | Secret del servizio — stessi nomi variabile: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| **Produzione (Cloud Run)** | Secret Manager → `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (Client OAuth **dedicato**, distinto da dev) |
 
 ## Variabili d'ambiente
 
@@ -38,8 +38,10 @@ Placeholder di riferimento in `.env.example` (senza valori reali).
   |---|---|---|
   | locale | Admin | `http://localhost:3000/api/users/oauth/google-admin/callback` ✅ registrato e testato |
   | locale | App (§ 2.5) | `http://localhost:3000/api/users/oauth/google-app/callback` ✅ registrato e testato |
-  | staging/prod | Admin | `{SERVER_URL}/api/users/oauth/google-admin/callback` |
-  | staging/prod | App | `{SERVER_URL}/api/users/oauth/google-app/callback` |
+  | produzione (Cloud Run) | Admin | `https://event-manager-757912956991.europe-west1.run.app/api/users/oauth/google-admin/callback` ✅ |
+  | produzione (Cloud Run) | App | `https://event-manager-757912956991.europe-west1.run.app/api/users/oauth/google-app/callback` ✅ |
+
+  **`SERVER_URL` produzione**: `https://event-manager-757912956991.europe-west1.run.app` (env var Cloud Run, § 3.3 Parte A ✅).
 
   Avvio OAuth Admin: `GET /api/users/oauth/google-admin` (bottone su `/admin/login`).
   Avvio OAuth App: `GET /api/users/oauth/google-app` (bottone su `/app/login`).

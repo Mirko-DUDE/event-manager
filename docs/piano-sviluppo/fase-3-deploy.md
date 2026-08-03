@@ -117,24 +117,61 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 
 ## 3.3 — OAuth Google e redirect URI produzione
 
-**Stato**: 🔲 da fare
+**Stato**: 🔶 in corso (Parte A ✅ 2026-08-03; Parte B spike pending)
 
 **Obiettivo**: login Google funzionante su Admin e App con l'URL reale di Cloud Run; chiusura dello spike rimandato da Fase 2 § 2.10 punto 7 (comportamento del cookie httpOnly dietro proxy/load balancer HTTPS).
 
-**Passaggio esterno (Google Cloud Console), dipende dall'URL assegnato in § 3.2 Parte C**:
-- Creare il **nuovo Client OAuth dedicato alla produzione** (stesso progetto GCP, stesso consent screen Internal — vedi § 3.2 Parte B), se non già creato in quel passaggio.
-- Recuperare l'URL `*.run.app` assegnato al servizio.
-- Registrare le redirect URI di produzione **sul nuovo Client**, per **entrambe** le istanze del plugin (path esatti in `auth/constants.ts`, vedi tabella in `docs/operativo/google-oauth.md`):
-  - `https://<url-run-app>/api/users/oauth/google-admin/callback`
-  - `https://<url-run-app>/api/users/oauth/google-app/callback`
-- Impostare `SERVER_URL` reale su Cloud Run e ridistribuire (redeploy della revision con la nuova variabile).
-- Verificare che il consent screen **Internal** si comporti come atteso anche dall'URL di produzione — stesso blocco Google per account non-Workspace già osservato in dev (vedi `docs/operativo/google-oauth.md`) — da verificare dall'URL reale, non assumerlo solo perché già confermato in locale.
+**Nessuna modifica di codice prevista** — il codice legge già `SERVER_URL` e i path OAuth sono fissi in `auth/constants.ts`. Questa sottofase è configurazione console + spike manuale.
 
-**Checklist spike** (chiude Fase 2 § 2.10 punto 7):
-- Login Google su `/admin` in produzione → autenticazione riuscita, il cookie autentica anche una chiamata REST (`/api/users/me`).
-- Login Google su `/app` in produzione → redirect `/app` OK (istanza separata, `strategyName` distinto).
-- Verificare gli attributi del cookie di sessione (`HttpOnly`, `Secure`) da DevTools → Application → Cookies, dietro il proxy/load balancer di Cloud Run.
-- Login locale App in produzione, con un utente di test dedicato (non riusare il super-admin per questo test).
+### Parte A — Redirect URI e `SERVER_URL` (umano, console GCP)
+
+**Stato**: ✅ fatto (2026-08-03)
+
+**Prerequisito**: servizio Cloud Run raggiungibile (§ 3.2 Parte C ✅). I secret `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` di produzione sono già in Secret Manager (§ 3.2 Parte B ✅).
+
+**Checklist per l'umano**:
+
+1. **Recuperare l'URL pubblico del servizio**
+   - [x] URL assegnato (senza trailing slash):
+
+     `SERVER_URL` produzione: `https://event-manager-757912956991.europe-west1.run.app`
+
+2. **Client OAuth di produzione** (se non già creato in § 3.2 Parte B)
+   - [x] Client dedicato alla produzione configurato; secret in Secret Manager.
+
+3. **Registrare le redirect URI di produzione** sul Client OAuth di produzione
+   - [x] Redirect URI registrate:
+
+     | Area | Redirect URI |
+     |---|---|
+     | Admin | `https://event-manager-757912956991.europe-west1.run.app/api/users/oauth/google-admin/callback` |
+     | App | `https://event-manager-757912956991.europe-west1.run.app/api/users/oauth/google-app/callback` |
+
+4. **Impostare `SERVER_URL` su Cloud Run**
+   - [x] Variabile `SERVER_URL` impostata e revisione deployata.
+
+5. **Smoke test rapido post-config**
+   - [x] `/` → 200 OK (vetrina).
+   - [ ] `/admin/login` → **500** (2026-08-03): causa `sharp`/`libvips` mancanti nel bundle standalone Alpine — fix Dockerfile (copia esplicita binari linuxmusl); redeploy su `main` necessario.
+
+**Nota smoke test (2026-08-03)**: log stderr Cloud Run: `Could not load the "sharp" module using the linuxmusl-x64 runtime` / `libvips-cpp.so.8.18.3: No such file or directory`. Non correlato al super-admin (§ 3.4). Fix in `Dockerfile` — push su `main` per nuova revisione.
+
+### Parte B — Spike produzione (umano, chiude Fase 2 § 2.10 punto 7)
+
+**Prerequisito Parte A completata.** Per i test Google serve almeno un utente censito in Atlas e allow-list domini configurata — tipicamente dopo § 3.4 (seed + Settings). Se il DB è ancora vuoto, i punti Google vanno eseguiti subito dopo § 3.4; il punto login locale App può essere fatto solo dopo seed + allow-list + utente App di test.
+
+**Checklist spike** (URL: `https://event-manager-757912956991.europe-west1.run.app`):
+- [ ] Login Google su `<SERVER_URL>/admin` → autenticazione riuscita; cookie autentica anche `GET <SERVER_URL>/api/users/me` (risposta utente, non 401).
+- [ ] Login Google su `<SERVER_URL>/app/login` → redirect `/app` OK (istanza `google-app`, distinta da Admin).
+- [ ] DevTools → Application → Cookies → cookie di sessione Payload: attributi **`HttpOnly`** e **`Secure`** presenti (HTTPS + proxy Cloud Run).
+- [ ] Login locale App in produzione con utente di test dedicato (non il super-admin): create → email attivazione → verify → login.
+- [ ] (Opzionale, coerenza con dev) Account Gmail personale su `/app/login` → blocco Google Internal (atteso, vedi `docs/operativo/google-oauth.md`).
+
+**Checklist per l'agente** (dopo conferma umana che Parte A + spike sono OK):
+- [ ] Aggiornare `docs/operativo/google-oauth.md` con URL produzione e redirect URI registrate.
+- [ ] Compilare `SERVER_URL` produzione nelle note di esecuzione sotto.
+- [ ] Marcare § 3.3 ✅ in questo file e in `00-piano-generale.md`.
+- [ ] Voce in `CHANGELOG.md` con esito spike (inclusi eventuali problemi cookie/OAuth).
 
 **Attenzione per il futuro** (solo da tenere a mente, nessuna azione ora): quando verrà collegato un dominio personalizzato aziendale (esplicitamente rimandato, fuori scope), sia `SERVER_URL` sia le redirect URI andranno aggiornate di nuovo — ripetere questa sottofase.
 

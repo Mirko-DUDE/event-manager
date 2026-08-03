@@ -17,7 +17,7 @@
 |---|---|---|---|
 | Fase 1 | Setup progetto: Next.js, PayloadCMS, Tailwind, MongoDB locale, dipendenze base | ✅ fatto (1.1–1.7) | `fase-1-setup.md` |
 | Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | ✅ fatto (2.1–2.10; spike su produzione Cloud Run → Fase 3) | `fase-2-login.md` |
-| Fase 3 | Deploy: Cloud Run, MongoDB Atlas, OAuth produzione, bootstrap | 🔶 in corso (3.1 ✅, 3.2 ✅) | `fase-3-deploy.md` |
+| Fase 3 | Deploy: Cloud Run, MongoDB Atlas, OAuth produzione, bootstrap | 🔶 in corso (3.1 ✅, 3.2 ✅, 3.3 🔶) | `fase-3-deploy.md` |
 
 ## Fase 1 — Setup, panoramica sottofasi
 
@@ -52,7 +52,7 @@ Dettaglio completo in `fase-3-deploy.md` (decisioni di deploy definite in sessio
 
 1. MongoDB Atlas (cluster M0) — ✅
 2. Build container e deploy Cloud Run — ✅
-3. OAuth Google e redirect URI produzione (+ spike ex § 2.10 punto 7) — 🔲
+3. OAuth Google e redirect URI produzione (+ spike ex § 2.10 punto 7) — 🔶
 4. Bootstrap super-admin e dati iniziali — 🔲
 5. Verifica chiusura fase — 🔲
 
