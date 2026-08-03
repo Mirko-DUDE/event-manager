@@ -49,19 +49,25 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 
 ## 3.2 — Build container, Secret Manager e deploy Cloud Run
 
-**Stato**: 🔲 da fare
+**Stato**: 🔶 in corso
 
 **Obiettivo**: immagine Docker funzionante, secret configurati con accesso IAM scoped, servizio Cloud Run raggiungibile con pipeline di deploy continuo attiva.
 
 ### Parte A — Build (agente, indipendente dal resto, può partire subito)
 
 **Checklist per l'agente**:
-- Scrivere `Dockerfile` multi-stage: build con **pnpm** (verificare `allowBuilds` in `pnpm-workspace.yaml` per i pacchetti con binari nativi — `sharp`, `esbuild`, `unrs-resolver` — prima di scrivere lo stage di build), poi immagine finale minimale (niente devDependencies, niente cache di build, niente toolchain). Scelta esplicita: Dockerfile invece di Cloud Buildpacks, per avere controllo diretto sul processo di build su un setup non-npm (Buildpacks farebbe autodetect con esito incerto).
-- Scrivere `.dockerignore` (almeno `node_modules`, `.next`, `.git`, `.env*`).
-- Verificare che `docker build .` riproduca in locale lo stesso esito già validato in Fase 2 (`tsc --noEmit`, `lint`, `build`) — se il container fallisce uno di questi tre step mentre in locale passano, è un problema di ambiente da correggere, non da bypassare (niente `--skipLibCheck` o lint disabilitato solo per far passare la build Docker).
-- **Allineamento `SERVER_URL` / `NEXT_PUBLIC_SERVER_URL` (decisione presa in revisione piano, non ancora eseguita in codice)**: `getServerURL()` lato OAuth legge già `SERVER_URL`, ma `payload.config.ts` e i template email (link di attivazione/reset) usano solo `NEXT_PUBLIC_SERVER_URL` (fallback `localhost:3000`). Tutti questi usi sono lato server (email renderizzate server-side, `payload.config.ts` è server-side) — **rimuovere `NEXT_PUBLIC_SERVER_URL`** e far leggere anche a `payload.config.ts`/template email la stessa `SERVER_URL`. Motivo: evita di dover gestire una seconda variabile *build-time* (le `NEXT_PUBLIC_*` vengono inlineate in build, mentre l'URL reale di Cloud Run è noto solo dopo il primo deploy — la pipeline wizard rifà una build ad ogni push, quindi una variabile build-time "nota solo dopo" sarebbe scomoda da gestire). Verificare con `grep -r NEXT_PUBLIC_SERVER_URL` che non resti nessun uso orfano dopo la modifica.
-- Aggiornare `.env.example` con le variabili ancora mancanti: `RESEND_FROM_ADDRESS` (non segreta — valore di produzione ancora da confermare, vedi Parte B), `SERVER_URL` (non segreta, unica variabile per l'URL pubblico, valorizzabile solo dopo che Cloud Run assegna l'URL — vedi Parte C), `NODE_ENV` (verificare se serve esplicitamente o se Next.js/Cloud Run lo gestiscono già di default — non assumere). **Rimuovere** `NEXT_PUBLIC_SERVER_URL` da `.env.example` se presente.
-- Se il repo non specifica una versione Node esplicita (`engines` in `package.json`), o la struttura di output Next.js (standalone vs full) non è chiara: fermarsi e chiedere conferma invece di indovinare (coerente con `06-processo-lavoro-agente.mdc`).
+- [x] Scrivere `Dockerfile` multi-stage: build con **pnpm** (verificare `allowBuilds` in `pnpm-workspace.yaml` per i pacchetti con binari nativi — `sharp`, `esbuild`, `unrs-resolver` — prima di scrivere lo stage di build), poi immagine finale minimale (niente devDependencies, niente cache di build, niente toolchain). Scelta esplicita: Dockerfile invece di Cloud Buildpacks, per avere controllo diretto sul processo di build su un setup non-npm (Buildpacks farebbe autodetect con esito incerto).
+- [x] Scrivere `.dockerignore` (almeno `node_modules`, `.next`, `.git`, `.env*`).
+- [x] Verificare che la build di produzione passi (`tsc --noEmit`, `lint`, `build`) — eseguito in locale con `pnpm`; esito OK. **`docker build .` in locale è opzionale**: non è un prerequisito del deploy (Parte C usa il wizard Cloud Run + GitHub; **Cloud Build** esegue il `Dockerfile` sui server Google a ogni push su `main`). Utile solo per debug anticipato; la verifica container avverrà al primo push di test (Parte C, ultimo punto).
+- [x] **Allineamento `SERVER_URL` / `NEXT_PUBLIC_SERVER_URL`**: rimossi tutti gli usi di `NEXT_PUBLIC_SERVER_URL` da codice e `.env.example`; `payload.config.ts`, `getServerURL()`, `getEmailServerURL()` leggono solo `SERVER_URL` (fallback `http://localhost:3000`).
+- [x] Aggiornare `.env.example`: `SERVER_URL`, commenti su `RESEND_FROM_ADDRESS` (non secret) e `NODE_ENV` (non impostare a mano — Next/`next start`/immagine lo gestiscono). Rimossa `NEXT_PUBLIC_SERVER_URL`.
+- [x] Conferma umana su punti aperti del piano: Node **22 LTS** (`engines.node >=22`, immagine `node:22-alpine`) + `output: 'standalone'` in `next.config.ts`.
+
+**Note di esecuzione** (2026-08-03):
+- `pnpm-workspace.yaml` ha già `allowBuilds` per `esbuild`, `sharp`, `unrs-resolver` — usati nello stage `deps` del Dockerfile (copia anche `pnpm-workspace.yaml`).
+- Validazione locale: `tsc --noEmit`, `lint` (solo warning preesistenti), `build` con `output: 'standalone'` → OK; `.next/standalone/server.js` presente.
+- Placeholder build-time nel Dockerfile (`PAYLOAD_SECRET`, `DATABASE_URL`) solo per caricare `payload.config` in `pnpm build`; a runtime arrivano da Secret Manager.
+- **Deploy**: il `Dockerfile` nel repo è la ricetta usata da **Cloud Build** (wizard Parte C, push su `main`) — non serve Docker Desktop né `docker build` locale per andare in produzione.
 
 ### Parte B — Secret Manager (umano, dipende da § 3.1)
 

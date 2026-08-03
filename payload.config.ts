@@ -11,7 +11,7 @@ import { googleAdminOAuth } from './plugins/googleAdminOAuth'
 import { googleAppOAuth } from './plugins/googleAppOAuth'
 
 export default buildConfig({
-  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
+  serverURL: process.env.SERVER_URL || 'http://localhost:3000',
   admin: {
     user: Users.slug,
     components: {

@@ -21,6 +21,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Added
 
+- **§ 3.2 Parte A — Build container (codice)**: `Dockerfile` multi-stage (Node 22 Alpine, pnpm, `output: 'standalone'`), `.dockerignore`, `engines.node >=22` in `package.json`. Allineamento a unica env `SERVER_URL` (rimossa `NEXT_PUBLIC_SERVER_URL` da codice e `.env.example`). Validazione locale `tsc`/`lint`/`build` OK. Il `Dockerfile` serve a Cloud Build (wizard Parte C); `docker build` locale opzionale, non prerequisito del deploy.
 - **§ 3.1 — MongoDB Atlas (cluster M0)**: passaggio esterno completato (cluster M0, region `europe-west1`, Network Access `0.0.0.0/0`, utente DB `readWrite` sul solo database `event-manager`); `.env.example` aggiornato con commento che indica Atlas come DB di produzione e Secret Manager come destinazione di `DATABASE_URL` (nessuna credenziale reale nel file).
 - **Fase 3 — Decisioni di deploy definite**: `fase-3-deploy.md` aggiornato dalla bozza iniziale con le decisioni complete, mantenendo il formato a sottofasi (Stato/Obiettivo/Checklist) di Fase 1/2.
   - **§ 3.1 (Atlas)**: tier M0, region `europe-west1`, network access aperto (`0.0.0.0/0`) con TLS + password random come compensazione, utente `readWrite` unico (seed e runtime).
@@ -32,7 +33,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 ### Changed
 
 - **Fase 3 — Revisione piano dopo analisi Cursor**: ulteriori decisioni prese, ancora nessuna sottofase eseguita.
-  - **`SERVER_URL` vs `NEXT_PUBLIC_SERVER_URL`**: allineamento a un'unica variabile server-side `SERVER_URL`; rimozione di `NEXT_PUBLIC_SERVER_URL` da `payload.config.ts` e template email — task aggiunto in § 3.2 Parte A, non ancora eseguito in codice.
+  - **`SERVER_URL` vs `NEXT_PUBLIC_SERVER_URL`**: allineamento a un'unica variabile server-side `SERVER_URL`; rimossa `NEXT_PUBLIC_SERVER_URL` da `payload.config.ts`, helper OAuth/email e `.env.example` (§ 3.2 Parte A).
   - **Progetto Google Cloud produzione**: stesso progetto GCP di sviluppo, ma con un **Client OAuth dedicato** creato per la produzione (non riusare il Client ID di sviluppo) — § 3.2 Parte B, § 3.3.
   - **Terminologia**: uniformata "staging" → "produzione" in tutto `00-piano-generale.md` e `fase-2-login.md` (non esiste un ambiente staging separato, un solo deploy Cloud Run).
   - **Seed super-admin (§ 3.4)**: confermata modalità locale (dal proprio computer, `DATABASE_URL` puntata temporaneamente ad Atlas) — chiarito che Cloud Run Services non espone accesso shell alle istanze, quindi l'alternativa "job one-off" richiederebbe una risorsa Cloud Run Jobs separata, non giustificata per un'operazione una tantum.
