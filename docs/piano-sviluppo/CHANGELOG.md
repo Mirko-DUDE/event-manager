@@ -43,6 +43,10 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
   - **`00-come-eseguire-il-piano.md`**: aggiunta riga prerequisiti generali per Fase 3 (account GCP con billing, repo collegabile a Cloud Build, Atlas, credenziali Resend).
   - **Aperto**: valore di produzione di `RESEND_FROM_ADDRESS` (stesso indirizzo di sviluppo o diverso) — non ancora deciso, annotato in § 3.2 Parte C.
 
+### Added
+
+- **§ 3.4 — Bootstrap produzione completato**: super-admin creato su Atlas con `pnpm seed:super-admin`; login locale `/admin/login/local` verificato in produzione; allow-list domini configurata in Global Settings; guardrail anti-lista-vuota confermato attivo.
+
 ### Fixed
 
 - **§ 3.4 — Seed super-admin fallisce su DB vuoto**: due guardrail bloccavano la creazione locale di un super-admin quando il DB è vuoto (caso produzione/CI) — in locale il seed era già passato perché il record esisteva da un run precedente e lo script usciva prima del `create`. Fix: (1) `guardSuperAdminAssignment` (`beforeChange`) ora controlla `req.context?.seed === true` e lascia passare il seed script; (2) `filterOptions` del campo `adminRole` (validazione server-side) riceve lo stesso segnale e non filtra le opzioni quando invocata dal seed. Il seed script passa `context: { seed: true }` alla chiamata `payload.create()`.

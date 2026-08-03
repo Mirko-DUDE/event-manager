@@ -182,7 +182,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 
 ## 3.4 — Bootstrap super-admin e dati iniziali
 
-**Stato**: 🔶 in corso
+**Stato**: ✅ fatto (2026-08-03)
 
 **Obiettivo**: primo accesso Admin possibile su ambiente deployato, con DB Atlas ancora vuoto.
 
@@ -198,9 +198,9 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
   4. **Ripristinare subito `.env`** dalla copia di backup, prima di riprendere a lavorare in locale — per non rischiare di far ripartire per sbaglio il dev server puntato su Atlas di produzione.
 - [x] Verificare **prima in locale/test** che lo script sia effettivamente idempotente, prima di lanciarlo su Atlas (se non già confermato altrove). *(Confermato: la fix al seed ha richiesto più run, tutti idempotenti.)*
 - [x] Eseguito `pnpm seed:super-admin` con `DATABASE_URL` e `PAYLOAD_SECRET` di produzione → super-admin creato su Atlas (2026-08-03).
-- [ ] Verificare il login locale su `/admin/login/local` (route non linkata, vedi `docs/operativo/admin-login-local.md`) in produzione — **richiede che il servizio Cloud Run sia già attivo e raggiungibile** (§ 3.2 Parte C).
-- [ ] Confermare esplicitamente (non assumere) che non serva alcuna migrazione di dati pregressi: si parte da DB vuoto.
-- [ ] Configurare la allow-list domini (Global Settings) subito dopo il seed, accedendo come super-admin appena creato; verificare che il guardrail anti-lista-vuota risulti attivo anche in produzione.
+- [x] Verificare il login locale su `/admin/login/local` in produzione — accesso confermato (2026-08-03).
+- [x] Confermato: nessuna migrazione di dati pregressi necessaria, si parte da DB vuoto.
+- [x] Allow-list domini configurata in Global Settings come super-admin; guardrail anti-lista-vuota attivo in produzione (2026-08-03).
 
 **Note di esecuzione (2026-08-03)**:
 - Lo script di seed falliva su DB vuoto (caso produzione) per due guardrail che non erano stati testati in questo scenario: `guardSuperAdminAssignment` (`beforeChange`, blocca qualsiasi create con `adminRole: super-admin`) e `filterOptions` del campo `adminRole` (validazione server-side che su `loginMethod: local` filtra le opzioni a `['none']`). In locale i test erano passati perché il record super-admin già esisteva e il seed usciva prima del `create`. Fix: entrambi i guardrail ora controllano `req.context?.seed === true`; il seed script passa `context: { seed: true }` a `payload.create()`.
