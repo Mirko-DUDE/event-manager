@@ -2,6 +2,9 @@ import { APP_LOGIN_PATH } from '@/auth/constants'
 import { getAuthenticatedAppUser } from '@/auth/app/getAuthenticatedAppUser'
 import { redirect } from 'next/navigation'
 
+/** Auth + DB a runtime — non prerenderizzare in `next build` (Cloud Build non ha MongoDB). */
+export const dynamic = 'force-dynamic'
+
 export default async function ProtectedAppLayout({
   children,
 }: Readonly<{

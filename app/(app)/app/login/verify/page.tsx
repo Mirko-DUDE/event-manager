@@ -7,6 +7,9 @@ type PageProps = {
   searchParams: Promise<{ token?: string }>
 }
 
+/** Verifica email usa Payload/DB — non prerenderizzare in `next build`. */
+export const dynamic = 'force-dynamic'
+
 /** Attivazione account da link email — pagina di esito con link al login App. */
 export default async function AppVerifyEmailPage({ searchParams }: PageProps) {
   const { token } = await searchParams

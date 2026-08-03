@@ -68,11 +68,14 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 - Validazione locale: `tsc --noEmit`, `lint` (solo warning preesistenti), `build` con `output: 'standalone'` → OK; `.next/standalone/server.js` presente.
 - Placeholder build-time nel Dockerfile (`PAYLOAD_SECRET`, `DATABASE_URL`) solo per caricare `payload.config` in `pnpm build`; a runtime arrivano da Secret Manager.
 - **Deploy**: il `Dockerfile` nel repo è la ricetta usata da **Cloud Build** (wizard Parte C, push su `main`) — non serve Docker Desktop né `docker build` locale per andare in produzione.
+- **Prima build Cloud Build (2026-08-03)**: fallita su prerender di `/app` — layout protetto chiamava Payload/MongoDB durante `next build` (nessun DB nel container di build). Fix: `export const dynamic = 'force-dynamic'` su `(protected)/layout.tsx` e `login/verify/page.tsx`.
 
 ### Parte B — Secret Manager (umano, dipende da § 3.1)
 
+**Stato**: ✅ fatto (2026-08-03, conferma umana in sessione)
+
 **Checklist per l'umano** (console GCP, manuale — non scriptato, coerente con la frequenza molto bassa di questa operazione):
-- Creare i **7 secret**, uno per uno:
+- [x] Creare i **7 secret**, uno per uno:
 
   | Secret | Valore | Fonte |
   |---|---|---|
@@ -86,8 +89,8 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 
   **Nota RESEND_FROM_ADDRESS (variabile non-secret, non in questa tabella)**: valore di produzione ancora da confermare — punto lasciato esplicitamente aperto, vedi Parte C.
 
-- `RESEND_FROM_ADDRESS` e `SERVER_URL` **non vanno in Secret Manager** — sono variabili d'ambiente normali su Cloud Run (Parte C).
-- IAM: assegnare `roles/secretmanager.secretAccessor` al service account runtime (creato in Parte C) **solo sui 7 secret specifici**, non a livello di progetto — evita che il servizio possa leggere secret futuri non pertinenti.
+- [x] `RESEND_FROM_ADDRESS` e `SERVER_URL` **non vanno in Secret Manager** — sono variabili d'ambiente normali su Cloud Run (Parte C).
+- [ ] IAM: assegnare `roles/secretmanager.secretAccessor` al service account runtime (creato in Parte C) **solo sui 7 secret specifici**, non a livello di progetto — evita che il servizio possa leggere secret futuri non pertinenti. *(Eseguito insieme alla creazione del SA in Parte C.)*
 
 ### Parte C — Configurazione e deploy Cloud Run (umano, dipende da Parte A + B)
 

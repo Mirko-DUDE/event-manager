@@ -44,6 +44,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Fixed
 
+- **§ 3.2 Parte C — prima build Cloud Build**: prerender di `/app` falliva con `ECONNREFUSED 127.0.0.1:27017` (layout protetto e verify email inizializzavano Payload in fase di build). Aggiunto `dynamic = 'force-dynamic'` su route che richiedono DB a runtime.
 - **Fase 3 — Incongruenze residue dopo la revisione**: rilevate da un secondo controllo, corrette senza nuove decisioni nel merito.
   - **Test § 2.9**: rimossi gli ultimi riferimenti "legacy" che li davano ancora come opzionali in locale (`00-piano-generale.md`, note di chiusura di `fase-2-login.md`) — ora rimandano esplicitamente a `fase-3-deploy.md` § 3.5.
   - **Terminologia "staging"**: ultimo residuo in `fase-2-login.md` (nota di chiusura § 2.10) uniformato a "produzione". Lo storico `[0.2.0]` sotto resta invariato (versione già chiusa).
