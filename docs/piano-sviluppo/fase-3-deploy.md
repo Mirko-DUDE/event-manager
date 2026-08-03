@@ -152,9 +152,12 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 
 5. **Smoke test rapido post-config**
    - [x] `/` → 200 OK (vetrina).
-   - [ ] `/admin/login` → **500** (2026-08-03): causa `sharp`/`libvips` mancanti nel bundle standalone Alpine — fix Dockerfile (copia esplicita binari linuxmusl); redeploy su `main` necessario.
+   - [x] `/admin/login` → **200** OK (2026-08-03, dopo fix sharp + DB).
+   - [x] `/app/login` → 200 OK.
 
-**Nota smoke test (2026-08-03)**: log stderr Cloud Run: `Could not load the "sharp" module using the linuxmusl-x64 runtime` / `libvips-cpp.so.8.18.3: No such file or directory`. Non correlato al super-admin (§ 3.4). Fix in `Dockerfile` — push su `main` per nuova revisione.
+**Note di esecuzione (2026-08-03)**:
+- **sharp/libvips**: 3 tentativi di copia manuale nel Dockerfile falliti per motivi diversi (path pnpm, hard link busybox cp, posizione RPATH sbagliata). Fix corretto: `outputFileTracingIncludes` in `next.config.ts` che include il pacchetto `@img/sharp-libvips-linuxmusl-x64` nello standalone mantenendo la struttura `.pnpm` attesa dal RPATH del binario `.node`.
+- **DATABASE_URL**: la connection string da Atlas Compass non includeva il nome del database — aggiunto `/event-manager` prima del `?`. Inoltre il privilegio Atlas dell'utente DB era su `event-manager-db` (nome usato in Atlas), non su `event-manager` (nome DB nella stringa di connessione) — corretto in Database Access. Risorse Atlas (cluster, utente, Network Access) create correttamente in § 3.1; solo il mapping nome database era disallineato.
 
 ### Parte B — Spike produzione (umano, chiude Fase 2 § 2.10 punto 7)
 
