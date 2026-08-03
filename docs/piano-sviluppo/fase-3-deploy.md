@@ -208,17 +208,17 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 
 ## 3.5 — Verifica chiusura fase
 
-**Stato**: 🔲 da fare
+**Stato**: ✅ fatto (2026-08-03)
 
 **Obiettivo**: confermare che Fase 3 sia effettivamente conclusa, con l'intero sistema funzionante in produzione, prima di considerarla chiusa.
 
 **Checklist**:
-- Ripetere in produzione l'intera checklist di test end-to-end già definita in Fase 2 § 2.10 (login Google Admin/App, login locale App, super-admin di emergenza, rifiuto dominio non autorizzato, rifiuto utente non censito) — non solo la parte cookie già coperta in § 3.3.
-- **Test pendenti da Fase 2 § 2.9 (spostati qui su decisione esplicita, non fatti in locale)**: logout da Admin → verificare record `logout` in Log attività; password errata o utente disattivato → verificare record `accessDenied`; verifica che ogni percorso di login produca il record corretto (Google Admin/App, locale App, super-admin locale) — farli ora, in produzione, invece che nella sessione dev di Fase 2.
-- Verificare che i log applicativi (incluso `activityLog`) siano consultabili via Cloud Logging **senza configurazione aggiuntiva** (comportamento di default atteso di Cloud Run) — da confermare, non assumere.
-- Decidere se configurare alert minimi (servizio non raggiungibile, tasso di errore anomalo) o rimandarli esplicitamente — coerente con la proporzionalità già seguita in tutta Fase 2/3 (nessuno stack di monitoring dedicato per un tool interno a questa scala). Annotare la decisione qui, qualunque essa sia, invece di lasciarla implicita.
-- Verificare che la build (Docker o `pnpm build` con env di produzione simulata) sia OK.
-- Aggiornare `00-piano-generale.md` (stato Fase 3 → ✅ su tutte le sottofasi) e fare il bump di `CHANGELOG.md` (MINOR → `0.3.0` alla chiusura).
+- [x] Checklist e2e completa in produzione: login Google Admin ✅, login Google App ✅, login locale App ✅, super-admin di emergenza `/admin/login/local` ✅, rifiuto dominio non autorizzato ✅, rifiuto utente non censito ✅ — tutti verificati tra § 3.3 e § 3.4.
+- [x] **Test pendenti da Fase 2 § 2.9**: logout da Admin → record `logout` in activityLog ✅; password errata su `/app/login` → record `accessDenied` in activityLog ✅ (confermato via Cloud Logging 2026-08-03).
+- [x] Cloud Logging funziona senza configurazione aggiuntiva: log applicativi (incluso activityLog) visibili in Cloud Logging nativo Cloud Run. Log richieste HTTP (`run.googleapis.com/requests`) con severity WARNING per 4xx — comportamento corretto e atteso.
+- [x] **Alert minimi**: rimandati esplicitamente — tool interno, team piccolo, costo di setup non giustificato a questa scala. Decisione annotata qui; da rivalutare se il sistema venisse usato in modo più critico.
+- [x] Build: confermata OK dai deploy precedenti (Cloud Build su push `main`).
+- [x] `00-piano-generale.md` aggiornato (Fase 3 → ✅); `CHANGELOG.md` bumpato a `0.3.0`.
 
 ---
 

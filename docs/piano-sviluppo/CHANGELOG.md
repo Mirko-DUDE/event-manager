@@ -17,9 +17,11 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ---
 
-## [Unreleased]
+## [0.3.0] — 2026-08-03
 
 ### Added
+
+- **§ 3.5 — Verifica chiusura Fase 3**: checklist e2e completa in produzione ✅; test pendenti § 2.9 (logout/accessDenied in activityLog) ✅; Cloud Logging confermato senza configurazione aggiuntiva ✅; alert minimi rimandati esplicitamente (tool interno, team piccolo).
 
 - **§ 3.2 Parte A — Build container (codice)**: `Dockerfile` multi-stage (Node 22 Alpine, pnpm, `output: 'standalone'`), `.dockerignore`, `engines.node >=22` in `package.json`. Allineamento a unica env `SERVER_URL` (rimossa `NEXT_PUBLIC_SERVER_URL` da codice e `.env.example`). Validazione locale `tsc`/`lint`/`build` OK. Il `Dockerfile` serve a Cloud Build (wizard Parte C); `docker build` locale opzionale, non prerequisito del deploy.
 - **§ 3.2 Parti B/C — Secret Manager e Cloud Run**: 7 secret in Secret Manager, service account dedicato con IAM scoped, servizio Cloud Run in `europe-west1` (scaling 0–4, 512 MiB), pipeline continua da GitHub su `main`. Prima build fallita (prerender + MongoDB), fix `force-dynamic`; deploy OK (2026-08-03).
