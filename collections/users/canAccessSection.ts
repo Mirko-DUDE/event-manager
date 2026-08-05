@@ -1,7 +1,7 @@
 /**
- * Stub centralizzato per i permessi per-sezione dell'Area App.
- * Collocazione definitiva (es. lib/permissions.ts) da decidere quando si svilupperà
- * la prima sezione App — vedi specifica 2.6.1 e fase-2-login.md § 2.1.
+ * Permessi per-sezione dell'Area App (specifica-login-payloadcms.md §2.6.1).
+ * Prima chiamata reale: `/app/wildcard` (Fase 4 Passo 5).
+ * Collocazione fisica lasciata qui (collections/users) — nessun motivo di spostarla.
  */
 export type AppSection = 'lista-inviati' | 'lettore' | 'wildcard'
 
