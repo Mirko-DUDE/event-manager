@@ -302,15 +302,19 @@ Sequenza operativa per dipendenze reali. Ogni passo indica se richiede ancora un
   - Collection `inviteCheckRateLimit` (`ip`, `timestamp`; access chiusi; nascosta in Admin); indice TTL MongoDB `expireAfterSeconds: 600` creato in `onInit` (`lib/inviteCheck/ensureTtlIndex.ts`); soglia **1000** req/IP/10 min → `429` senza campo `invited`; chiave rate limit = header `X-Invite-Client-IP` (IP browser dalla LP) con fallback IP di connessione.
   - Note operative: `docs/operativo/check-invite.md`. Propagazione `INVITE_API_KEY` su Firebase resta manuale (§3).
 
-### Passo 7 — Verifica di chiusura
-- Test end-to-end sync HubSpot (inserimento, aggiornamento, scarto per precedenza, riconciliazione Caso F) su un ambiente con dati di prova.
-- Test end-to-end upload CSV (mapping, Caso E, righe non valide, riepilogo).
-- Test end-to-end Wildcard (inserimento diretto, blocco email esistente, warning soft-match + conferma).
-- Test end-to-end endpoint verifica invito (email presente/assente, chiave invalida, rate limit).
-- Verifica che ogni scarto/rifiuto risulti effettivamente in `activityLog` con `detail` specifico (principio §2.3).
+### Passo 7 — Verifica di chiusura ✅
+- Checklist e2e Passo 7 **chiusa per conferma** (2026-08-05, umano): non ripetuti smoke dedicati; esiti già verificati e documentati nei Passi 3–6 sufficienti per la chiusura Fase 4.
+  - **HubSpot** — Passo 3: ~2882 contatti, idempotenza, Caso F SI→NO, UI avanzamento.
+  - **CSV** — Passo 4: Casi A/C/D/E + email malformata; scarti su `activityLog`.
+  - **Wildcard** — Passo 5: insert / `emailEsistente` / soft-match + conferma / senza email; accessi manager vs hostess.
+  - **Check-invite** — Passo 6: presente/assente/`attivo=false` / Bearer invalido / rate limit; soglia 1000 + `X-Invite-Client-IP` documentati in `docs/operativo/check-invite.md` (handoff LP sufficiente; propagazione `INVITE_API_KEY` resta manuale).
+  - **activityLog** — principio §2.3 coperto dai test Passi 3–4 (e insert Wildcard Passo 5); gap accettato: blocchi Wildcard `emailEsistente` / warning soft-match non scrivono su `activityLog` (fuori dall’elenco esplicito §2.3).
+- **Gap/debiti §3 non chiusi** (non bloccanti): `ticketConfig`, soft-match CSV senza email, post-insert Wildcard/ticket, debiti UX Wildcard vincolanti per Sviluppo App, Caso F storici, ottimizzazione sync update selettivo, propagazione manuale chiave Firebase — restano aperti in §3.
 
 ### Esplicitamente rimandato, non parte di questo piano
 - `ticketConfig` (§3).
 - Cosa succede dopo l'inserimento Wildcard — thank-you page, trigger ticket (§3, `specifica-ticket-qrcode.md` §3).
 - Ricerca duplicati nome+cognome per CSV senza email (§3).
 - Cleanup dei soft-delete (§3).
+- Debiti UX Wildcard vincolanti per Sviluppo App (§3).
+- Caso F — allineamento soft delete storici; ottimizzazione sync update selettivo (§3).

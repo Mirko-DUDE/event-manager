@@ -19,6 +19,12 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ## [Unreleased]
 
+---
+
+## [0.4.0] — 2026-08-05
+
+Chiusura **Fase 4** (Import e sync contatti). Debiti §3 di `fase-4-import-sync.md` restano aperti (rimandati a ticket / Sviluppo App / ottimizzazioni future).
+
 ### Added
 
 - **Fase 4 § 4 Passo 6 — Endpoint verifica invito (`POST /api/check-invite`)**: Route Handler server-to-server per landing Firebase; Bearer validato contro Global `apiCredentials` (solo chiavi `attiva`, `verifyApiKey` + Local API `overrideAccess`); email normalizzata (trim+lowercase); lookup `contatti` → `{ invited: true }` solo se presente e `attivo !== false`, altrimenti `{ invited: false }` (nessun altro dato contatto); `401` se Bearer assente/invalido; collection `inviteCheckRateLimit` (`ip`+`timestamp`, access chiusi, nascosta in Admin) con indice TTL MongoDB 600s in `onInit`; rate limit per IP con preferenza header `X-Invite-Client-IP` (IP browser dalla LP) e fallback IP di connessione; soglia **1000** req/IP/10 min → `429` senza campo `invited`. Note operative in `docs/operativo/check-invite.md`.
@@ -46,6 +52,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Tests
 
+- **Fase 4 § 4 Passo 7 — Verifica di chiusura Fase 4 (2026-08-05)**: checklist e2e chiusa per conferma umana degli esiti già documentati nei Passi 3–6 (HubSpot ~2882/idempotenza/Caso F; CSV A/C/D/E; Wildcard tre esiti; check-invite presente/assente/`attivo=false`/401/429; `activityLog` con `detail` su scarti sync/CSV e insert Wildcard). Nessuna regressione bloccante; nessun nuovo smoke obbligatorio. Gap accettati: debiti §3 invariati; blocchi Wildcard `emailEsistente`/soft-match non loggati su `activityLog` (fuori elenco §2.3). Documentazione di chiusura: `fase-4-import-sync.md` Passo 7 ✅, `00-piano-generale.md` Fase 4 ✅.
 - **Fase 4 § 4 Passo 6 — Validazione codice**: `pnpm generate:types`, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK (`/api/check-invite` in route list).
 - **Fase 4 § 4 Passo 6 — Test dev check-invite (umano, 2026-08-05)**: Bearer + contatto attivo → `invited: true`; email assente → `false`; `attivo=false` → `false`; Bearer errato → `401`; rate limit → `429` senza `invited` (soglia iniziale 20 esaurita anche dalle chiamate di prova precedenti sullo stesso IP — atteso). Post-test: soglia alzata a 1000 + header `X-Invite-Client-IP` per la LP.
 - **Fase 4 § 4 Passo 5 — Validazione codice**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK.
