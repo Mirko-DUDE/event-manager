@@ -68,6 +68,8 @@ export interface Config {
   blocks: {};
   collections: {
     activityLog: ActivityLog;
+    contatti: Contatti;
+    conflittiImport: ConflittiImport;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -77,6 +79,8 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     activityLog: ActivityLogSelect<false> | ActivityLogSelect<true>;
+    contatti: ContattiSelect<false> | ContattiSelect<true>;
+    conflittiImport: ConflittiImportSelect<false> | ConflittiImportSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -127,10 +131,48 @@ export interface UserAuthOperations {
  */
 export interface ActivityLog {
   id: string;
-  user: string | User;
+  /**
+   * Opzionale per sync automatico HubSpot (nessun operatore). Obbligatorio per login/logout/accessDenied.
+   */
+  user?: (string | null) | User;
   timestamp: string;
   area?: ('admin' | 'app') | null;
-  eventType: 'login' | 'logout' | 'accessDenied' | 'hubspotSync' | 'csvUpload' | 'checkIn';
+  eventType:
+    | 'login'
+    | 'logout'
+    | 'accessDenied'
+    | 'hubspotSync'
+    | 'csvUpload'
+    | 'checkIn'
+    | 'wildcardInsert'
+    | 'ticketGenerated'
+    | 'ticketSent';
+  relatedContact?: (string | null) | Contatti;
+  detail?: string | null;
+  /**
+   * Valori prima della modifica (Caso B) o contesto dello scarto.
+   */
+  previousValue?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Valori applicati (Caso B) o dati riga scartata (Caso C).
+   */
+  newValue?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   method?: ('google' | 'local') | null;
 }
 /**
@@ -172,6 +214,98 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contatti".
+ */
+export interface Contatti {
+  id: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  /**
+   * Opzionale. Unique con indice sparse se assente (fase-4-import-sync.md §2.1).
+   */
+  email?: string | null;
+  dudeCompany?: string | null;
+  category?:
+    | (
+        | 'Clients'
+        | 'Prospects'
+        | 'Supplier'
+        | 'Talent'
+        | 'Partner'
+        | 'Founders'
+        | 'Design'
+        | 'Local Community'
+        | 'Friend'
+        | 'exDude'
+        | 'Event Guest'
+        | 'Needs Review'
+      )
+    | null;
+  assegnazione?: string | null;
+  /**
+   * Generato al momento della creazione ticket (Passo futuro). Unique, opzionale.
+   */
+  qrToken?: string | null;
+  /**
+   * Modalità effettivamente usata per il QR di questo contatto (specifica-ticket-qrcode.md §2.3).
+   */
+  qrContentMode?: ('token' | 'fullData') | null;
+  checkIn?: boolean | null;
+  checkInAt?: string | null;
+  checkInBy?: (string | null) | User;
+  /**
+   * Valore copiato da HubSpot as-is, nessun collegamento a users.
+   */
+  hubspotOwner?: string | null;
+  hubspotRecordId?: string | null;
+  /**
+   * Fonte di creazione originale del record — non aggiornata da sync di precedenza (Caso B).
+   */
+  source?: ('Hubspot' | 'Upload' | 'Wildcard') | null;
+  /**
+   * "Hubspot", "CSV" o username del manager (Wildcard).
+   */
+  createdBy?: string | null;
+  /**
+   * Soft delete: false = uscito dal segmento o disattivato (Caso F).
+   */
+  attivo?: boolean | null;
+  /**
+   * Flag rapido per contatti con voce aperta in conflittiImport.
+   */
+  hasOpenConflict?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conflittiImport".
+ */
+export interface ConflittiImport {
+  id: string;
+  contatto: string | Contatti;
+  source: 'csv' | 'hubspot';
+  /**
+   * Snapshot dei valori della riga/record in conflitto (Caso D, fase-4-import-sync.md §2.2).
+   */
+  datiIncoming?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  note?: string | null;
+  stato: 'aperto' | 'risolto';
+  risoltoDa?: (string | null) | User;
+  risoltoIl?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -197,6 +331,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'activityLog';
         value: string | ActivityLog;
+      } | null)
+    | ({
+        relationTo: 'contatti';
+        value: string | Contatti;
+      } | null)
+    | ({
+        relationTo: 'conflittiImport';
+        value: string | ConflittiImport;
       } | null)
     | ({
         relationTo: 'users';
@@ -253,7 +395,51 @@ export interface ActivityLogSelect<T extends boolean = true> {
   timestamp?: T;
   area?: T;
   eventType?: T;
+  relatedContact?: T;
+  detail?: T;
+  previousValue?: T;
+  newValue?: T;
   method?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contatti_select".
+ */
+export interface ContattiSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  email?: T;
+  dudeCompany?: T;
+  category?: T;
+  assegnazione?: T;
+  qrToken?: T;
+  qrContentMode?: T;
+  checkIn?: T;
+  checkInAt?: T;
+  checkInBy?: T;
+  hubspotOwner?: T;
+  hubspotRecordId?: T;
+  source?: T;
+  createdBy?: T;
+  attivo?: T;
+  hasOpenConflict?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conflittiImport_select".
+ */
+export interface ConflittiImportSelect<T extends boolean = true> {
+  contatto?: T;
+  source?: T;
+  datiIncoming?: T;
+  note?: T;
+  stato?: T;
+  risoltoDa?: T;
+  risoltoIl?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

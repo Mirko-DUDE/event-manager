@@ -10,7 +10,7 @@ export const ActivityLog: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'eventType',
-    defaultColumns: ['user', 'timestamp', 'area', 'eventType', 'method'],
+    defaultColumns: ['user', 'timestamp', 'area', 'eventType', 'relatedContact', 'method'],
     group: 'Sistema',
   },
   timestamps: false,
@@ -25,8 +25,11 @@ export const ActivityLog: CollectionConfig = {
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
-      required: true,
-      admin: { readOnly: true },
+      admin: {
+        readOnly: true,
+        description:
+          'Opzionale per sync automatico HubSpot (nessun operatore). Obbligatorio per login/logout/accessDenied.',
+      },
     },
     {
       name: 'timestamp',
@@ -58,8 +61,38 @@ export const ActivityLog: CollectionConfig = {
         { label: 'Sync HubSpot', value: 'hubspotSync' },
         { label: 'Upload CSV', value: 'csvUpload' },
         { label: 'Check-in', value: 'checkIn' },
+        { label: 'Inserimento Wildcard', value: 'wildcardInsert' },
+        { label: 'Ticket generato', value: 'ticketGenerated' },
+        { label: 'Ticket inviato', value: 'ticketSent' },
       ],
       admin: { readOnly: true },
+    },
+    {
+      name: 'relatedContact',
+      type: 'relationship',
+      relationTo: 'contatti',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'detail',
+      type: 'textarea',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'previousValue',
+      type: 'json',
+      admin: {
+        readOnly: true,
+        description: 'Valori prima della modifica (Caso B) o contesto dello scarto.',
+      },
+    },
+    {
+      name: 'newValue',
+      type: 'json',
+      admin: {
+        readOnly: true,
+        description: 'Valori applicati (Caso B) o dati riga scartata (Caso C).',
+      },
     },
     {
       name: 'method',

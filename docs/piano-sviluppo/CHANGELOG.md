@@ -17,6 +17,20 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **Fase 4 § 4 Passo 1 — Schema dati contatti e import**: collection `contatti` (`collections/Contatti.ts`) con schema completo da `specifica-contatti-import.md` §2.1 + campi ticket (`qrToken`, `qrContentMode`, `checkIn*`) da `specifica-ticket-qrcode.md` §2.3 — `email` non required ma unique, enum `category`/`source`, flag `attivo`/`hasOpenConflict`, normalizzazione email in `beforeValidate`; collection `conflittiImport` (`collections/ConflittiImport.ts`) con `contatto`, `source` (csv/hubspot), `datiIncoming`, `note`, `stato`, `risoltoDa`/`risoltoIl`; estensione `activityLog` con `user` opzionale, `relatedContact`, `detail`, `previousValue`/`newValue`, eventType `wildcardInsert`/`ticketGenerated`/`ticketSent`; stub `resolveContactPrecedence` in `lib/contacts/precedence.ts` (tipi + firma, nessun chiamante). Access control Admin/super-admin su `contatti` e `conflittiImport`. Nessun Global, sync, UI App o logica Casi A–F in questo passo.
+
+- **Fase 4 § 4 Passo 0 — Setup credenziali HubSpot**: scelta **Service Key** (non Private App legacy) per sync unidirezionale contatti — scope `crm.objects.contacts.read`, uso in codice via `HUBSPOT_ACCESS_TOKEN` + header `Authorization: Bearer`. Token configurato in `.env` locale e placeholder in `.env.example`; secret `HUBSPOT_ACCESS_TOKEN` in Secret Manager (8° secret) con IAM `secretAccessor` scoped e env var su Cloud Run `event-manager` (`europe-west1`), stesso pattern di `fase-3-deploy.md` § 3.2 Parte B. Nessun codice sync introdotto in questo passo.
+
+### Tests
+
+- **Fase 4 § 4 Passo 1 — Validazione codice**: `pnpm generate:types` → `payload-types.ts` aggiornato con `contatti`, `conflittiImport` ed estensioni `activityLog`; `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK.
+
+---
+
 ## [0.3.0] — 2026-08-03
 
 ### Added
