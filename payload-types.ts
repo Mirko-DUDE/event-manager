@@ -70,6 +70,7 @@ export interface Config {
     activityLog: ActivityLog;
     contatti: Contatti;
     conflittiImport: ConflittiImport;
+    inviteCheckRateLimit: InviteCheckRateLimit;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -81,6 +82,7 @@ export interface Config {
     activityLog: ActivityLogSelect<false> | ActivityLogSelect<true>;
     contatti: ContattiSelect<false> | ContattiSelect<true>;
     conflittiImport: ConflittiImportSelect<false> | ConflittiImportSelect<true>;
+    inviteCheckRateLimit: InviteCheckRateLimitSelect<false> | InviteCheckRateLimitSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -318,6 +320,15 @@ export interface ConflittiImport {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inviteCheckRateLimit".
+ */
+export interface InviteCheckRateLimit {
+  id: string;
+  ip: string;
+  timestamp: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -351,6 +362,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conflittiImport';
         value: string | ConflittiImport;
+      } | null)
+    | ({
+        relationTo: 'inviteCheckRateLimit';
+        value: string | InviteCheckRateLimit;
       } | null)
     | ({
         relationTo: 'users';
@@ -454,6 +469,14 @@ export interface ConflittiImportSelect<T extends boolean = true> {
   risoltoIl?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inviteCheckRateLimit_select".
+ */
+export interface InviteCheckRateLimitSelect<T extends boolean = true> {
+  ip?: T;
+  timestamp?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

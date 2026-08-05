@@ -7,6 +7,7 @@ import sharp from 'sharp'
 import { ActivityLog } from './collections/ActivityLog'
 import { ConflittiImport } from './collections/ConflittiImport'
 import { Contatti } from './collections/Contatti'
+import { InviteCheckRateLimit } from './collections/InviteCheckRateLimit'
 import { Users } from './collections/Users'
 import { ApiCredentials } from './globals/ApiCredentials'
 import { HubspotSyncConfig } from './globals/HubspotSyncConfig'
@@ -35,7 +36,7 @@ export default buildConfig({
       afterNavLinks: ['@/components/admin/CsvUploadNavLink'],
     },
   },
-  collections: [Users, ActivityLog, Contatti, ConflittiImport],
+  collections: [Users, ActivityLog, Contatti, ConflittiImport, InviteCheckRateLimit],
   globals: [Settings, HubspotSyncConfig, ApiCredentials],
   email: resendAdapter({
     apiKey: process.env.RESEND_API_KEY || '',
@@ -52,5 +53,10 @@ export default buildConfig({
   onInit: async (payload) => {
     const { startHubspotSyncTimer } = await import('./lib/hubspot/syncTimer')
     startHubspotSyncTimer(payload)
+
+    const { ensureInviteCheckRateLimitTtlIndex } = await import(
+      './lib/inviteCheck/ensureTtlIndex'
+    )
+    await ensureInviteCheckRateLimitTtlIndex(payload)
   },
 })

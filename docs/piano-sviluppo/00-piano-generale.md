@@ -67,12 +67,12 @@ Dettaglio completo in `fase-4-import-sync.md` (decisioni definite in sessione de
 3. Sync HubSpot: `runHubspotSync()`, mapping, lock, Caso F, UI avanzamento — ✅ *(2026-08-05: implementazione + fix paginazione, progress poll, campi partyDude/partyTtt, Caso F con batch read; test dev ~2882 contatti; vedi `fase-4-import-sync.md` Passo 3 e §2.9)*
 4. Upload CSV in Area Admin: mapping colonne, Caso E, righe non valide, riepilogo — ✅ *(2026-08-05: view `/admin/upload-csv`, `runCsvUpload()`, parser nativo, Server Action; test dev Casi A/C/D/E + email malformata; vedi `fase-4-import-sync.md` Passo 4 e `docs/operativo/csv-upload.md`)*
 5. API inserimento Wildcard (Server Action, tre esiti) — ✅ *(2026-08-05: `/app/wildcard`, `insertWildcardContact`, prima chiamata reale a `canAccessSection`; esclude cosa succede dopo l'inserimento — debito verso ticket/Wildcard, vedi `fase-4-import-sync.md` §3)*
-6. Endpoint di verifica invito per landing page esterna, con rate limiting per IP (collection `inviteCheckRateLimit`, 20 richieste/10 min, `429`) — 🔲 *(schema e parametri già decisi, resta solo lo sviluppo)*
+6. Endpoint di verifica invito per landing page esterna, con rate limiting per IP (collection `inviteCheckRateLimit`, 1000 richieste/10 min, header `X-Invite-Client-IP`, `429`) — ✅ *(2026-08-05: `POST /api/check-invite`, Bearer vs `apiCredentials`, TTL rate limit; vedi `fase-4-import-sync.md` Passo 6 e `docs/operativo/check-invite.md`)*
 7. Verifica di chiusura fase — 🔲
 
 ## Prossimi passi
 
-- **Prossimo passo**: Fase 4, Passo 6 — Endpoint di verifica invito (`fase-4-import-sync.md` § 4 Passo 6 / §2.12).
+- **Prossimo passo**: Fase 4, Passo 7 — Verifica di chiusura fase (`fase-4-import-sync.md` § 4 Passo 7).
 - Punti aperti/debiti volutamente rimandati, da tenere presente durante l'esecuzione (non bloccanti per il resto di Fase 4): `ticketConfig` come Global separato o campo, ricerca duplicati nome+cognome per CSV senza email, cosa succede dopo l'inserimento Wildcard (debito verso la sessione ticket), cleanup dei soft-delete, **ottimizzazione sync HubSpot (update/log selettivo su contatti invariati)**, propagazione manuale della chiave `apiCredentials` verso Firebase — vedi `fase-4-import-sync.md` § 3.
 - **Debiti vincolanti per Sviluppo App** (emersi dal test Wildcard Passo 5; non nel set §2.11): form Wildcard con `dudeCompany` select (valori HubSpot: SRL, Milano, London, Things, Design, Originals, Fondazione/MFF); campo telefono; `assegnazione` auto-compilata dalla parte locale dell’email utente App (es. `mm@dude.it` → `mm`); all’insert sempre `partyDude=SI` e `partyTtt=YES` (server-side, non in form) — dettaglio in `fase-4-import-sync.md` § 3.
 - Aggiornare questo indice e il file di fase corrispondente a ogni sottofase completata.

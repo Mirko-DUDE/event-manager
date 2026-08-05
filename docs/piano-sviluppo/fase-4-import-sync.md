@@ -215,7 +215,8 @@ Global: apiCredentials (da creare)
   - **Contatto con `attivo: false`** (soft-deleted, Caso F): risponde `invited: false` — un contatto uscito dal segmento non deve risultare invitato.
   - Risponde **solo** `{ invited: boolean }` — nessun altro dato del contatto.
 - **Rate limiting per IP**: necessario (rischio di enumerazione email tramite il form pubblico). Contatore per IP su una collection MongoDB dedicata (**nome: `inviteCheckRateLimit`**, campi minimi: `ip`, `timestamp` con **indice TTL** su `timestamp` per l'auto-scadenza) — nessun job di pulizia, coerente con "nessun cron" già deciso in `fase-3-deploy.md` §2.6; stessa soluzione orientativamente proposta per il check-in in `specifica-ticket-qrcode.md` §3.
-  - **Soglia**: 20 richieste per IP ogni 10 minuti.
+  - **Soglia**: **1000** richieste per IP ogni 10 minuti (aggiornato 2026-08-05 post test: 20 era insufficiente per il picco post-invito se tutto il traffico passasse da un unico IP Firebase).
+  - **IP usato per il contatore**: la chiamata è server-to-server dalla landing — l’IP di connessione è quello Firebase, non del browser. La LP deve inviare l’IP del client nell’header **`X-Invite-Client-IP`**; se presente e plausibile (IPv4/IPv6) è la chiave del rate limit, altrimenti fallback all’IP di connessione (dev/curl o LP non ancora aggiornata).
   - **Comportamento al superamento**: blocco secco, risposta `429`, nessun campo `invited` nel body.
   - **Ambito**: contatore dedicato a questo endpoint (`/api/check-invite`), non condiviso con eventuali altri rate limit futuri (es. check-in) — evita che traffico su un endpoint faccia scattare un blocco su un altro.
 
@@ -232,7 +233,7 @@ Global: apiCredentials (da creare)
   2. **Campo telefono (`phone`)** sul form Wildcard — oggi **assente** dallo schema `contatti` e dalle specifiche import/ticket. Richiede aggiunta campo (e eventuale mapping HubSpot se va sincronizzato) nella sessione Sviluppo App / schema contatti.
   3. **`assegnazione` auto-compilata** con la parte locale dell’email dell’utente App autenticato (prima di `@`), es. `mm@dude.it` → `mm`. Oggi il form espone `assegnazione` come testo editabile libero (input §2.11). In Sviluppo App: precompilazione da sessione; decidere se il campo resta editabile o read-only.
   4. **`partyDude` / `partyTtt` automatici all’insert Wildcard**: ogni contatto creato da Wildcard deve salvare sempre `partyDude = SI` e `partyTtt = YES` (stessi valori usati come inclusione segmento HubSpot). Oggi l’insert Passo 5 non valorizza questi campi (restano vuoti). Non esporsi nel form — impostazione server-side alla create.
-- **Endpoint di verifica invito**: da costruire (2.12) — non esiste ancora lato nostro progetto (schema e rate limiting già decisi, resta solo lo sviluppo).
+- ~~**Endpoint di verifica invito**~~ — **fatto** (Passo 6, 2026-08-05): `POST /api/check-invite` + collection `inviteCheckRateLimit` con TTL.
 - **Nota operativa non bloccante**: propagazione manuale della chiave `apiCredentials` verso `INVITE_API_KEY` su Firebase ad ogni rotazione.
 - **Cleanup dei soft-delete** (`attivo = false` da molto tempo): nessun job periodico previsto, eredità da `specifica-contatti-import.md` §3 — da valutare se il volume lo giustificherà.
 - **Caso F — allineamento soft delete storici**: oggi la riconciliazione Caso F opera solo su contatti con `attivo=true` usciti dal segmento in **quel** sync. I soft delete già presenti (es. disattivati prima del batch read Caso F, o con campi stale tipo `partyDude=SI` mentre HubSpot ha già `NO`) **non** vengono aggiornati ai sync successivi finché non rientrano nel segmento o non si interviene manualmente. **Possibilità futura** (non implementata): estendere la riconciliazione anche ai contatti `attivo=false`, `source=Hubspot`, fuori segmento — batch read HubSpot + aggiornamento campi **senza** riattivare (`attivo` resta `false`), così un sync “guarisce” i soft delete storici senza modifiche su HubSpot. Workaround attuale: correzione manuale in Admin, oppure temporaneo ripristino del flag in HubSpot + doppio sync.
@@ -290,10 +291,16 @@ Sequenza operativa per dipendenze reali. Ogni passo indica se richiede ancora un
 - **Post-implementazione (2026-08-05)**: core `insertWildcardContact()` in `lib/contacts/wildcardInsert.ts` (Local API + `overrideAccess`, tre esiti, soft-match case-insensitive nome+cognome, `source: Wildcard` / `createdBy: <email manager>`, log `wildcardInsert` su `activityLog` area `app`); Server Action `executeWildcardInsert` in `lib/contacts/wildcardActions.ts` (auth Area App + `canAccessSection(..., 'wildcard')`); route `/app/wildcard` (`WildcardForm` client + gate hostess/none con messaggio); link dalla home Area App. Note operative in `docs/operativo/wildcard-insert.md`.
 - **Test dev (2026-08-05, umano)**: checklist Passo 5 OK — accesso manager/full-access; blocco hostess; insert email nuova (`source=Wildcard`, `createdBy`, log `wildcardInsert`); `emailEsistente`; soft-match + conferma; insert senza email. Dal test emerse richieste UX form (select DUDE Company, telefono, assegnazione auto da email utente) **fuori set §2.11** → annotate come debiti vincolanti Sviluppo App in §3, non implementate in questo passo.
 
-### Passo 6 — Endpoint di verifica invito (indipendente dai Passi 3-5, può partire in parallelo)
+### Passo 6 — Endpoint di verifica invito (indipendente dai Passi 3-5, può partire in parallelo) ✅
 - Costruire l'endpoint (2.12): validazione Bearer contro `apiCredentials`, normalizzazione email, lookup, gestione `attivo: false`, risposta booleana. *Sviluppo, logica già decisa.*
-- Implementare il rate limiting per IP: collection `inviteCheckRateLimit` con indice TTL, soglia 20 richieste/10 minuti, blocco `429` (2.12). *Sviluppo, meccanismo e parametri già decisi.*
+- Implementare il rate limiting per IP: collection `inviteCheckRateLimit` con indice TTL, soglia 1000 richieste/10 minuti, blocco `429`, header `X-Invite-Client-IP` (2.12). *Sviluppo, meccanismo e parametri già decisi.*
 - Coordinarsi con chi gestisce la landing page (Firebase) per la chiave e l'URL definitivo.
+- **Post-implementazione (2026-08-05)**:
+  - Route Handler `POST /api/check-invite` in `app/(payload)/api/check-invite/route.ts` (server-to-server; Bearer mai esposto al browser; nessun CORS).
+  - Auth: `Authorization: Bearer` validato con `verifyApiKey` contro voci `attiva` di Global `apiCredentials` (Local API + `overrideAccess` per leggere `chiaveCifrata`).
+  - Lookup `contatti` su email normalizzata (trim + lowercase); `attivo: false` o assente → `{ invited: false }`; presente e attivo → `{ invited: true }`; body successo **solo** `{ invited: boolean }`.
+  - Collection `inviteCheckRateLimit` (`ip`, `timestamp`; access chiusi; nascosta in Admin); indice TTL MongoDB `expireAfterSeconds: 600` creato in `onInit` (`lib/inviteCheck/ensureTtlIndex.ts`); soglia **1000** req/IP/10 min → `429` senza campo `invited`; chiave rate limit = header `X-Invite-Client-IP` (IP browser dalla LP) con fallback IP di connessione.
+  - Note operative: `docs/operativo/check-invite.md`. Propagazione `INVITE_API_KEY` su Firebase resta manuale (§3).
 
 ### Passo 7 — Verifica di chiusura
 - Test end-to-end sync HubSpot (inserimento, aggiornamento, scarto per precedenza, riconciliazione Caso F) su un ambiente con dati di prova.
