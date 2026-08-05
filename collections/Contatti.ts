@@ -130,6 +130,22 @@ export const Contatti: CollectionConfig = {
       index: true,
     },
     {
+      name: 'partyDude',
+      type: 'text',
+      label: 'Party DUDE',
+      admin: {
+        description: 'Copia da HubSpot (party_dude) — verifica manuale del segmento sync.',
+      },
+    },
+    {
+      name: 'partyTtt',
+      type: 'text',
+      label: 'Party TTT',
+      admin: {
+        description: 'Copia da HubSpot (party_ttt) — verifica manuale del segmento sync.',
+      },
+    },
+    {
       name: 'source',
       type: 'select',
       label: 'Source',

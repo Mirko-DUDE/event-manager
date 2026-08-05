@@ -43,4 +43,8 @@ export default buildConfig({
   }),
   plugins: [googleAdminOAuth, googleAppOAuth],
   sharp,
+  onInit: async (payload) => {
+    const { startHubspotSyncTimer } = await import('./lib/hubspot/syncTimer')
+    startHubspotSyncTimer(payload)
+  },
 })

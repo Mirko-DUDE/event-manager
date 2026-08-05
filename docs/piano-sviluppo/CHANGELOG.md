@@ -19,27 +19,32 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ## [Unreleased]
 
+### Added
+
+- **Fase 4 § 4 Passo 3 — Sync HubSpot end-to-end**: `runHubspotSync()` in `lib/hubspot/sync.ts` (CRM Search API paginata via `fetch` nativo, timeout 15s, retry su rete/5xx), mapping proprietà §2.8, lock applicativo `syncInProgress`/`syncStartedAt` (Local API + `context.hubspotSyncLockUpdate` per bypass hook Admin), riconciliazione Caso F (soft-delete o `conflittiImport`), riepilogo in memoria. `resolveContactPrecedence` implementato (Casi A–D) in `lib/contacts/precedence.ts`; normalizzazione `category` in `lib/contacts/category.ts`. Server Action `triggerHubspotSync` + `HubspotSyncNowButton` con toast/riepilogo. Timer in-process `lib/hubspot/syncTimer.ts` registrato in `payload.config.ts` `onInit` (sync automatico). `hubspotOwner` salvato come ID grezzo. Note operative in `docs/operativo/hubspot-sync.md` (incluso `minInstances: 1` per sync automatico in produzione).
+- **Fase 4 § 4 Passo 3 — UI avanzamento sync**: campi `syncProgressPages` / `syncProgressProcessed` / `syncProgressTotal` / `syncProgressPhase` su `hubspotSyncConfig`; aggiornamento a ogni pagina HubSpot e ogni 10 contatti; Route Handler `GET /api/hubspot-sync/progress` per poll client (evita accodamento Server Action); barra percentuale e indeterminata in `HubspotSyncNowButton`.
+- **Fase 4 § 4 Passo 3 — Campi verifica segmento su `contatti`**: `partyDude` (label Party DUDE) e `partyTtt` (label Party TTT), mappati da HubSpot e aggiornati ad ogni sync.
+- **Fase 4 § 4 Passo 2 — Global di configurazione sync e API**: Global `hubspotSyncConfig` e `apiCredentials`; UI `HubspotSyncNowButton` (poi collegato al sync in Passo 3) e `ApiKeyRowControls`.
+- **Fase 4 § 4 Passo 1 — Schema dati contatti e import**: collection `contatti`, `conflittiImport`, estensione `activityLog`, stub `resolveContactPrecedence`.
+- **Fase 4 § 4 Passo 0 — Setup credenziali HubSpot**: Service Key, `HUBSPOT_ACCESS_TOKEN` locale + Secret Manager.
+
 ### Changed
 
+- **Fase 4 § 4 Passo 3 — Caso F con allineamento campi**: prima del soft delete su contatti usciti dal segmento (`attivo=true`, no check-in/ticket), batch read HubSpot per ID e aggiornamento di tutti i campi sync mappati, poi `attivo=false` (inclusi `partyDude`/`partyTtt`).
 - **Fase 4 § 4 Passo 2 — API Credentials UX HubSpot**: sostituito modello hash one-shot + banner con cifratura AES-256-GCM (`keyPrefix` + `chiaveCifrata`, chiave da `PAYLOAD_SECRET`) e componente `ApiKeyRowControls` (Mostra / Copia / Ruota). Rimossi `ApiKeyRevealBanner`, `pendingReveals` e `revealPendingKeys`. Aggiornato `fase-4-import-sync.md` §2.6.
 
 ### Fixed
 
-- **Fase 4 § 4 Passo 2 — `ApiKeyRowControls` non renderizzava i controlli**: `FormState` in Payload v3 è una mappa piatta `{ [dotPath: string]: FieldState }` (es. `fields['chiavi.0.keyPrefix']`), non un oggetto annidato. `readFieldValue` attraversava per segmenti (`fields.chiavi['0'].keyPrefix`) ottenendo sempre `undefined` → i controlli non apparivano mai. Fix: accesso diretto `fields[fieldPath]?.value`. Confermato da sorgente `addFieldStatePromise.js`: `state['chiavi.0.id'] = { value: row.id }`. Campo `chiaveCifrata`: aggiunto `access.read: () => false` (escluso da REST API; le Server Actions leggono via Local API con `overrideAccess: true`). `keyPrefix` reso visibile nel form (non sensibile).
-
-### Added
-
-- **Fase 4 § 4 Passo 2 — Global di configurazione sync e API**: Global `hubspotSyncConfig` (`globals/HubspotSyncConfig.ts`) con `proprietaFiltro`, `valoreInclusione`, `syncAutomatico`, `intervalloMinuti` (validato se sync automatico attivo), campi lock `syncInProgress`/`syncStartedAt` read-only in Admin; access read/update admin e super-admin. Global `apiCredentials` (`globals/ApiCredentials.ts`) con array `chiavi` (etichetta, `keyPrefix`, `chiaveCifrata` cifrata AES, attiva, creataIl) — UI `ApiKeyRowControls` (Mostra/Copia/Ruota stile HubSpot); access read admin, write super-admin. Componente placeholder `HubspotSyncNowButton` nel Global HubSpot (nessuna chiamata a `runHubspotSync()`). Entrambi in `admin.group: 'Configurazione'`. `HUBSPOT_ACCESS_TOKEN` resta solo env/Secret Manager.
-
-- **Fase 4 § 4 Passo 1 — Schema dati contatti e import**: collection `contatti` (`collections/Contatti.ts`) con schema completo da `specifica-contatti-import.md` §2.1 + campi ticket (`qrToken`, `qrContentMode`, `checkIn*`) da `specifica-ticket-qrcode.md` §2.3 — `email` non required ma unique, enum `category`/`source`, flag `attivo`/`hasOpenConflict`, normalizzazione email in `beforeValidate`; collection `conflittiImport` (`collections/ConflittiImport.ts`) con `contatto`, `source` (csv/hubspot), `datiIncoming`, `note`, `stato`, `risoltoDa`/`risoltoIl`; estensione `activityLog` con `user` opzionale, `relatedContact`, `detail`, `previousValue`/`newValue`, eventType `wildcardInsert`/`ticketGenerated`/`ticketSent`; stub `resolveContactPrecedence` in `lib/contacts/precedence.ts` (tipi + firma, nessun chiamante). Access control Admin/super-admin su `contatti` e `conflittiImport`. Nessun Global, sync, UI App o logica Casi A–F in questo passo.
-
-- **Fase 4 § 4 Passo 0 — Setup credenziali HubSpot**: scelta **Service Key** (non Private App legacy) per sync unidirezionale contatti — scope `crm.objects.contacts.read`, uso in codice via `HUBSPOT_ACCESS_TOKEN` + header `Authorization: Bearer`. Token configurato in `.env` locale e placeholder in `.env.example`; secret `HUBSPOT_ACCESS_TOKEN` in Secret Manager (8° secret) con IAM `secretAccessor` scoped e env var su Cloud Run `event-manager` (`europe-west1`), stesso pattern di `fase-3-deploy.md` § 3.2 Parte B. Nessun codice sync introdotto in questo passo.
+- **Fase 4 § 4 Passo 3 — Paginazione HubSpot Search API**: il cursore pagina successiva è in `paging.next.after`, non in `after` a livello root — il sync elaborava solo la prima pagina (100 contatti) segnalando erroneamente "completato". Fix in `lib/hubspot/client.ts`; verificato in dev con ~2882 contatti (secondo sync: 0 inseriti, ~2882 aggiornati).
+- **Fase 4 § 4 Passo 3 — Poll avanzamento sync**: Server Action di poll restava in coda dietro `triggerHubspotSync()` → UI bloccata su "Avvio sync…"; spostato poll su Route Handler dedicato.
+- **Fase 4 § 4 Passo 2 — `ApiKeyRowControls` non renderizzava i controlli**: `FormState` in Payload v3 è mappa piatta `{ [dotPath]: FieldState }`; fix accesso diretto `fields[fieldPath]?.value`. Campo `chiaveCifrata`: `access.read: () => false` (REST); Server Actions via Local API + `overrideAccess`.
 
 ### Tests
 
-- **Fase 4 § 4 Passo 2 — Validazione codice (refactor API Credentials)**: `pnpm generate:types`, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK dopo passaggio a cifratura AES + `ApiKeyRowControls`.
+- **Fase 4 § 4 Passo 3 — Validazione codice (implementazione iniziale)**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm generate:importmap`, `pnpm build` OK.
+- **Fase 4 § 4 Passo 3 — Test dev HubSpot (umano, 2026-08-05)**: sync completo ~2882 contatti `party_dude=SI`; idempotenza (secondo sync solo aggiornamenti); Caso F SI→NO → soft delete con `attivo=false`; cambio campo singolo su HubSpot → aggiornato al sync; UI avanzamento con barra % dopo fix Route Handler; soft delete antecedente al batch read Caso F resta con campi stale — documentato come limitazione + possibilità futura §3 `fase-4-import-sync.md`.
 
-- **Fase 4 § 4 Passo 2 — Validazione codice**: `pnpm generate:types` → `payload-types.ts` con `hubspotSyncConfig` e `apiCredentials`; `pnpm generate:importmap` → `HubspotSyncNowButton` e `ApiKeyRevealBanner` in import map; `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK.
+- **Fase 4 § 4 Passo 2 — Validazione codice (refactor API Credentials)**: `pnpm generate:types`, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK dopo passaggio a cifratura AES + `ApiKeyRowControls`. `pnpm generate:types` → `payload-types.ts` con `hubspotSyncConfig` e `apiCredentials`; `pnpm generate:importmap` → `HubspotSyncNowButton` e `ApiKeyRevealBanner` in import map; `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK.
 
 - **Fase 4 § 4 Passo 1 — Validazione codice**: `pnpm generate:types` → `payload-types.ts` aggiornato con `contatti`, `conflittiImport` ed estensioni `activityLog`; `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK.
 

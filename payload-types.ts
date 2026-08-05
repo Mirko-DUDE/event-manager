@@ -263,6 +263,14 @@ export interface Contatti {
   hubspotOwner?: string | null;
   hubspotRecordId?: string | null;
   /**
+   * Copia da HubSpot (party_dude) — verifica manuale del segmento sync.
+   */
+  partyDude?: string | null;
+  /**
+   * Copia da HubSpot (party_ttt) — verifica manuale del segmento sync.
+   */
+  partyTtt?: string | null;
+  /**
    * Fonte di creazione originale del record — non aggiornata da sync di precedenza (Caso B).
    */
   source?: ('Hubspot' | 'Upload' | 'Wildcard') | null;
@@ -423,6 +431,8 @@ export interface ContattiSelect<T extends boolean = true> {
   checkInBy?: T;
   hubspotOwner?: T;
   hubspotRecordId?: T;
+  partyDude?: T;
+  partyTtt?: T;
   source?: T;
   createdBy?: T;
   attivo?: T;
@@ -554,6 +564,22 @@ export interface HubspotSyncConfig {
    * Timestamp di avvio sync — per riconoscere un lock morto (Passo 3).
    */
   syncStartedAt?: string | null;
+  /**
+   * Avanzamento sync — gestito dal codice, non modificare manualmente.
+   */
+  syncProgressPages?: number | null;
+  /**
+   * Contatti già processati nel sync in corso.
+   */
+  syncProgressProcessed?: number | null;
+  /**
+   * Totale contatti nel segmento HubSpot (dalla prima risposta API).
+   */
+  syncProgressTotal?: number | null;
+  /**
+   * importazione | riconciliazione
+   */
+  syncProgressPhase?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -613,6 +639,10 @@ export interface HubspotSyncConfigSelect<T extends boolean = true> {
   intervalloMinuti?: T;
   syncInProgress?: T;
   syncStartedAt?: T;
+  syncProgressPages?: T;
+  syncProgressProcessed?: T;
+  syncProgressTotal?: T;
+  syncProgressPhase?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

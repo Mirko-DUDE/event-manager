@@ -163,6 +163,8 @@ Global: apiCredentials (da creare)
 | `assegnazione` | Assegnazione | `assegnazione` | custom — testo libero, 150 valori distinti |
 | `hubspotOwner` | Owner (proprietario del contatto) | `hubspot_owner_id` | proprietà standard nativa — **nota**: restituisce l'**ID numerico** dell'owner, non il nome leggibile; `contatti.hubspotOwner` è definito come testo "copiato as-is" (`specifica-contatti-import.md` §2.7) — da decidere se salvare l'ID grezzo o risolverlo in nome tramite una chiamata separata alle Owners API di HubSpot (vedi punti aperti) |
 | `hubspotRecordId` | Record ID | (ID nativo del record, non una proprietà) | — |
+| `partyDude` | Party DUDE | `party_dude` | custom — duplicato volutamente su `contatti` per verifica manuale in Admin (non è il filtro sync); sincronizzato ad ogni sync |
+| `partyTtt` | Party TTT | `party_ttt` | custom — idem `partyDude`; utile per doppio controllo umano indipendentemente da quale proprietà sia usata come filtro in `hubspotSyncConfig` |
 | filtro sync (`proprietaFiltro`, 2.5) | Party DUDE | `party_dude` | custom — solo `SI`/`NO`/vuoto nell'export |
 | filtro sync alternativo | Party TTT | `party_ttt` | custom — **esiste come seconda proprietà di filtro possibile**, non presente nell'export usato per la verifica valori (quel dataset era filtrato su Party DUDE); conferma perché `proprietaFiltro` in `hubspotSyncConfig` è configurabile e non hardcoded — eventi diversi useranno proprietà diverse |
 
@@ -172,11 +174,13 @@ Global: apiCredentials (da creare)
 
 - **Dove vive**: funzione core `runHubspotSync()`, transport-agnostic, in `lib/hubspot/sync.ts`. Richiamata sia dal componente custom con bottone nel Global (Server Action) sia da un timer in-process se `syncAutomatico = true`. Se in futuro servirà un trigger esterno (Cloud Scheduler, punto già superato da questa sessione), la stessa funzione può essere richiamata anche da un Route Handler.
 - **Autenticazione verso HubSpot**: `HUBSPOT_ACCESS_TOKEN` da env (2.7), header `Authorization: Bearer`.
-- **Passi**: legge `hubspotSyncConfig` via Local API → chiama HubSpot CRM Search API (paginata, ~25–30 chiamate per l'intero segmento, filtro su `proprietaFiltro`/`valoreInclusione` con i nomi interni verificati in 2.8) → per ogni contatto applica `resolveContactPrecedence` (mapping proprietà→campi da 2.8) → scrive su `contatti` e `activityLog` → a fine esecuzione calcola il riepilogo.
+- **Passi**: legge `hubspotSyncConfig` via Local API (**valori salvati** — il bottone sync non legge il form non salvato) → chiama HubSpot CRM Search API (paginata, cursore in `paging.next.after`, ~25–30 chiamate per l'intero segmento, filtro su `proprietaFiltro`/`valoreInclusione` con i nomi interni verificati in 2.8) → per ogni contatto applica `resolveContactPrecedence` (mapping proprietà→campi da 2.8) → scrive su `contatti` e `activityLog` → **Caso F** (solo a sync completato) → riepilogo.
+- **UI avanzamento**: campi read-only su `hubspotSyncConfig` (`syncProgressPages`, `syncProgressProcessed`, `syncProgressTotal`, `syncProgressPhase`) aggiornati durante l'esecuzione; il componente `HubspotSyncNowButton` effettua poll via `GET /api/hubspot-sync/progress` (Route Handler dedicato — non Server Action, per evitare accodamento dietro la richiesta sync lunga) ogni ~1s; barra percentuale quando il totale HubSpot è noto, barra indeterminata in fase `connessione`.
+- **Caso F — soft delete con campi allineati**: contatti `source=Hubspot`, `attivo=true`, assenti dal segmento corrente e senza check-in/ticket → batch read HubSpot per ID (`/crm/v3/objects/contacts/batch/read`) per leggere lo stato attuale (es. `party_dude=NO` pur essendo fuori dalla Search filtrata) → aggiornamento di **tutti i campi sync** mappati → `attivo=false`. Con check-in/ticket → solo `conflittiImport`, record invariato (specifica §2.4.1). **Limitazione attuale**: contatti **già** soft-deleted in passato (`attivo=false`) non vengono riallineati — vedi §3 voce dedicata.
 - **Errori/timeout**: timeout 15s per chiamata, retry limitato (1–2 tentativi) solo su errori di rete/5xx — non su 4xx (errore di configurazione, non risolvibile con retry — es. proprietà filtro con nome interno sbagliato).
 - **Sync parziale**: nessun rollback — le scritture già eseguite restano valide (il sync è idempotente per design, rilanciarlo da capo è la procedura di recovery naturale). Il **Caso F** (riconciliazione contatti usciti dal segmento) va eseguito **solo a sync completato con successo** — su un'esecuzione interrotta l'insieme dei contatti letti è incompleto, e calcolare "chi è uscito dal segmento" su un insieme parziale genererebbe falsi soft-delete.
 - **Riepilogo**: calcolato in memoria durante il loop (inseriti/aggiornati/scartati/conflitti), mostrato a schermo a fine esecuzione — non persistito separatamente. Un sync interrotto mostra un riepilogo che segnala esplicitamente l'interruzione ("interrotto dopo N/30 pagine — rilanciare").
-- **Logging**: per ogni contatto toccato, `activityLog` con `eventType: hubspotSync`, `relatedContact`, `previousValue`/`newValue` dove pertinente (Caso B), `detail` sempre con motivo esplicito. Per il sync automatico, `user` resta vuoto (2.3).
+- **Logging**: per ogni contatto toccato, `activityLog` con `eventType: hubspotSync`, `relatedContact`, `previousValue`/`newValue` dove pertinente (Caso B), `detail` sempre con motivo esplicito. Per il sync automatico, `user` resta vuoto (2.3). **Nota**: oggi anche i contatti invariati generano update + log — vedi §3 debito «Ottimizzazione sync — update selettivo».
 
 ### 2.10 Upload CSV — dettaglio implementativo
 
@@ -226,6 +230,8 @@ Global: apiCredentials (da creare)
 - **Endpoint di verifica invito**: da costruire (2.12) — non esiste ancora lato nostro progetto (schema e rate limiting già decisi, resta solo lo sviluppo).
 - **Nota operativa non bloccante**: propagazione manuale della chiave `apiCredentials` verso `INVITE_API_KEY` su Firebase ad ogni rotazione.
 - **Cleanup dei soft-delete** (`attivo = false` da molto tempo): nessun job periodico previsto, eredità da `specifica-contatti-import.md` §3 — da valutare se il volume lo giustificherà.
+- **Caso F — allineamento soft delete storici**: oggi la riconciliazione Caso F opera solo su contatti con `attivo=true` usciti dal segmento in **quel** sync. I soft delete già presenti (es. disattivati prima del batch read Caso F, o con campi stale tipo `partyDude=SI` mentre HubSpot ha già `NO`) **non** vengono aggiornati ai sync successivi finché non rientrano nel segmento o non si interviene manualmente. **Possibilità futura** (non implementata): estendere la riconciliazione anche ai contatti `attivo=false`, `source=Hubspot`, fuori segmento — batch read HubSpot + aggiornamento campi **senza** riattivare (`attivo` resta `false`), così un sync “guarisce” i soft delete storici senza modifiche su HubSpot. Workaround attuale: correzione manuale in Admin, oppure temporaneo ripristino del flag in HubSpot + doppio sync.
+- **Ottimizzazione sync — update selettivo**: oggi ogni contatto nel segmento viene **sempre** riscritto (`payload.update`) e loggato su `activityLog`, anche se nessun campo sync è cambiato rispetto al record locale — comportamento volutamente semplice e idempotente (§2.9), ma costoso su ~2800+ contatti (scritture DB + log a ogni esecuzione). **Debito futuro**: introdurre confronto campo-per-campo sui dati sync mappati e saltare update/log quando i valori sono identici; valutare anche riduzione verbosità `activityLog` (es. log solo su cambi reali o su Casi B/F). Non bloccante: il sync completo resta la procedura di recovery; l'ottimizzazione serve a ridurre durata sync ripetuti e volume log.
 - **Trigger automatico sync HubSpot via Cloud Scheduler**: superato da questa sessione (flag `syncAutomatico` + lock in-process, §2.5/2.9) — non serve più.
 
 ---
@@ -250,12 +256,19 @@ Sequenza operativa per dipendenze reali. Ogni passo indica se richiede ancora un
 - Creare `apiCredentials` (2.6), stesso gruppo. *Sviluppo, schema già deciso.*
 - Componente custom con bottone "Sincronizza ora" nella view del Global — placeholder, senza logica di sync ancora agganciata. *Piccolo sviluppo, non decisione.*
 
-### Passo 3 — Sync HubSpot (dipende da Passi 0, 1 e 2 — bloccato solo dal token, mapping già confermato)
+### Passo 3 — Sync HubSpot (dipende da Passi 0, 1 e 2 — bloccato solo dal token, mapping già confermato) ✅
 - Salvare `HUBSPOT_ACCESS_TOKEN` come secret/variabile d'ambiente (2.7). *Solo esecuzione, dopo Passo 0.*
 - Implementare `runHubspotSync()` in `lib/hubspot/sync.ts`: chiamata CRM Search API con i nomi interni confermati (2.8), applicazione `resolveContactPrecedence` con mapping proprietà→campi, scrittura `contatti`/`activityLog`, calcolo riepilogo (2.9). *Sviluppo, logica e mapping già decisi — per `hubspotOwner`, partire con l'ID grezzo (§3) e raffinare in seguito se serve il nome risolto.*
 - Agganciare il bottone Admin alla funzione via Server Action. *Solo esecuzione.*
 - Implementare il lock (`syncInProgress`/`syncStartedAt`) e, se si decide di attivare `syncAutomatico` da subito, il timer in-process. *Sviluppo, logica già decisa.*
 - Gestione errori/timeout e comportamento su sync parziale (Caso F solo a fine corretto). *Sviluppo, logica già decisa.*
+- **Post-implementazione (2026-08-05, test dev con ~2882 contatti reali)** — fix e affinamenti documentati in §2.9 e `docs/operativo/hubspot-sync.md`:
+  - Paginazione Search API: cursore in `paging.next.after` (prima pagina sola → fix).
+  - Config sync: **Salva** obbligatorio prima di «Sincronizza ora» (il codice legge il Global salvato, non il form).
+  - UI avanzamento: campi `syncProgress*` + poll Route Handler + barra percentuale/indeterminata.
+  - Campi verifica Admin: `partyDude`, `partyTtt` su `contatti`.
+  - Caso F: batch read per allineare tutti i campi sync prima del soft delete (contatti `attivo=true` usciti dal segmento).
+  - Test dev: import ~2882 contatti, idempotenza, Caso F SI→NO verificato; soft delete storici non riallineati — voce aperta §3.
 
 ### Passo 4 — Upload CSV (dipende dal Passo 1, indipendente dal Passo 3)
 - UI di caricamento file in Area Admin + rilevamento automatico colonne per alias + UI di mapping manuale (2.10). *Sviluppo, logica già decisa.*

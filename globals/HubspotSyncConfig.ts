@@ -72,6 +72,58 @@ export const HubspotSyncConfig: GlobalConfig = {
       },
     },
     {
+      name: 'syncProgressPages',
+      type: 'number',
+      label: 'Sync — pagine elaborate',
+      admin: {
+        readOnly: true,
+        description: 'Avanzamento sync — gestito dal codice, non modificare manualmente.',
+        condition: (data) => Boolean(data?.syncInProgress),
+      },
+      access: {
+        update: () => false,
+      },
+    },
+    {
+      name: 'syncProgressProcessed',
+      type: 'number',
+      label: 'Sync — contatti elaborati',
+      admin: {
+        readOnly: true,
+        description: 'Contatti già processati nel sync in corso.',
+        condition: (data) => Boolean(data?.syncInProgress),
+      },
+      access: {
+        update: () => false,
+      },
+    },
+    {
+      name: 'syncProgressTotal',
+      type: 'number',
+      label: 'Sync — totale segmento',
+      admin: {
+        readOnly: true,
+        description: 'Totale contatti nel segmento HubSpot (dalla prima risposta API).',
+        condition: (data) => Boolean(data?.syncInProgress),
+      },
+      access: {
+        update: () => false,
+      },
+    },
+    {
+      name: 'syncProgressPhase',
+      type: 'text',
+      label: 'Sync — fase',
+      admin: {
+        readOnly: true,
+        description: 'importazione | riconciliazione',
+        condition: (data) => Boolean(data?.syncInProgress),
+      },
+      access: {
+        update: () => false,
+      },
+    },
+    {
       name: 'syncNowButton',
       type: 'ui',
       admin: {
@@ -103,13 +155,20 @@ export const HubspotSyncConfig: GlobalConfig = {
       },
     ],
     beforeChange: [
-      ({ data, originalDoc }) => {
+      ({ data, originalDoc, context }) => {
         if (!data) return data
+
+        // Il codice di sync scrive i campi lock via Local API con context dedicato.
+        if (context?.hubspotSyncLockUpdate) return data
 
         return {
           ...data,
           syncInProgress: originalDoc?.syncInProgress ?? false,
           syncStartedAt: originalDoc?.syncStartedAt ?? null,
+          syncProgressPages: originalDoc?.syncProgressPages ?? null,
+          syncProgressProcessed: originalDoc?.syncProgressProcessed ?? null,
+          syncProgressTotal: originalDoc?.syncProgressTotal ?? null,
+          syncProgressPhase: originalDoc?.syncProgressPhase ?? null,
         }
       },
     ],
