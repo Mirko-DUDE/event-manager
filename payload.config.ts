@@ -26,7 +26,13 @@ export default buildConfig({
           path: '/login/local',
           exact: true,
         },
+        csvUpload: {
+          Component: '@/components/admin/CsvUploadView',
+          path: '/upload-csv',
+          exact: true,
+        },
       },
+      afterNavLinks: ['@/components/admin/CsvUploadNavLink'],
     },
   },
   collections: [Users, ActivityLog, Contatti, ConflittiImport],

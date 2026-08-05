@@ -18,7 +18,7 @@
 | Fase 1 | Setup progetto: Next.js, PayloadCMS, Tailwind, MongoDB locale, dipendenze base | ✅ fatto (1.1–1.7) | `fase-1-setup.md` |
 | Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | ✅ fatto (2.1–2.10; spike su produzione Cloud Run → Fase 3) | `fase-2-login.md` |
 | Fase 3 | Deploy: Cloud Run, MongoDB Atlas, OAuth produzione, bootstrap | ✅ fatto (3.1–3.5) | `fase-3-deploy.md` |
-| Fase 4 | Import e sync contatti: collection/Global, sync HubSpot, upload CSV, API Wildcard, verifica invito | 🔶 in corso (Passo 0–3 ✅) | `fase-4-import-sync.md` |
+| Fase 4 | Import e sync contatti: collection/Global, sync HubSpot, upload CSV, API Wildcard, verifica invito | 🔶 in corso (Passo 0–4 ✅) | `fase-4-import-sync.md` |
 
 ## Fase 1 — Setup, panoramica sottofasi
 
@@ -65,13 +65,13 @@ Dettaglio completo in `fase-4-import-sync.md` (decisioni definite in sessione de
 1. Schema dati: `contatti` (creata, `email` non required), `conflittiImport` (creata, con `datiIncoming`), `activityLog` (estesa con `relatedContact`, `detail`, `user` opzionale, `previousValue`/`newValue`, nuovi eventType `wildcardInsert`/`ticketGenerated`/`ticketSent`), stub `resolveContactPrecedence` — ✅
 2. Global `hubspotSyncConfig` (creato, con `syncAutomatico`/lock) e `apiCredentials` (creato), entrambi `admin.group: 'Configurazione'` (stesso gruppo del Global `Settings` esistente) — ✅
 3. Sync HubSpot: `runHubspotSync()`, mapping, lock, Caso F, UI avanzamento — ✅ *(2026-08-05: implementazione + fix paginazione, progress poll, campi partyDude/partyTtt, Caso F con batch read; test dev ~2882 contatti; vedi `fase-4-import-sync.md` Passo 3 e §2.9)*
-4. Upload CSV in Area Admin: mapping colonne, Caso E, righe non valide, riepilogo — 🔲
+4. Upload CSV in Area Admin: mapping colonne, Caso E, righe non valide, riepilogo — ✅ *(2026-08-05: view `/admin/upload-csv`, `runCsvUpload()`, parser nativo, Server Action; test dev Casi A/C/D/E + email malformata; vedi `fase-4-import-sync.md` Passo 4 e `docs/operativo/csv-upload.md`)*
 5. API inserimento Wildcard (Server Action, tre esiti) — 🔲 *(esclude cosa succede dopo l'inserimento — debito verso ticket/Wildcard, vedi `fase-4-import-sync.md` §3)*
 6. Endpoint di verifica invito per landing page esterna, con rate limiting per IP (collection `inviteCheckRateLimit`, 20 richieste/10 min, `429`) — 🔲 *(schema e parametri già decisi, resta solo lo sviluppo)*
 7. Verifica di chiusura fase — 🔲
 
 ## Prossimi passi
 
-- **Prossimo passo**: Fase 4, Passo 4 — upload CSV in Area Admin (`fase-4-import-sync.md` § 4 Passo 4).
+- **Prossimo passo**: Fase 4, Passo 5 — API inserimento Wildcard (`fase-4-import-sync.md` § 4 Passo 5).
 - Punti aperti/debiti volutamente rimandati, da tenere presente durante l'esecuzione (non bloccanti): `ticketConfig` come Global separato o campo, ricerca duplicati nome+cognome per CSV senza email, cosa succede dopo l'inserimento Wildcard (debito verso la sessione ticket), cleanup dei soft-delete, **ottimizzazione sync HubSpot (update/log selettivo su contatti invariati)**, propagazione manuale della chiave `apiCredentials` verso Firebase — vedi `fase-4-import-sync.md` § 3 per l'elenco completo.
 - Aggiornare questo indice e il file di fase corrispondente a ogni sottofase completata.

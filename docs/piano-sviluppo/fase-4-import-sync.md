@@ -270,11 +270,13 @@ Sequenza operativa per dipendenze reali. Ogni passo indica se richiede ancora un
   - Caso F: batch read per allineare tutti i campi sync prima del soft delete (contatti `attivo=true` usciti dal segmento).
   - Test dev: import ~2882 contatti, idempotenza, Caso F SI→NO verificato; soft delete storici non riallineati — voce aperta §3.
 
-### Passo 4 — Upload CSV (dipende dal Passo 1, indipendente dal Passo 3)
+### Passo 4 — Upload CSV (dipende dal Passo 1, indipendente dal Passo 3) ✅
 - UI di caricamento file in Area Admin + rilevamento automatico colonne per alias + UI di mapping manuale (2.10). *Sviluppo, logica già decisa.*
 - Validazione Caso E (duplicati nel file) con rifiuto in blocco e log dettagliato. *Sviluppo, logica già decisa.*
 - Parsing riga per riga con `resolveContactPrecedence`, gestione righe non valide, normalizzazione `category` fuori enum. *Sviluppo, logica già decisa.*
 - Riepilogo di fine upload. *Sviluppo, logica già decisa.*
+- **Post-implementazione (2026-08-05)**: view Admin `/admin/upload-csv` (`CsvUploadView` + `CsvUploadPanel`), link sidebar `CsvUploadNavLink`; core `runCsvUpload()` in `lib/contacts/csvUpload.ts`, parser/mapping in `lib/contacts/csvParser.ts`, Server Action `executeCsvUpload` in `lib/contacts/csvUploadActions.ts`. Parser CSV nativo (virgola, campi quotati). Note operative in `docs/operativo/csv-upload.md`.
+- **Test dev (2026-08-05, umano)**: Caso A — 2 inserimenti (`vittoriaventra@gmail.com`, Nicolò Gramegna senza email); Caso C — scarto email già HubSpot (`trvroberto@gmail.com`, `zecca.el@gmail.com`, `david@therealco.com`); Caso D — conflitto su email già Upload con dati divergenti (`vittoriaventra@gmail.com`: Maria Vittoria Ventra vs Elisabetta Zecca in CSV successivo) → voce `conflittiImport` con `datiIncoming`, record esistente invariato; Caso E — file rifiutato in blocco (stessa email righe 2–3); email malformata (`zeynepfilm@gmail`) scartata singolarmente. Ogni esito tracciato su `activityLog` (`eventType: csvUpload`). Nota operativa: Caso D richiede email con `source=Upload` già persistita — righe scartate in Caso C non creano record Upload e non possono generare Caso D in un upload successivo.
 
 ### Passo 5 — API Wildcard (dipende dal Passo 1, indipendente da Passi 3/4)
 - Server Action di inserimento con la logica a tre esiti (2.11). *Sviluppo, logica già decisa.*
