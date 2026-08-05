@@ -8,6 +8,8 @@ import { ActivityLog } from './collections/ActivityLog'
 import { ConflittiImport } from './collections/ConflittiImport'
 import { Contatti } from './collections/Contatti'
 import { Users } from './collections/Users'
+import { ApiCredentials } from './globals/ApiCredentials'
+import { HubspotSyncConfig } from './globals/HubspotSyncConfig'
 import { Settings } from './globals/Settings'
 import { googleAdminOAuth } from './plugins/googleAdminOAuth'
 import { googleAppOAuth } from './plugins/googleAppOAuth'
@@ -28,7 +30,7 @@ export default buildConfig({
     },
   },
   collections: [Users, ActivityLog, Contatti, ConflittiImport],
-  globals: [Settings],
+  globals: [Settings, HubspotSyncConfig, ApiCredentials],
   email: resendAdapter({
     apiKey: process.env.RESEND_API_KEY || '',
     defaultFromAddress: process.env.RESEND_FROM_ADDRESS || 'noreply@example.com',

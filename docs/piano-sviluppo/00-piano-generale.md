@@ -18,7 +18,7 @@
 | Fase 1 | Setup progetto: Next.js, PayloadCMS, Tailwind, MongoDB locale, dipendenze base | ✅ fatto (1.1–1.7) | `fase-1-setup.md` |
 | Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | ✅ fatto (2.1–2.10; spike su produzione Cloud Run → Fase 3) | `fase-2-login.md` |
 | Fase 3 | Deploy: Cloud Run, MongoDB Atlas, OAuth produzione, bootstrap | ✅ fatto (3.1–3.5) | `fase-3-deploy.md` |
-| Fase 4 | Import e sync contatti: collection/Global, sync HubSpot, upload CSV, API Wildcard, verifica invito | 🔶 in corso (Passo 0–1 ✅) | `fase-4-import-sync.md` |
+| Fase 4 | Import e sync contatti: collection/Global, sync HubSpot, upload CSV, API Wildcard, verifica invito | 🔶 in corso (Passo 0–2 ✅) | `fase-4-import-sync.md` |
 
 ## Fase 1 — Setup, panoramica sottofasi
 
@@ -63,7 +63,7 @@ Dettaglio completo in `fase-4-import-sync.md` (decisioni definite in sessione de
 
 0. Prerequisiti esterni: setup Service Key HubSpot (scope `crm.objects.contacts.read`, token) — ✅ (2026-08-05: locale + Secret Manager produzione); nomi interni proprietà e specifiche nel repo già verificati
 1. Schema dati: `contatti` (creata, `email` non required), `conflittiImport` (creata, con `datiIncoming`), `activityLog` (estesa con `relatedContact`, `detail`, `user` opzionale, `previousValue`/`newValue`, nuovi eventType `wildcardInsert`/`ticketGenerated`/`ticketSent`), stub `resolveContactPrecedence` — ✅
-2. Global `hubspotSyncConfig` (creato, con `syncAutomatico`/lock) e `apiCredentials` (creato), entrambi `admin.group: 'Configurazione'` (stesso gruppo del Global `Settings` esistente) — 🔲
+2. Global `hubspotSyncConfig` (creato, con `syncAutomatico`/lock) e `apiCredentials` (creato), entrambi `admin.group: 'Configurazione'` (stesso gruppo del Global `Settings` esistente) — ✅
 3. Sync HubSpot: `runHubspotSync()`, mapping proprietà già confermato, lock, errori/timeout, riepilogo — 🔲 *(dipende dal Passo 0 solo per il token)*
 4. Upload CSV in Area Admin: mapping colonne, Caso E, righe non valide, riepilogo — 🔲
 5. API inserimento Wildcard (Server Action, tre esiti) — 🔲 *(esclude cosa succede dopo l'inserimento — debito verso ticket/Wildcard, vedi `fase-4-import-sync.md` §3)*
@@ -72,6 +72,6 @@ Dettaglio completo in `fase-4-import-sync.md` (decisioni definite in sessione de
 
 ## Prossimi passi
 
-- **Prossimo passo**: Fase 4, Passo 2 — Global di configurazione (`hubspotSyncConfig`, `apiCredentials`, `fase-4-import-sync.md` § 4 Passo 2).
+- **Prossimo passo**: Fase 4, Passo 3 — sync HubSpot (`runHubspotSync()`, lock, `fase-4-import-sync.md` § 4 Passo 3).
 - Punti aperti/debiti volutamente rimandati, da tenere presente durante l'esecuzione (non bloccanti): `ticketConfig` come Global separato o campo, ricerca duplicati nome+cognome per CSV senza email, cosa succede dopo l'inserimento Wildcard (debito verso la sessione ticket), cleanup dei soft-delete, propagazione manuale della chiave `apiCredentials` verso Firebase — vedi `fase-4-import-sync.md` § 3 per l'elenco completo.
 - Aggiornare questo indice e il file di fase corrispondente a ogni sottofase completata.

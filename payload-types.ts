@@ -93,9 +93,13 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     settings: Setting;
+    hubspotSyncConfig: HubspotSyncConfig;
+    apiCredentials: ApiCredential;
   };
   globalsSelect: {
     settings: SettingsSelect<false> | SettingsSelect<true>;
+    hubspotSyncConfig: HubspotSyncConfigSelect<false> | HubspotSyncConfigSelect<true>;
+    apiCredentials: ApiCredentialsSelect<false> | ApiCredentialsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -525,6 +529,64 @@ export interface Setting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hubspotSyncConfig".
+ */
+export interface HubspotSyncConfig {
+  id: string;
+  /**
+   * Nome interno della proprietà HubSpot (es. party_dude, party_ttt). Testo libero, non un elenco fisso.
+   */
+  proprietaFiltro?: string | null;
+  /**
+   * Valore che qualifica il contatto per il sync (es. SI, YES).
+   */
+  valoreInclusione?: string | null;
+  syncAutomatico?: boolean | null;
+  /**
+   * Obbligatorio se il sync automatico è attivo.
+   */
+  intervalloMinuti?: number | null;
+  /**
+   * Lock applicativo — gestito dal codice di sync (Passo 3).
+   */
+  syncInProgress?: boolean | null;
+  /**
+   * Timestamp di avvio sync — per riconoscere un lock morto (Passo 3).
+   */
+  syncStartedAt?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "apiCredentials".
+ */
+export interface ApiCredential {
+  id: string;
+  /**
+   * Chiavi Bearer per consumer esterni (es. landing page). Mostra, copia e ruota come le Service Key HubSpot.
+   */
+  chiavi?:
+    | {
+        /**
+         * Nome descrittivo del consumer (es. Landing page Firebase).
+         */
+        etichetta: string;
+        /**
+         * Primi caratteri visibili (non sensibili — il resto è cifrato).
+         */
+        keyPrefix?: string | null;
+        chiaveCifrata?: string | null;
+        attiva?: boolean | null;
+        creataIl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "settings_select".
  */
 export interface SettingsSelect<T extends boolean = true> {
@@ -534,6 +596,40 @@ export interface SettingsSelect<T extends boolean = true> {
         domain?: T;
         allowAdmin?: T;
         allowApp?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hubspotSyncConfig_select".
+ */
+export interface HubspotSyncConfigSelect<T extends boolean = true> {
+  proprietaFiltro?: T;
+  valoreInclusione?: T;
+  syncAutomatico?: T;
+  intervalloMinuti?: T;
+  syncInProgress?: T;
+  syncStartedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "apiCredentials_select".
+ */
+export interface ApiCredentialsSelect<T extends boolean = true> {
+  chiavi?:
+    | T
+    | {
+        etichetta?: T;
+        keyPrefix?: T;
+        chiaveCifrata?: T;
+        attiva?: T;
+        creataIl?: T;
         id?: T;
       };
   updatedAt?: T;

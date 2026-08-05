@@ -110,15 +110,16 @@ Global: hubspotSyncConfig (da creare)
 ```
 Global: apiCredentials (da creare)
 - chiavi (array)
-  - etichetta    text
-  - chiaveHash   text — hash, mai il valore in chiaro
-  - attiva       checkbox, default true
-  - creataIl     date, automatico
+  - etichetta       text
+  - keyPrefix       text — primi caratteri visibili nel display mascherato
+  - chiaveCifrata   text — chiave completa cifrata AES-256-GCM (chiave derivata da PAYLOAD_SECRET)
+  - attiva          checkbox, default true
+  - creataIl        date, automatico
 ```
 
 - **Gruppo menu Admin**: `admin.group: 'Configurazione'` (vedi 2.5 — allineato al Global `Settings` esistente).
-- **Uso**: validazione del Bearer token sull'endpoint di verifica invito (2.12). La chiave in chiaro si mostra una sola volta alla creazione (come i token GitHub); solo l'hash viene salvato, verificato per confronto come una password.
-- **Rotazione**: creare nuova voce, disattivare la vecchia — nessun redeploy, nessun secret da toccare in GCP.
+- **Uso**: validazione del Bearer token sull'endpoint di verifica invito (2.12). UX stile HubSpot Service Key: chiave sempre visibile mascherata (`keyPrefix` + `•••`), pulsanti **Mostra**, **Copia** e **Ruota** in Admin (componente custom per riga). La chiave completa è recuperabile decifrando `chiaveCifrata` (solo super-admin). Rotazione in-place sulla stessa voce — aggiornare manualmente il consumer esterno.
+- **Rotazione**: bottone **Ruota** sulla voce (genera nuova chiave, sovrascrive `chiaveCifrata`/`keyPrefix`) oppure creare nuova voce e disattivare la vecchia — nessun redeploy, nessun secret da toccare in GCP.
 - **Nota operativa non bloccante**: la chiave non si propaga automaticamente al consumer esterno (landing page su Firebase, variabile `INVITE_API_KEY`) — aggiornamento manuale ad ogni rotazione.
 - **Chiude un punto lasciato aperto in `specifica-ticket-qrcode.md` §3**: l'endpoint di check-in non è pubblico/kiosk (confermato: nessun device senza login previsto) — vive dentro `/app`, autenticato via sessione, nessuna API key condivisa necessaria per quel caso.
 
@@ -244,7 +245,7 @@ Sequenza operativa per dipendenze reali. Ogni passo indica se richiede ancora un
 - Estendere `activityLog`: aggiungere `relatedContact`, `detail` (previsti da tempo, non ancora implementati), rendere `user` opzionale, aggiungere `previousValue`, `newValue`, nuovi valori enum `wildcardInsert`, `ticketGenerated`, `ticketSent` (2.3) — questi ultimi due riguardano la generazione ticket (fase successiva, `specifica-ticket-qrcode.md` §2.4), ma si aggiungono ora insieme al resto per evitare una seconda migrazione dell'enum quando si arriverà a quella fase; nessuna logica applicativa li popola ancora. *Sviluppo, schema già deciso.*
 - Scrivere lo stub di `resolveContactPrecedence` in `lib/contacts/precedence.ts` (2.4), senza ancora agganciarlo a nessun chiamante. *Solo esecuzione.*
 
-### Passo 2 — Global di configurazione (dipende dal Passo 1 solo per coerenza di schema, non blocca)
+### Passo 2 — Global di configurazione (dipende dal Passo 1 solo per coerenza di schema, non blocca) ✅
 - Creare `hubspotSyncConfig` con i campi estesi (2.5), `admin.group: 'Configurazione'`. *Sviluppo, schema già deciso.*
 - Creare `apiCredentials` (2.6), stesso gruppo. *Sviluppo, schema già deciso.*
 - Componente custom con bottone "Sincronizza ora" nella view del Global — placeholder, senza logica di sync ancora agganciata. *Piccolo sviluppo, non decisione.*
