@@ -77,12 +77,18 @@ Sequenza operativa per dipendenze reali.
   - Esito a schermo + toast (successo / errore sync / non autorizzato — messaggi dalle Server Action).
   - Save nativo del Global: lasciato com'è (opzionale, innocuo come da Passo 1).
 
-### Passo 4 — Verifica di chiusura (test dev) 🔲
+### Passo 4 — Verifica di chiusura (test dev) ✅
 - Test manuale in ambiente dev con dati di test: Reset solo contatti su un set noto → verificare cancellazione reale di `contatti`/`conflittiImport`, `activityLog` invariato salvo il nuovo record con conteggi corretti.
 - Reset generale su un set noto → verificare cancellazione reale di tutte e tre le collection.
 - Guardrail: avviare (o simulare) `syncInProgress = true` e verificare che entrambe le azioni siano bloccate con messaggio chiaro.
 - Verificare che il bottone di conferma resti disabilitato su frase parziale, minuscola, o con spazi extra.
 - Verificare che un utente con `adminRole = admin` (non super-admin) **veda** la view e il riepilogo (accesso concesso), ma **non possa eseguire** le azioni: bottoni disabilitati in UI **e** rifiuto esplicito se si forza la chiamata alla Server Action bypassando la UI (es. da un test diretto sulla funzione, non solo dal click del bottone).
+- **Esito (2026-08-06, umano + agente)**:
+  - **Conferma frase**: bottone disabilitato su parziale / minuscola / spazi extra; abilitato solo con match esatto `RESET CONTATTI` / `RESET GENERALE`.
+  - **Admin (non super-admin)**: view + riepilogo OK; UI disabilitata + messaggio «Azione riservata al super-admin»; force Server Action (patch temporanea `canExecute=true` poi ripristinata) → rifiuto «Azione riservata al super-admin.» senza delete.
+  - **Guardrail lock**: simulato `syncInProgress` via Local API (campi read-only in Admin); entrambe le azioni bloccate con messaggio sync in corso; lock azzerato dopo il test.
+  - **Reset solo contatti**: 2888 contatti + 1 conflitto eliminati; record `activityLog` `contactsReset` (user super-admin, area Admin, relatedContact vuoto, detail con conteggi).
+  - **Reset generale**: 2863 contatti + 0 conflitti + 20305 voci log eliminate (contatti ripopolati tra D ed E, plausibile sync automatico/manual post-D — atteso in dev). Collection vuote dopo l'esecuzione.
 
 ### Passo 5 — Documento operativo GDPR (non codice) 🔲
 - Produrre `docs/operativo/reset-gdpr.md` con la procedura manuale descritta in `specifica-reset-contatti-log.md` § "Perimetro GDPR e decisioni collegate", incluse queste note operative (già decise, solo da trascrivere):

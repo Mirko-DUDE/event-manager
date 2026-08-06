@@ -27,6 +27,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Tests
 
+- **Fase 5 § Passo 4 — Test e2e reset in ambiente dev (umano, 2026-08-06)**: checklist chiusa. Conferma frase case-sensitive OK (parziale/minuscola/spazi → bottone disabilitato). Admin non-super-admin: view+riepilogo OK, UI bloccata; force Server Action (bypass UI temporaneo) → rifiuto «Azione riservata al super-admin.» senza delete. Guardrail `syncInProgress` simulato via Local API → entrambe le azioni bloccate con messaggio chiaro. Reset solo contatti: 2888 contatti + 1 conflitto eliminati, traccia `activityLog` `contactsReset` con conteggi. Reset generale: 2863 contatti + 0 conflitti + 20305 log eliminati (contatti ripopolati tra i due reset, plausibile sync automatico in dev). Nessuna regressione bloccante.
 - **Fase 5 § Passo 3 — Validazione codice (2026-08-06)**: `pnpm exec tsc --noEmit`, `pnpm lint` (solo warning preesistenti), `pnpm build` OK. Import map invariata (stesso path componente). Nessun test e2e runtime in questo passo (Passo 4).
 - **Fase 5 § Passo 2 — Validazione codice (2026-08-06)**: `pnpm exec tsc --noEmit`, `pnpm lint` (solo warning preesistenti), `pnpm build` OK. Nessun test runtime delle delete in questo passo (UI e checklist e2e = Passo 3–4).
 - **Fase 5 § Passo 1 — Validazione codice (2026-08-06)**: `pnpm generate:types`, `pnpm generate:importmap`, `pnpm exec tsc --noEmit`, `pnpm lint` (solo warning preesistenti), `pnpm build` OK.
