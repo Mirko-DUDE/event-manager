@@ -17,10 +17,13 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ---
 
-## [Unreleased]
+## [0.5.0] — 2026-08-06
+
+Chiusura **Fase 5** (Reset contatti e log / procedura GDPR). Debito tecnico dichiarato (pulizia log associata ai contatti / per intervallo date) resta aperto — vedi `specifica-reset-contatti-log.md`.
 
 ### Added
 
+- **Fase 5 § Passo 5 — Documento operativo GDPR**: `docs/operativo/reset-gdpr.md` — procedura manuale fine evento (sempre Reset generale) e pre-go-live (Reset solo contatti); dove eseguire in Admin (`/admin/globals/resetContattiELog`, frasi `RESET GENERALE` / `RESET CONTATTI`); annotazione conteggi fuori sistema prima della conferma; perimetro solo-tool (non HubSpot); nota cancellazione log auth; limite backup Atlas; valutazione disattivazione temporanea `syncAutomatico` prima del reset solo contatti. Nessuna decisione nuova, nessun codice.
 - **Fase 5 § Passo 3 — UI Zona pericolosa**: sostituito lo stub con `ResetContattiELogPanel` reale sul Global `resetContattiELog` (campo ui `zonaPericolosa`). Due blocchi Reset generale / Reset solo contatti: riepilogo via `computeResetSummary`, conferma con frase esatta case-sensitive (`RESET GENERALE` / `RESET CONTATTI`, nessuna normalizzazione), esecuzione via Server Action Passo 2. Admin non-super-admin: view e riepilogo visibili; bottoni conferma e campo testo disabilitati con messaggio «Azione riservata al super-admin». Esito a schermo + toast (successo / sync in corso / non autorizzato). Save nativo Payload lasciato invariato.
 - **Fase 5 § Passo 2 — Server Action reset**: core in `lib/contacts/reset.ts`, actions in `lib/contacts/resetActions.ts`. `computeResetSummary(scope)` per admin+super-admin (conteggi runtime `contatti` tutti, `conflittiImport`, e per scope generale anche tutte le voci `activityLog`). `executeGeneralReset` / `executeContactsReset` con rifiuto esplicito se `adminRole !== 'super-admin'`; guardrail sync via `isLockActive` (stale 10 min) esportata da `lib/hubspot/sync.ts` insieme a `LOCK_STALE_MS`; hard delete Local API in sequenza (contatti → conflittiImport → activityLog per il generale; contatti → conflittiImport + record `contactsReset` per il solo contatti). Frase di conferma non gestita lato action (Passo 3).
 - **Fase 5 § Passo 1 — Schema Global reset + `eventType`**: Global `resetContattiELog` (`globals/ResetContattiELog.ts`, label «Reset contatti e log», `admin.group: 'Configurazione'`), un solo campo ui `zonaPericolosa` con stub `ResetContattiELogPanel` (placeholder Passo 3). Access: `read` admin+super-admin (`hasAdminPanelAccess`), `update` solo super-admin. Enum `activityLog.eventType`: aggiunto `contactsReset`. Registrato in `payload.config.ts`; types/import map aggiornati. Save nativo su Global solo-ui: nessun campo business persistito (solo metadati `id`/`createdAt`/`updatedAt`); Save super-admin al più aggiorna `updatedAt`, innocuo — nessuna gestione speciale in Passo 1.

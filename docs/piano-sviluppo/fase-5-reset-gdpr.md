@@ -90,7 +90,7 @@ Sequenza operativa per dipendenze reali.
   - **Reset solo contatti**: 2888 contatti + 1 conflitto eliminati; record `activityLog` `contactsReset` (user super-admin, area Admin, relatedContact vuoto, detail con conteggi).
   - **Reset generale**: 2863 contatti + 0 conflitti + 20305 voci log eliminate (contatti ripopolati tra D ed E, plausibile sync automatico/manual post-D — atteso in dev). Collection vuote dopo l'esecuzione.
 
-### Passo 5 — Documento operativo GDPR (non codice) 🔲
+### Passo 5 — Documento operativo GDPR (non codice) ✅
 - Produrre `docs/operativo/reset-gdpr.md` con la procedura manuale descritta in `specifica-reset-contatti-log.md` § "Perimetro GDPR e decisioni collegate", incluse queste note operative (già decise, solo da trascrivere):
   - Quale azione usare a fine evento (**Reset generale**, non "Reset solo contatti") e perché.
   - Dove annotare i conteggi fuori sistema prima di confermare.
@@ -99,6 +99,7 @@ Sequenza operativa per dipendenze reali.
   - **Nota sui log di autenticazione**: il Reset generale cancella anche `login`/`logout`/`accessDenied`, non solo i log legati ai contatti — da tenere presente prima di eseguirlo, non solo dopo.
   - **Nota sul sync automatico**: prima di un "Reset solo contatti" pre-go-live, valutare se disattivare temporaneamente `syncAutomatico` (Global `hubspotSyncConfig`) — altrimenti il prossimo ciclo di sync ripopola i contatti appena cancellati.
 - *Compito di scrittura, non sviluppo — nessuna decisione nuova, solo trascrizione operativa di quanto già deciso.*
+- **Esito (2026-08-06)**: prodotto `docs/operativo/reset-gdpr.md` — dove eseguire (Global `/admin/globals/resetContattiELog`, frasi `RESET GENERALE` / `RESET CONTATTI`), quale azione per fine evento vs pre-go-live, traccia fuori sistema, perimetro solo-tool, log auth, backup Atlas, nota `syncAutomatico`. Nessuna decisione nuova, nessun codice. **Fase 5 chiusa.**
 
 ### Esplicitamente rimandato, non parte di questo piano
 - Cancellazione dei log associati a un contatto cancellato singolarmente, o cancellazione log per intervallo di date (debito tecnico dichiarato in specifica, sviluppo futuro).
