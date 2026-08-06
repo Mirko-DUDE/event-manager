@@ -64,6 +64,7 @@ export const ActivityLog: CollectionConfig = {
         { label: 'Inserimento Wildcard', value: 'wildcardInsert' },
         { label: 'Ticket generato', value: 'ticketGenerated' },
         { label: 'Ticket inviato', value: 'ticketSent' },
+        { label: 'Reset contatti', value: 'contactsReset' },
       ],
       admin: { readOnly: true },
     },

@@ -19,8 +19,13 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ## [Unreleased]
 
+### Added
+
+- **Fase 5 § Passo 1 — Schema Global reset + `eventType`**: Global `resetContattiELog` (`globals/ResetContattiELog.ts`, label «Reset contatti e log», `admin.group: 'Configurazione'`), un solo campo ui `zonaPericolosa` con stub `ResetContattiELogPanel` (placeholder Passo 3). Access: `read` admin+super-admin (`hasAdminPanelAccess`), `update` solo super-admin. Enum `activityLog.eventType`: aggiunto `contactsReset`. Registrato in `payload.config.ts`; types/import map aggiornati. Save nativo su Global solo-ui: nessun campo business persistito (solo metadati `id`/`createdAt`/`updatedAt`); Save super-admin al più aggiorna `updatedAt`, innocuo — nessuna gestione speciale in Passo 1.
+
 ### Tests
 
+- **Fase 5 § Passo 1 — Validazione codice (2026-08-06)**: `pnpm generate:types`, `pnpm generate:importmap`, `pnpm exec tsc --noEmit`, `pnpm lint` (solo warning preesistenti), `pnpm build` OK.
 - **Fase 5 § Passo 0 — Verifica prerequisiti (2026-08-06)**: OK, nessuna implementazione. `activityLog` ha già `relatedContact`, `detail`, `previousValue`, `newValue` (`collections/ActivityLog.ts` + `payload-types.ts`). Lock `syncInProgress`/`syncStartedAt` su Global `hubspotSyncConfig` leggibile da codice esterno al sync via Local API `findGlobal` (già usato in `syncActions.ts` e route progress). `isLockActive` esiste in `lib/hubspot/sync.ts` con soglia stale 10 min; oggi non esportata — riuso previsto in Passo 2 (export o estrazione), senza riscrivere la logica.
 
 ---

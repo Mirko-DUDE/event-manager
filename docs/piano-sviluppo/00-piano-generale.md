@@ -19,7 +19,7 @@
 | Fase 2 | Login: Google OAuth, login locale, ruoli/permessi, sessione, activity log | ✅ fatto (2.1–2.10; spike su produzione Cloud Run → Fase 3) | `fase-2-login.md` |
 | Fase 3 | Deploy: Cloud Run, MongoDB Atlas, OAuth produzione, bootstrap | ✅ fatto (3.1–3.5) | `fase-3-deploy.md` |
 | Fase 4 | Import e sync contatti: collection/Global, sync HubSpot, upload CSV, API Wildcard, verifica invito | ✅ fatto (Passo 0–7) | `fase-4-import-sync.md` |
-| Fase 5 | Reset contatti e log: Global "Zona pericolosa", Reset generale/solo contatti, procedura GDPR | 🔶 in corso (Passo 0 ✅; 1–5 🔲) | `fase-5-reset-gdpr.md` |
+| Fase 5 | Reset contatti e log: Global "Zona pericolosa", Reset generale/solo contatti, procedura GDPR | 🔶 in corso (Passo 0–1 ✅; 2–5 🔲) | `fase-5-reset-gdpr.md` |
 
 ## Fase 1 — Setup, panoramica sottofasi
 
@@ -73,10 +73,10 @@ Dettaglio completo in `fase-4-import-sync.md` (decisioni definite in sessione de
 
 ## Fase 5 — Reset contatti e log, panoramica sottofasi
 
-Dettaglio completo in `fase-5-reset-gdpr.md` (decisioni definite in sessione dedicata, 2026-08-06; riferimento decisionale `specifica-reset-contatti-log.md`, aggiornata nella stessa sessione con la sezione "Perimetro GDPR e decisioni collegate" e con la scelta di implementazione come Global dedicato). **Fase 5 in corso** — Passo 0 ✅; Passo 1–5 🔲.
+Dettaglio completo in `fase-5-reset-gdpr.md` (decisioni definite in sessione dedicata, 2026-08-06; riferimento decisionale `specifica-reset-contatti-log.md`, aggiornata nella stessa sessione con la sezione "Perimetro GDPR e decisioni collegate" e con la scelta di implementazione come Global dedicato). **Fase 5 in corso** — Passo 0–1 ✅; Passo 2–5 🔲.
 
 0. Verifica prerequisiti (campi `activityLog` da Fase 4, lock `syncInProgress` leggibile) — ✅ *(2026-08-06: campi e lock OK; `isLockActive` presente ma ancora non esportata — da esportare/riusare in Passo 2)*
-1. Schema: nuovo Global "Zona pericolosa" (proposto `resetContattiELog`, `admin.group: 'Configurazione'`, campo `type: 'ui'`, access control `read` admin+super-admin / `update` super-admin) + nuovo `eventType` su `activityLog` per il reset contatti — 🔲
+1. Schema: Global `resetContattiELog` (`admin.group: 'Configurazione'`, campo ui stub, `read` admin+super-admin / `update` super-admin) + `eventType: contactsReset` su `activityLog` — ✅ *(2026-08-06: vedi esito in `fase-5-reset-gdpr.md` Passo 1; Save nativo innocuo su Global solo-ui)*
 2. Funzioni core: `computeResetSummary` (accessibile a admin+super-admin), `executeGeneralReset`, `executeContactsReset` (verifica esplicita `adminRole === 'super-admin'`, guardrail `syncInProgress` con soglia stale, hard delete reale) — 🔲
 3. UI: componente "Zona pericolosa" montato sul Global (due blocchi di azione, visibili a admin ma disabilitati per non-super-admin, conferma con frase esatta case-sensitive) — 🔲
 4. Verifica di chiusura (test dev: entrambi i reset, guardrail attivo, frase di conferma parziale/case, `admin` vede ma non può eseguire) — 🔲
@@ -84,7 +84,7 @@ Dettaglio completo in `fase-5-reset-gdpr.md` (decisioni definite in sessione ded
 
 ## Prossimi passi
 
-- **Prossimo passo**: Fase 5 Passo 1 (schema Global + `eventType`), oppure la fase su **ticket/QR e check-in** (`specifica-ticket-qrcode.md`) e/o **Sviluppo App** (UI Area App) — nessuna dipendenza reale tra Fase 5 e queste due, possono procedere in qualunque ordine.
+- **Prossimo passo**: Fase 5 Passo 2 (Server Action di reset), oppure la fase su **ticket/QR e check-in** (`specifica-ticket-qrcode.md`) e/o **Sviluppo App** (UI Area App) — nessuna dipendenza reale tra Fase 5 e queste due, possono procedere in qualunque ordine.
 - **Debiti rimasti aperti da Fase 4** (`fase-4-import-sync.md` § 3, non bloccanti per la chiusura): `ticketConfig`; soft-match CSV senza email; post-insert Wildcard (thank-you / trigger ticket); Caso F soft-delete storici; ottimizzazione sync HubSpot (update/log selettivo); cleanup soft-delete; propagazione manuale `INVITE_API_KEY` su Firebase; `hubspotOwner` ID grezzo vs nome risolto.
 - **Debiti vincolanti per Sviluppo App** (dal test Wildcard Passo 5): form con `dudeCompany` select (SRL, Milano, London, Things, Design, Originals, Fondazione/MFF); campo telefono; `assegnazione` auto da email utente App; all’insert `partyDude=SI` + `partyTtt=YES` server-side — dettaglio in `fase-4-import-sync.md` § 3.
 - **Debito tecnico dichiarato da Fase 5** (non bloccante, sviluppo futuro): pulizia dei log associati ai contatti nel "Reset solo contatti" — vedi `specifica-reset-contatti-log.md` § "Debito tecnico dichiarato".

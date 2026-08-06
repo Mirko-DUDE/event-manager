@@ -97,11 +97,13 @@ export interface Config {
     settings: Setting;
     hubspotSyncConfig: HubspotSyncConfig;
     apiCredentials: ApiCredential;
+    resetContattiELog: ResetContattiELog;
   };
   globalsSelect: {
     settings: SettingsSelect<false> | SettingsSelect<true>;
     hubspotSyncConfig: HubspotSyncConfigSelect<false> | HubspotSyncConfigSelect<true>;
     apiCredentials: ApiCredentialsSelect<false> | ApiCredentialsSelect<true>;
+    resetContattiELog: ResetContattiELogSelect<false> | ResetContattiELogSelect<true>;
   };
   locale: null;
   widgets: {
@@ -152,7 +154,8 @@ export interface ActivityLog {
     | 'checkIn'
     | 'wildcardInsert'
     | 'ticketGenerated'
-    | 'ticketSent';
+    | 'ticketSent'
+    | 'contactsReset';
   relatedContact?: (string | null) | Contatti;
   detail?: string | null;
   /**
@@ -636,6 +639,15 @@ export interface ApiCredential {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "resetContattiELog".
+ */
+export interface ResetContattiELog {
+  id: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "settings_select".
  */
 export interface SettingsSelect<T extends boolean = true> {
@@ -685,6 +697,15 @@ export interface ApiCredentialsSelect<T extends boolean = true> {
         creataIl?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "resetContattiELog_select".
+ */
+export interface ResetContattiELogSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
