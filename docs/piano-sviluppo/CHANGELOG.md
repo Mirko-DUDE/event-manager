@@ -19,6 +19,10 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ## [Unreleased]
 
+### Tests
+
+- **Fase 5 § Passo 0 — Verifica prerequisiti (2026-08-06)**: OK, nessuna implementazione. `activityLog` ha già `relatedContact`, `detail`, `previousValue`, `newValue` (`collections/ActivityLog.ts` + `payload-types.ts`). Lock `syncInProgress`/`syncStartedAt` su Global `hubspotSyncConfig` leggibile da codice esterno al sync via Local API `findGlobal` (già usato in `syncActions.ts` e route progress). `isLockActive` esiste in `lib/hubspot/sync.ts` con soglia stale 10 min; oggi non esportata — riuso previsto in Passo 2 (export o estrazione), senza riscrivere la logica.
+
 ---
 
 ## [0.4.0] — 2026-08-05

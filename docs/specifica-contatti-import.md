@@ -182,7 +182,7 @@ Il punto precedentemente aperto sul campo `ticket` (tipizzazione, generazione, c
 
 - La precedenza tra fonti (HubSpot > CSV > Wildcard) va sempre applicata come regola unica e centralizzata, mai reimplementata separatamente per ciascun processo di import — stesso principio già seguito per la whitelist utenti e per `activityLog` in `specifica-login-payloadcms.md`.
 - Il campo `source`/`createdBy` non va mai aggiornato in seguito a un allineamento automatico di precedenza (caso B): riflette solo la creazione originale del record.
-- Nessuna cancellazione fisica (hard delete) di record in `contatti`: l'unico meccanismo di rimozione previsto è il soft delete (`attivo = false`).
+- Nessuna cancellazione fisica (hard delete) di record in `contatti`: l'unico meccanismo di rimozione previsto è il soft delete (`attivo = false`). **Unica eccezione, dichiarata e isolata**: le due azioni di reset di `specifica-reset-contatti-log.md` (Fase 5) — pulizia pre-go-live e minimizzazione dati GDPR di fine evento — usano hard delete reale, consapevolmente, senza che questo diventi un precedente per altre operazioni sui contatti.
 - `conflittiImport` va popolato solo per i casi D e F-con-interazione; il caso C resta un evento informativo su `activityLog`, non genera una riga di conflitto.
 - La configurazione del filtro di sync HubSpot (`hubspotSyncConfig`) va sempre letta dal Global, mai hardcoded — stesso principio già applicato all'allow-list domini.
 - Qualunque estensione futura di `activityLog` o `conflittiImport` va valutata contro il rischio di over-engineering: aggiungere struttura (enum, campi comparati) solo quando un pattern reale e ricorrente lo giustifica, non in anticipo.
