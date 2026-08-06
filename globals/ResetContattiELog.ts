@@ -3,7 +3,7 @@ import type { GlobalConfig } from 'payload'
 import { hasAdminPanelAccess } from '../collections/users/access'
 
 /**
- * Global "Zona pericolosa" — solo UI per le azioni di reset (Passo 3).
+ * Global "Zona pericolosa" — UI reset (ResetContattiELogPanel).
  * Nessun campo persistibile: i conteggi sono runtime, la traccia va su activityLog.
  * Access: admin+super-admin vedono; update solo super-admin (view, non auth delle Server Action).
  */

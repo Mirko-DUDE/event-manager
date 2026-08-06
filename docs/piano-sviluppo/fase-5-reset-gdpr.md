@@ -64,11 +64,18 @@ Sequenza operativa per dipendenze reali.
   - `computeResetSummary`: auth `hasAdminPanelAccess`; conteggi via Local API `count` senza filtro (include soft-deleted e tutte le voci log).
   - Execute: rifiuto esplicito se `adminRole !== 'super-admin'`; guardrail via `isLockActive` esportata da `lib/hubspot/sync.ts` (con `LOCK_STALE_MS`); hard delete Local API `payload.delete({ where: { id: { exists: true } }, overrideAccess: true })` in sequenza (niente transazione multi-collection); Reset solo contatti scrive `activityLog` `eventType: contactsReset`, `area: 'admin'`, `relatedContact` omesso, `detail` testuale con i conteggi. Frase di conferma non passata alle actions (Passo 3).
 
-### Passo 3 — UI: componente "Zona pericolosa" nel Global 🔲
+### Passo 3 — UI: componente "Zona pericolosa" nel Global ✅
 - Componente custom montato sul campo `type: 'ui'` del Global del Passo 1 (stesso pattern già usato per il bottone "Sincronizza ora" su `hubspotSyncConfig`).
 - Due blocchi (Reset generale / Reset solo contatti), ciascuno con: bottone che mostra il riepilogo (`computeResetSummary`), campo di testo per la frase di conferma, bottone di conferma disabilitato finché il testo non corrisponde esattamente (case-sensitive, nessuna normalizzazione), chiamata alla Server Action corrispondente al click.
 - **Comportamento per `admin` (non super-admin)**: la view è raggiungibile (`read` concesso dal Global) e il riepilogo con i conteggi è visibile — coerente con "admin vede". I bottoni di esecuzione vanno mostrati **disabilitati** con un messaggio (es. "Azione riservata al super-admin"), non nascosti del tutto: nascondere l'intera sezione contraddirebbe il "read" concesso a livello di Global. Il controllo di UI è comunque solo cosmetico — l'autorizzazione reale è la verifica lato Server Action (Passo 2), che va comunque implementata anche se la UI già disabilita il bottone.
 - Messaggio di esito (successo / bloccato da `syncInProgress` / bloccato da autorizzazione) mostrato a schermo dopo l'esecuzione. *Sviluppo, meccanismo già deciso — dettaglio UI (layout esatto dei due blocchi) a scelta dell'agente.*
+- **Esito (2026-08-06)**:
+  - Stub sostituito da UI reale in `components/admin/ResetContattiELogPanel.tsx` (stesso path del campo ui `zonaPericolosa` — import map invariata).
+  - Due sezioni: Reset generale (`RESET GENERALE`) e Reset solo contatti (`RESET CONTATTI`); match esatto case-sensitive senza trim.
+  - Riepilogo via `computeResetSummary`; esecuzione via `executeGeneralReset` / `executeContactsReset` (frase non inviata alle action).
+  - Ruolo da `useAuth()`: non-super-admin vede view/riepilogo; conferma e campo testo disabilitati + messaggio «Azione riservata al super-admin».
+  - Esito a schermo + toast (successo / errore sync / non autorizzato — messaggi dalle Server Action).
+  - Save nativo del Global: lasciato com'è (opzionale, innocuo come da Passo 1).
 
 ### Passo 4 — Verifica di chiusura (test dev) 🔲
 - Test manuale in ambiente dev con dati di test: Reset solo contatti su un set noto → verificare cancellazione reale di `contatti`/`conflittiImport`, `activityLog` invariato salvo il nuovo record con conteggi corretti.
