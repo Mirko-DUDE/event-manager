@@ -9,7 +9,8 @@ import {
 } from '../contacts/precedence'
 import { HubspotApiError, fetchHubspotContactsByIds, iterateHubspotContacts, type HubspotSearchContact } from './client'
 
-const LOCK_STALE_MS = 10 * 60 * 1000
+/** Soglia stale del lock sync (10 min) — riusata anche dal reset GDPR. */
+export const LOCK_STALE_MS = 10 * 60 * 1000
 const LOCK_UPDATE_CONTEXT = { hubspotSyncLockUpdate: true }
 
 export type HubspotSyncSummary = {
@@ -145,7 +146,11 @@ async function findExistingContact(
   return null
 }
 
-function isLockActive(syncInProgress: boolean | null | undefined, syncStartedAt: string | null | undefined): boolean {
+/** Lock attivo solo se syncInProgress e syncStartedAt entro LOCK_STALE_MS. */
+export function isLockActive(
+  syncInProgress: boolean | null | undefined,
+  syncStartedAt: string | null | undefined,
+): boolean {
   if (!syncInProgress) return false
   if (!syncStartedAt) return true
 
