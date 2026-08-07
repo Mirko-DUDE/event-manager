@@ -13,6 +13,7 @@ import { ApiCredentials } from './globals/ApiCredentials'
 import { HubspotSyncConfig } from './globals/HubspotSyncConfig'
 import { ResetContattiELog } from './globals/ResetContattiELog'
 import { Settings } from './globals/Settings'
+import { TicketConfig } from './globals/TicketConfig'
 import { googleAdminOAuth } from './plugins/googleAdminOAuth'
 import { googleAppOAuth } from './plugins/googleAppOAuth'
 
@@ -38,7 +39,7 @@ export default buildConfig({
     },
   },
   collections: [Users, ActivityLog, Contatti, ConflittiImport, InviteCheckRateLimit],
-  globals: [Settings, HubspotSyncConfig, ApiCredentials, ResetContattiELog],
+  globals: [Settings, HubspotSyncConfig, ApiCredentials, ResetContattiELog, TicketConfig],
   email: resendAdapter({
     apiKey: process.env.RESEND_API_KEY || '',
     defaultFromAddress: process.env.RESEND_FROM_ADDRESS || 'noreply@example.com',

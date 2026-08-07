@@ -64,6 +64,7 @@ Oggi **ogni contatto nel segmento** viene riscritto e loggato a ogni sync, anche
 | "Configurazione incompleta…" | Global non salvato — clic **Save** prima di sincronizzare. |
 | Sync fermo a 100 contatti | Bug paginazione risolto (cursore `paging.next.after`); aggiornare codice e rilanciare. |
 | "Sync già in corso" | Lock attivo; attendere o verificare lock morto (soglia 10 min). |
+| Sync bloccato per «Invio massivo ticket in corso» | Mutua esclusione Fase 6: attendere fine invio massivo (o lock stale). |
 | Barra resta su "Avvio sync…" | Verificare che `GET /api/hubspot-sync/progress` risponda (Route Handler); riavviare `pnpm dev` dopo aggiornamenti. |
 | Errore 4xx HubSpot | Proprietà filtro errata o token senza scope `crm.objects.contacts.read`. |
 | Sync interrotto a metà | Errore rete/5xx; rilanciare — nessun rollback, Caso F non eseguito se interrotto. |

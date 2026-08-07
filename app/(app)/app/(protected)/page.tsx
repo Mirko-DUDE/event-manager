@@ -8,6 +8,11 @@ export default function AppHomePage() {
         <p className="text-sm text-slate-600">Sezioni disponibili in base al tuo ruolo App.</p>
         <ul className="space-y-2 text-sm">
           <li>
+            <Link href="/app/contatti" className="font-medium text-slate-900 underline">
+              Contatti — lista e resend ticket
+            </Link>
+          </li>
+          <li>
             <Link href="/app/wildcard" className="font-medium text-slate-900 underline">
               Wildcard — inserimento contatto
             </Link>

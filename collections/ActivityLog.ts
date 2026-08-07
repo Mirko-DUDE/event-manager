@@ -62,11 +62,34 @@ export const ActivityLog: CollectionConfig = {
         { label: 'Upload CSV', value: 'csvUpload' },
         { label: 'Check-in', value: 'checkIn' },
         { label: 'Inserimento Wildcard', value: 'wildcardInsert' },
-        { label: 'Ticket generato', value: 'ticketGenerated' },
-        { label: 'Ticket inviato', value: 'ticketSent' },
+        { label: 'Invio ticket Wildcard', value: 'invioTicketWildcard' },
+        { label: 'Invio ticket Resend', value: 'invioTicketResend' },
+        { label: 'Invio ticket massivo', value: 'invioTicketMassivo' },
+        { label: 'Invio ticket massivo avviato', value: 'invioTicketMassivoAvviato' },
+        { label: 'Invio ticket massivo completato', value: 'invioTicketMassivoCompletato' },
         { label: 'Reset contatti', value: 'contactsReset' },
       ],
       admin: { readOnly: true },
+    },
+    {
+      name: 'esito',
+      type: 'select',
+      label: 'Esito invio',
+      options: [
+        { label: 'Successo', value: 'successo' },
+        { label: 'Fallito — email invalida', value: 'fallito_email_invalida' },
+        { label: 'Fallito — errore invio', value: 'fallito_errore_invio' },
+        { label: 'Bloccato — modalità test', value: 'bloccato_modalita_test' },
+      ],
+      admin: {
+        readOnly: true,
+        description:
+          'Applicabile agli invii per-contatto (Wildcard / Resend / massivo). Vuoto sui record di apertura/chiusura processo.',
+        condition: (_data, siblingData) =>
+          siblingData?.eventType === 'invioTicketWildcard' ||
+          siblingData?.eventType === 'invioTicketResend' ||
+          siblingData?.eventType === 'invioTicketMassivo',
+      },
     },
     {
       name: 'relatedContact',

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { generateQrToken, resolveQrContentMode, type QrContentMode } from '../lib/tickets/qrToken'
 import { adminOrSuperAdminAccess } from './users/access'
 
 const CATEGORY_OPTIONS = [
@@ -76,7 +77,8 @@ export const Contatti: CollectionConfig = {
       unique: true,
       label: 'QR Token',
       admin: {
-        description: 'Generato al momento della creazione ticket (Passo futuro). Unique, opzionale.',
+        description:
+          'UUID v4 generato all’inserimento/aggiornamento se assente (hook Contatti). Unique, immutabile salvo rigenerazione manuale esplicita.',
         readOnly: true,
       },
     },
@@ -89,7 +91,19 @@ export const Contatti: CollectionConfig = {
         { label: 'Full data', value: 'fullData' },
       ],
       admin: {
-        description: 'Modalità effettivamente usata per il QR di questo contatto (specifica-ticket-qrcode.md §2.3).',
+        description:
+          'Modalità effettivamente usata per il QR di questo contatto. Default da ticketConfig se assente alla prima generazione.',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'ticketInviatoAt',
+      type: 'date',
+      label: 'Ticket inviato il',
+      admin: {
+        description:
+          'Timestamp dell’ultimo invio email ticket riuscito (qualunque canale). Vuoto = mai inviato via email.',
+        date: { pickerAppearance: 'dayAndTime' },
         readOnly: true,
       },
     },
@@ -187,12 +201,50 @@ export const Contatti: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      ({ data }) => {
-        if (!data?.email || typeof data.email !== 'string') return data
+      async ({ data, originalDoc, req }) => {
+        if (!data) return data
+
+        let next = data
+
+        if (next.email && typeof next.email === 'string') {
+          next = {
+            ...next,
+            email: next.email.trim().toLowerCase(),
+          }
+        }
+
+        const existingToken =
+          (typeof next.qrToken === 'string' && next.qrToken.trim()) ||
+          (typeof originalDoc?.qrToken === 'string' && originalDoc.qrToken.trim()) ||
+          ''
+
+        const existingMode = (next.qrContentMode ??
+          originalDoc?.qrContentMode) as QrContentMode | null | undefined
+
+        const needsToken = !existingToken
+        const needsMode = !existingMode
+
+        if (!needsToken && !needsMode) {
+          return next
+        }
+
+        let defaultMode: QrContentMode | null | undefined
+        if (needsMode) {
+          try {
+            const ticketConfig = await req.payload.findGlobal({
+              slug: 'ticketConfig',
+              overrideAccess: true,
+            })
+            defaultMode = ticketConfig.qrContentModeDefault as QrContentMode | null | undefined
+          } catch {
+            defaultMode = 'token'
+          }
+        }
 
         return {
-          ...data,
-          email: data.email.trim().toLowerCase(),
+          ...next,
+          ...(needsToken ? { qrToken: generateQrToken() } : {}),
+          ...(needsMode ? { qrContentMode: resolveQrContentMode(undefined, defaultMode) } : {}),
         }
       },
     ],

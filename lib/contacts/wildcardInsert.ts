@@ -25,10 +25,17 @@ export type WildcardSimilarContact = {
   category?: Contatti['category']
   assegnazione?: string | null
   source?: Contatti['source']
+  /** Presente dopo insert (hook eager Passo 1); opzionale sui soft-match. */
+  qrToken?: string | null
+}
+
+/** Contatto appena inserito: qrToken obbligatorio per thank-you / WhatsApp / invio. */
+export type WildcardInsertedContact = WildcardSimilarContact & {
+  qrToken: string
 }
 
 export type WildcardInsertResult =
-  | { esito: 'inserito'; contatto: WildcardSimilarContact }
+  | { esito: 'inserito'; contatto: WildcardInsertedContact }
   | { esito: 'emailEsistente'; contatto?: never; recordSimile?: never }
   | { esito: 'warningSoftMatch'; recordSimile: WildcardSimilarContact }
 
@@ -60,7 +67,16 @@ function toSimilarContact(doc: Contatti): WildcardSimilarContact {
     category: doc.category ?? null,
     assegnazione: doc.assegnazione ?? null,
     source: doc.source ?? null,
+    qrToken: doc.qrToken ?? null,
   }
+}
+
+function toInsertedContact(doc: Contatti): WildcardInsertedContact {
+  const qrToken = typeof doc.qrToken === 'string' ? doc.qrToken.trim() : ''
+  if (!qrToken) {
+    throw new Error('Inserimento Wildcard: qrToken assente sul contatto creato.')
+  }
+  return { ...toSimilarContact(doc), qrToken }
 }
 
 async function findContactByEmail(
@@ -211,5 +227,5 @@ export async function insertWildcardContact(
     detail: `Contatto inserito da Wildcard: ${firstName} ${lastName}, email ${emailLabel}${confermaSoftMatch ? ' (soft-match confermato)' : ''}.`,
   })
 
-  return { esito: 'inserito', contatto: toSimilarContact(created) }
+  return { esito: 'inserito', contatto: toInsertedContact(created) }
 }

@@ -244,5 +244,5 @@ export const Users: CollectionConfig = {
   },
 }
 
-export { canAccessSection } from './users/canAccessSection'
+export { canAccessSection, canResendTicket } from './users/canAccessSection'
 export type { AppSection, AppRole } from './users/canAccessSection'

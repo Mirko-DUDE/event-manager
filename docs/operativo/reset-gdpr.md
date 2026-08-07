@@ -26,6 +26,15 @@
 - **Non** cancella né modifica nulla su HubSpot: stessi contatti, base giuridica e retention HubSpot restano fuori scope.
 - Non tocca `users` né i Global di configurazione (`hubspotSyncConfig`, `apiCredentials`, allow-list domini, ecc.).
 
+## Guardrail lock (mutua esclusione)
+
+Entrambe le azioni di reset rifiutano l’esecuzione se è attivo:
+
+- sync HubSpot (`syncInProgress` / `syncStartedAt`, stale 10 min), oppure
+- invio massivo ticket (`invioTicketInProgress` / `invioTicketStartedAt` su `ticketConfig`, stessa soglia stale — Fase 6 §2.8).
+
+Messaggio chiaro in UI; riprovare a operazione terminata (o dopo sblocco automatico del lock morto).
+
 ## Procedura — chiusura GDPR a fine evento
 
 1. Accedere come **super-admin** al Global «Reset contatti e log».

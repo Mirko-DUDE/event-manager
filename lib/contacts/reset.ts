@@ -51,11 +51,19 @@ export async function countResetSummary(
   return { contatti, conflittiImport }
 }
 
-async function assertSyncLockClear(payload: Payload): Promise<string | null> {
-  const config = await payload.findGlobal({ slug: 'hubspotSyncConfig', overrideAccess: true })
+/** Mutua esclusione con sync HubSpot e invio massivo ticket (§2.8 Fase 6). */
+async function assertHeavyOpsLocksClear(payload: Payload): Promise<string | null> {
+  const [syncConfig, ticketConfig] = await Promise.all([
+    payload.findGlobal({ slug: 'hubspotSyncConfig', overrideAccess: true }),
+    payload.findGlobal({ slug: 'ticketConfig', overrideAccess: true }),
+  ])
 
-  if (isLockActive(config.syncInProgress, config.syncStartedAt)) {
+  if (isLockActive(syncConfig.syncInProgress, syncConfig.syncStartedAt)) {
     return 'Sync HubSpot in corso — riprovare al termine (o dopo lo sblocco automatico del lock).'
+  }
+
+  if (isLockActive(ticketConfig.invioTicketInProgress, ticketConfig.invioTicketStartedAt)) {
+    return 'Invio massivo ticket in corso — riprovare al termine (o dopo lo sblocco automatico del lock).'
   }
 
   return null
@@ -66,7 +74,7 @@ async function assertSyncLockClear(payload: Payload): Promise<string | null> {
  * Nessuna traccia su activityLog (viene svuotato). Chiamare solo da super-admin.
  */
 export async function runGeneralReset(payload: Payload): Promise<ResetExecutionResult> {
-  const lockError = await assertSyncLockClear(payload)
+  const lockError = await assertHeavyOpsLocksClear(payload)
   if (lockError) return { ok: false, error: lockError }
 
   const deleted = await countResetSummary(payload, 'generale')
@@ -86,7 +94,7 @@ export async function runContactsReset(
   payload: Payload,
   userId: string,
 ): Promise<ResetExecutionResult> {
-  const lockError = await assertSyncLockClear(payload)
+  const lockError = await assertHeavyOpsLocksClear(payload)
   if (lockError) return { ok: false, error: lockError }
 
   const deleted = await countResetSummary(payload, 'contatti')

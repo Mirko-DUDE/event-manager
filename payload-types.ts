@@ -98,12 +98,14 @@ export interface Config {
     hubspotSyncConfig: HubspotSyncConfig;
     apiCredentials: ApiCredential;
     resetContattiELog: ResetContattiELog;
+    ticketConfig: TicketConfig;
   };
   globalsSelect: {
     settings: SettingsSelect<false> | SettingsSelect<true>;
     hubspotSyncConfig: HubspotSyncConfigSelect<false> | HubspotSyncConfigSelect<true>;
     apiCredentials: ApiCredentialsSelect<false> | ApiCredentialsSelect<true>;
     resetContattiELog: ResetContattiELogSelect<false> | ResetContattiELogSelect<true>;
+    ticketConfig: TicketConfigSelect<false> | TicketConfigSelect<true>;
   };
   locale: null;
   widgets: {
@@ -153,9 +155,16 @@ export interface ActivityLog {
     | 'csvUpload'
     | 'checkIn'
     | 'wildcardInsert'
-    | 'ticketGenerated'
-    | 'ticketSent'
+    | 'invioTicketWildcard'
+    | 'invioTicketResend'
+    | 'invioTicketMassivo'
+    | 'invioTicketMassivoAvviato'
+    | 'invioTicketMassivoCompletato'
     | 'contactsReset';
+  /**
+   * Applicabile agli invii per-contatto (Wildcard / Resend / massivo). Vuoto sui record di apertura/chiusura processo.
+   */
+  esito?: ('successo' | 'fallito_email_invalida' | 'fallito_errore_invio' | 'bloccato_modalita_test') | null;
   relatedContact?: (string | null) | Contatti;
   detail?: string | null;
   /**
@@ -252,13 +261,17 @@ export interface Contatti {
     | null;
   assegnazione?: string | null;
   /**
-   * Generato al momento della creazione ticket (Passo futuro). Unique, opzionale.
+   * UUID v4 generato all’inserimento/aggiornamento se assente (hook Contatti). Unique, immutabile salvo rigenerazione manuale esplicita.
    */
   qrToken?: string | null;
   /**
-   * Modalità effettivamente usata per il QR di questo contatto (specifica-ticket-qrcode.md §2.3).
+   * Modalità effettivamente usata per il QR di questo contatto. Default da ticketConfig se assente alla prima generazione.
    */
   qrContentMode?: ('token' | 'fullData') | null;
+  /**
+   * Timestamp dell’ultimo invio email ticket riuscito (qualunque canale). Vuoto = mai inviato via email.
+   */
+  ticketInviatoAt?: string | null;
   checkIn?: boolean | null;
   checkInAt?: string | null;
   checkInBy?: (string | null) | User;
@@ -425,6 +438,7 @@ export interface ActivityLogSelect<T extends boolean = true> {
   timestamp?: T;
   area?: T;
   eventType?: T;
+  esito?: T;
   relatedContact?: T;
   detail?: T;
   previousValue?: T;
@@ -444,6 +458,7 @@ export interface ContattiSelect<T extends boolean = true> {
   assegnazione?: T;
   qrToken?: T;
   qrContentMode?: T;
+  ticketInviatoAt?: T;
   checkIn?: T;
   checkInAt?: T;
   checkInBy?: T;
@@ -648,6 +663,60 @@ export interface ResetContattiELog {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ticketConfig".
+ */
+export interface TicketConfig {
+  id: string;
+  /**
+   * Testo mostrato sul biglietto (email e pagina pubblica).
+   */
+  locationEvento?: string | null;
+  /**
+   * Valore applicato ai nuovi contatti (e al backfill) se qrContentMode non è ancora valorizzato.
+   */
+  qrContentModeDefault?: ('token' | 'fullData') | null;
+  /**
+   * Attivare dopo l’upgrade del piano Resend a Pro, prima di eseguire l’invio massivo. Non riguarda gli invii singoli (Wildcard/resend).
+   */
+  pianoResendPro?: boolean | null;
+  /**
+   * Se attiva, le email ticket partono solo verso gli indirizzi in Contatti di test. Default: attiva (sistema protetto). Disattivare solo quando si è pronti a comunicare con invitati reali.
+   */
+  modalitaTestInvio?: boolean | null;
+  /**
+   * Whitelist usata solo con Modalità test invio attiva. Inserire esclusivamente indirizzi di test del team — mai email di invitati reali. Se la lista è vuota e la modalità test è attiva, nessuna email parte.
+   */
+  contattiTest?:
+    | {
+        email: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Lock applicativo — gestito dal codice di invio massivo (Passo 6+).
+   */
+  invioTicketInProgress?: boolean | null;
+  /**
+   * Timestamp di avvio — per riconoscere un lock morto (stessa soglia del sync HubSpot).
+   */
+  invioTicketStartedAt?: string | null;
+  /**
+   * Avanzamento invio massivo — gestito dal codice.
+   */
+  invioTicketProgressProcessed?: number | null;
+  /**
+   * Totale contatti nel perimetro dell’invio in corso.
+   */
+  invioTicketProgressTotal?: number | null;
+  /**
+   * Fase testuale dell’invio massivo (es. invio | report).
+   */
+  invioTicketProgressPhase?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "settings_select".
  */
 export interface SettingsSelect<T extends boolean = true> {
@@ -706,6 +775,30 @@ export interface ApiCredentialsSelect<T extends boolean = true> {
  * via the `definition` "resetContattiELog_select".
  */
 export interface ResetContattiELogSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ticketConfig_select".
+ */
+export interface TicketConfigSelect<T extends boolean = true> {
+  locationEvento?: T;
+  qrContentModeDefault?: T;
+  pianoResendPro?: T;
+  modalitaTestInvio?: T;
+  contattiTest?:
+    | T
+    | {
+        email?: T;
+        id?: T;
+      };
+  invioTicketInProgress?: T;
+  invioTicketStartedAt?: T;
+  invioTicketProgressProcessed?: T;
+  invioTicketProgressTotal?: T;
+  invioTicketProgressPhase?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

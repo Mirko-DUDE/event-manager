@@ -21,3 +21,12 @@ export function canAccessSection(user: UserWithAppRole, section: AppSection): bo
   if (user.appRole === 'none') return false
   return sectionPermissions[user.appRole].includes(section)
 }
+
+/**
+ * Resend ticket da Contatti (§2.5 / Fase 6 Passo 5): solo manager e full-access.
+ * Distinto da `canAccessSection(..., 'lista-inviati')` — hostess può vedere la lista/scheda
+ * ma non può inviare/reinviare email né usare i bottoni di condivisione resend.
+ */
+export function canResendTicket(user: UserWithAppRole): boolean {
+  return user.appRole === 'manager' || user.appRole === 'full-access'
+}

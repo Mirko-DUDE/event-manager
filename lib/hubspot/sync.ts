@@ -398,6 +398,16 @@ export async function runHubspotSync(options: RunHubspotSyncOptions): Promise<Hu
     }
   }
 
+  // Mutua esclusione con invio massivo ticket (Fase 6 §2.8).
+  const ticketConfig = await payload.findGlobal({ slug: 'ticketConfig', overrideAccess: true })
+  if (isLockActive(ticketConfig.invioTicketInProgress, ticketConfig.invioTicketStartedAt)) {
+    return {
+      ...summary,
+      status: 'skipped-lock',
+      message: 'Invio massivo ticket in corso — sync bloccato fino al termine.',
+    }
+  }
+
   const filterProperty = config.proprietaFiltro?.trim()
   const filterValue = config.valoreInclusione?.trim()
 
