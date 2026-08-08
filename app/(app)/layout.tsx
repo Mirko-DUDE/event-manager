@@ -6,7 +6,7 @@ export default function AppAreaLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="it">
+    <html lang="en">
       <body>{children}</body>
     </html>
   )

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<!-- DESKTOP mockup — browser window with sidebar shell, not a phone frame. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Manager — Desktop contacts list</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --text-primary: #18181b;
+    --text-secondary: #71717a;
+    --text-muted: #a1a1aa;
+    --accent: #18181b;
+    --accent-fg: #ffffff;
+    --success-bg: #f0fdf4;
+    --success-text: #15803d;
+    --success-border: #bbf7d0;
+    --pending-text: #a1a1aa;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    overflow-x: hidden;
+    background: #f0f0f2;
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .proto-controls {
+    background: #fff7ed;
+    border: 1px dashed #fdba74;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: min(1180px, calc(100vw - 32px));
+  }
+
+  .desktop-frame {
+    width: 100%;
+    max-width: min(1180px, calc(100vw - 32px));
+    min-height: 640px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  .sidebar {
+    width: 232px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0 0;
+  }
+  .sidebar-logo {
+    padding: 0 20px 22px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sidebar-logo-mark {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; flex: 1; }
+  .sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .sidebar-nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .sidebar-nav-item.active { background: var(--bg); color: var(--text-primary); }
+  .sidebar-user { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .sidebar-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-fg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12.5px; font-weight: 700; flex-shrink: 0;
+  }
+  .sidebar-user-name { font-size: 12.5px; font-weight: 600; }
+  .sidebar-role { font-size: 11px; color: var(--text-secondary); }
+
+  .main-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-width: 0; }
+  .main-header { padding: 22px 32px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .main-title { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+  .main-subtitle { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
+
+  .main-body { padding: 24px 32px; flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+  .toolbar { display: flex; align-items: center; gap: 12px; }
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+    flex: 1;
+    max-width: 340px;
+  }
+  .search-box svg { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
+  .search-box input { border: none; outline: none; font-size: 13.5px; flex: 1; background: transparent; color: var(--text-primary); }
+  .search-box .clear-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; display: none; padding: 2px; }
+  .search-box .clear-btn.show { display: flex; }
+  .search-box .clear-btn svg { width: 14px; height: 14px; }
+
+  .segmented {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 3px;
+    gap: 2px;
+  }
+  .segmented button {
+    border: none;
+    background: none;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-radius: 7px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .segmented button.active { background: var(--accent); color: var(--accent-fg); }
+  .segmented .count { font-size: 10.5px; opacity: 0.75; }
+
+  .sort-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0 4px 0 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    height: 40px;
+    margin-left: auto;
+  }
+  .sort-select svg.sort-icon { width: 14px; height: 14px; flex-shrink: 0; }
+  .sort-select select { border: none; background: none; font-size: 12.5px; font-weight: 600; color: var(--text-primary); padding: 10px 2px; outline: none; }
+  .sort-dir-btn {
+    border: none; background: none; color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    min-width: 34px; height: 100%;
+    border-left: 1px solid var(--border);
+  }
+  .sort-dir-btn svg { width: 14px; height: 14px; }
+
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; flex: 1; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  thead th.checkin-col { text-align: right; }
+  tbody tr { border-bottom: 1px solid var(--border); cursor: pointer; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg); }
+  tbody td { padding: 12px 20px; font-size: 13.5px; }
+  .row-name-cell { display: flex; align-items: center; gap: 12px; }
+  .row-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bg); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11.5px; font-weight: 700; color: var(--text-secondary); flex-shrink: 0;
+  }
+  .checkin-pill {
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+    display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  }
+  .row-name { font-weight: 600; }
+  .muted-cell { color: var(--text-secondary); }
+  thead th:first-child, tbody td:first-child { width: 30%; }
+  thead th:nth-child(4), tbody td:nth-child(4) { width: 160px; white-space: nowrap; }
+  td.checkin-col { text-align: right; }
+  .checkin-pill.done { background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+  .checkin-pill.pending { background: var(--bg); color: var(--pending-text); border: 1px solid var(--border); }
+  .checkin-pill svg { width: 11px; height: 11px; }
+
+  .empty-state { text-align: center; padding: 60px 24px; color: var(--text-muted); font-size: 13.5px; }
+</style>
+</head>
+<body>
+<div class="proto-controls">⚠ Prototype only: same data and logic as the mobile contacts list, just laid out for wide screens.</div>
+<div id="root"></div>
+
+<script>
+const ICON_SEARCH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>';
+const ICON_CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>';
+const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+const ICON_SORT = '<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>';
+const ICON_ARROW_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg>';
+const ICON_ARROW_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M18 13l-6 6-6-6"/></svg>';
+const ICON_CONTACTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+const ICON_WILDCARD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>';
+const ICON_CHECKIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
+
+const CONTACTS = [
+  { first: "Marco", last: "Bianchi", email: "marco.bianchi@acme.it", assegnazione: "m.rossi", checkedIn: true },
+  { first: "Giulia", last: "Rossi", email: "giulia.rossi@studio.it", assegnazione: "l.verdi", checkedIn: false },
+  { first: "Luca", last: "Ferrari", email: "luca.ferrari@techco.it", assegnazione: "m.rossi", checkedIn: true },
+  { first: "Sara", last: "Conti", email: "sara.conti@brand.it", assegnazione: "h.desai", checkedIn: false },
+  { first: "Andrea", last: "Ricci", email: "andrea.ricci@acme.it", assegnazione: "l.verdi", checkedIn: false },
+  { first: "Elena", last: "Marino", email: "elena.marino@studio.it", assegnazione: "m.rossi", checkedIn: true },
+  { first: "Davide", last: "Greco", email: "davide.greco@techco.it", assegnazione: "h.desai", checkedIn: false },
+  { first: "Chiara", last: "Bruno", email: "chiara.bruno@brand.it", assegnazione: "l.verdi", checkedIn: true },
+  { first: "Matteo", last: "Villa", email: "matteo.villa@acme.it", assegnazione: "m.rossi", checkedIn: false },
+  { first: "Francesca", last: "Costa", email: "francesca.costa@studio.it", assegnazione: "h.desai", checkedIn: false },
+  { first: "Simone", last: "Fontana", email: "simone.fontana@techco.it", assegnazione: "l.verdi", checkedIn: true },
+  { first: "Alice", last: "Moretti", email: "alice.moretti@brand.it", assegnazione: "m.rossi", checkedIn: false }
+];
+
+let query = "";
+let filter = "all";
+let sortBy = "last";
+let sortDir = "asc";
+
+function matches(c) {
+  const q = query.trim().toLowerCase();
+  const textMatch = !q || c.first.toLowerCase().includes(q) || c.last.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
+  const statusMatch = filter === "all" || (filter === "done" && c.checkedIn) || (filter === "pending" && !c.checkedIn);
+  return textMatch && statusMatch;
+}
+
+function render() {
+  let filtered = CONTACTS.filter(matches);
+  filtered = filtered.slice().sort((a, b) => {
+    const av = sortBy === "first" ? a.first : a.last;
+    const bv = sortBy === "first" ? b.first : b.last;
+    const cmp = av.localeCompare(bv);
+    return sortDir === "asc" ? cmp : -cmp;
+  });
+
+  const q = query.trim().toLowerCase();
+  const textFiltered = CONTACTS.filter(c => !q || c.first.toLowerCase().includes(q) || c.last.toLowerCase().includes(q) || c.email.toLowerCase().includes(q));
+  const countAll = textFiltered.length;
+  const countDone = textFiltered.filter(c => c.checkedIn).length;
+  const countPending = countAll - countDone;
+
+  const rowsHtml = filtered.length ? filtered.map(c => {
+    const initials = (c.first[0] + c.last[0]).toUpperCase();
+    const pill = c.checkedIn
+      ? '<span class="checkin-pill done">' + ICON_CHECK + 'Checked in</span>'
+      : '<span class="checkin-pill pending">Not checked in</span>';
+    return '<tr><td><div class="row-name-cell"><div class="row-avatar">' + initials + '</div><span class="row-name">' + c.first + ' ' + c.last + '</span></div></td>' +
+      '<td class="muted-cell">' + c.email + '</td>' +
+      '<td class="muted-cell">' + c.assegnazione + '</td>' +
+      '<td class="checkin-col">' + pill + '</td></tr>';
+  }).join("") : '';
+
+  const bodyHtml = filtered.length
+    ? '<table><thead><tr><th>Name</th><th>Email</th><th>Assegnazione</th><th class="checkin-col">Status</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>'
+    : '<div class="empty-state">No contacts found.<br>Try changing your search or filter.</div>';
+
+  document.getElementById("root").innerHTML =
+    '<div class="desktop-frame">' +
+      '<div class="sidebar">' +
+        '<div class="sidebar-logo"><div class="sidebar-logo-mark">EM</div>Event Manager</div>' +
+        '<div class="sidebar-nav">' +
+          '<button class="sidebar-nav-item active">' + ICON_CONTACTS + '<span>Contacts</span></button>' +
+          '<button class="sidebar-nav-item">' + ICON_WILDCARD + '<span>Wildcard</span></button>' +
+          '<button class="sidebar-nav-item">' + ICON_CHECKIN + '<span>Check-in</span></button>' +
+        '</div>' +
+        '<div class="sidebar-user">' +
+          '<div class="sidebar-avatar">M</div>' +
+          '<div><div class="sidebar-user-name">m.rossi@company.com</div><div class="sidebar-role">Manager</div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="main-area">' +
+        '<div class="main-header"><div class="main-title">Contacts list</div><div class="main-subtitle">Browse and search all event guests.</div></div>' +
+        '<div class="main-body">' +
+          '<div class="toolbar">' +
+            '<div class="search-box">' + ICON_SEARCH +
+              '<input id="searchInput" type="text" placeholder="Search by first name, last name or email" value="' + query.replace(/"/g,"&quot;") + '">' +
+              '<button class="clear-btn ' + (query ? "show" : "") + '" id="clearBtn">' + ICON_CLOSE + '</button>' +
+            '</div>' +
+            '<div class="segmented">' +
+              '<button class="' + (filter === "all" ? "active" : "") + '" data-filter="all">All <span class="count">' + countAll + '</span></button>' +
+              '<button class="' + (filter === "pending" ? "active" : "") + '" data-filter="pending">NOT <span class="count">' + countPending + '</span></button>' +
+              '<button class="' + (filter === "done" ? "active" : "") + '" data-filter="done">IN <span class="count">' + countDone + '</span></button>' +
+            '</div>' +
+            '<div class="sort-select">' +
+              ICON_SORT +
+              '<select id="sortSelect">' +
+                '<option value="last"' + (sortBy === "last" ? " selected" : "") + '>Last name</option>' +
+                '<option value="first"' + (sortBy === "first" ? " selected" : "") + '>First name</option>' +
+              '</select>' +
+              '<button id="sortDirBtn" class="sort-dir-btn" title="Toggle sort direction">' + (sortDir === "asc" ? ICON_ARROW_UP : ICON_ARROW_DOWN) + '</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="table-wrap">' + bodyHtml + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  const input = document.getElementById("searchInput");
+  input.addEventListener("input", (e) => {
+    query = e.target.value;
+    const pos = e.target.selectionStart;
+    render();
+    const newInput = document.getElementById("searchInput");
+    newInput.focus();
+    newInput.setSelectionRange(pos, pos);
+  });
+  document.getElementById("clearBtn").addEventListener("click", () => { query = ""; render(); document.getElementById("searchInput").focus(); });
+  document.querySelectorAll(".segmented button").forEach(btn => {
+    btn.addEventListener("click", () => { filter = btn.dataset.filter; render(); });
+  });
+  document.getElementById("sortSelect").addEventListener("change", (e) => { sortBy = e.target.value; render(); });
+  document.getElementById("sortDirBtn").addEventListener("click", () => { sortDir = sortDir === "asc" ? "desc" : "asc"; render(); });
+  document.querySelectorAll("tbody tr").forEach(row => {
+    row.addEventListener("click", () => { alert("Opens the contact detail (desktop variant, to be designed)."); });
+  });
+}
+
+render();
+</script>
+</body>
+</html>

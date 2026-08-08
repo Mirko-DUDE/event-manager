@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<!-- DESKTOP mockup — browser window with sidebar shell, not a phone frame. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Manager — Desktop Wildcard</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --text-primary: #18181b;
+    --text-secondary: #71717a;
+    --text-muted: #a1a1aa;
+    --accent: #18181b;
+    --accent-fg: #ffffff;
+    --danger-bg: #fef2f2;
+    --danger-text: #b91c1c;
+    --danger-border: #fecaca;
+    --warning-bg: #fffbeb;
+    --warning-text: #92400e;
+    --warning-border: #fde68a;
+    --success-bg: #f0fdf4;
+    --success-text: #15803d;
+    --success-border: #bbf7d0;
+    --pending-text: #a1a1aa;
+    --whatsapp: #25D366;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    overflow-x: hidden;
+    background: #f0f0f2;
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .proto-controls {
+    background: #fff7ed;
+    border: 1px dashed #fdba74;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: min(1180px, calc(100vw - 32px));
+  }
+  .proto-controls select {
+    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    border: 1px solid #fdba74;
+    background: #fff;
+    color: #92400e;
+    font-weight: 600;
+  }
+
+  .desktop-frame {
+    width: 100%;
+    max-width: min(1180px, calc(100vw - 32px));
+    min-height: 640px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  .sidebar {
+    width: 232px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0 0;
+  }
+  .sidebar-logo { padding: 0 20px 22px; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+  .sidebar-logo-mark { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: var(--accent-fg); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; flex: 1; }
+  .sidebar-nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px;
+    font-size: 13.5px; font-weight: 600; color: var(--text-secondary);
+    border: none; background: none; width: 100%; text-align: left; position: relative;
+  }
+  .sidebar-nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .sidebar-nav-item.active { background: var(--bg); color: var(--text-primary); }
+  .sidebar-badge {
+    margin-left: auto; background: var(--text-primary); color: #fff; font-size: 10.5px; font-weight: 700;
+    min-width: 18px; height: 18px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 5px;
+  }
+  .sidebar-user { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700; flex-shrink: 0; }
+  .sidebar-user-name { font-size: 12.5px; font-weight: 600; }
+  .sidebar-role { font-size: 11px; color: var(--text-secondary); }
+
+  .main-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-width: 0; overflow-y: auto; }
+  .main-header { padding: 22px 32px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .main-title { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+  .main-subtitle { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer; margin-bottom: 4px; }
+  .back-link svg { width: 14px; height: 14px; }
+
+  .main-body { padding: 28px 32px; flex: 1; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+  /* Main view: quota row */
+  .quota-toolbar { display: flex; align-items: center; gap: 20px; }
+  .quota-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 20px; display: flex; align-items: center; gap: 20px; flex: 1; }
+  .quota-block { }
+  .quota-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+  .quota-number { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+  .quota-number.low { color: var(--danger-text); }
+  .quota-sub { font-size: 11.5px; color: var(--text-muted); }
+  .quota-bar-track { background: var(--bg); border-radius: 6px; height: 6px; width: 160px; overflow: hidden; }
+  .quota-bar-fill { background: var(--accent); height: 100%; border-radius: 6px; }
+  .quota-bar-fill.low { background: var(--danger-text); }
+  .unlimited-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: var(--success-text); background: var(--success-bg); border: 1px solid var(--success-border); padding: 4px 10px; border-radius: 20px; }
+
+  .create-btn {
+    background: var(--accent); color: var(--accent-fg); border: none; border-radius: var(--radius);
+    padding: 12px 20px; font-size: 13.5px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  }
+  .create-btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+  .create-btn svg { width: 16px; height: 16px; }
+
+  .quota-exhausted-note { font-size: 12px; color: var(--danger-text); background: var(--danger-bg); border: 1px solid var(--danger-border); border-radius: var(--radius); padding: 9px 12px; }
+
+  .section-title { font-size: 12.5px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin-top: 4px; }
+
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: left; font-size: 11.5px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--bg); }
+  thead th.checkin-col { text-align: right; }
+  tbody tr { border-bottom: 1px solid var(--border); cursor: pointer; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg); }
+  tbody td { padding: 12px 20px; font-size: 13.5px; }
+  .row-name-cell { display: flex; align-items: center; gap: 12px; }
+  .row-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 700; color: var(--text-secondary); flex-shrink: 0; }
+  .row-name { font-weight: 600; }
+  .muted-cell { color: var(--text-secondary); }
+  td.checkin-col { text-align: right; white-space: nowrap; }
+  .checkin-pill { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .checkin-pill.done { background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+  .checkin-pill.pending { background: var(--bg); color: var(--pending-text); border: 1px solid var(--border); }
+  .checkin-pill svg { width: 11px; height: 11px; }
+  .empty-state { text-align: center; padding: 50px 24px; color: var(--text-muted); font-size: 13.5px; }
+
+  /* Form */
+  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; max-width: 640px; }
+  form { display: flex; flex-direction: column; gap: 16px; }
+  .field-row-2col { display: flex; gap: 16px; }
+  .field-row-2col .field-group { flex: 1; min-width: 0; }
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+  label .optional { color: var(--text-muted); font-weight: 400; }
+  label .required { color: var(--danger-text); font-weight: 700; }
+  input, select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+    font-size: 13.5px; background: var(--surface); color: var(--text-primary);
+  }
+  input:focus, select:focus { outline: 2px solid var(--text-primary); outline-offset: 1px; }
+  input.readonly-field { background: var(--bg); color: var(--text-secondary); cursor: not-allowed; }
+  input.field-error { border-color: var(--danger-text); }
+  .field-hint { font-size: 11px; color: var(--text-muted); }
+  .field-error-msg { font-size: 11.5px; color: var(--danger-text); font-weight: 500; }
+
+  .warning-banner { background: var(--warning-bg); border: 1px solid var(--warning-border); color: var(--warning-text); border-radius: var(--radius); padding: 10px 12px; font-size: 12.5px; line-height: 1.5; display: flex; flex-direction: column; gap: 8px; }
+  .warning-main { display: flex; align-items: flex-start; gap: 8px; }
+  .warning-main svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
+  .warning-main span { flex: 1; min-width: 0; }
+  .warning-actions { display: flex; gap: 8px; }
+  .warning-actions button { flex: 1; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; font-weight: 700; cursor: pointer; border: 1px solid var(--warning-border); }
+  .warning-actions .confirm-btn { background: var(--warning-text); color: #fff; border-color: var(--warning-text); }
+  .warning-actions .cancel-btn { background: transparent; color: var(--warning-text); }
+
+  .submit-btn { background: var(--accent); color: var(--accent-fg); border: none; border-radius: var(--radius); padding: 12px 16px; font-size: 13.5px; font-weight: 700; cursor: pointer; align-self: flex-start; padding-left: 24px; padding-right: 24px; }
+  .submit-btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+  .success-banner { background: var(--success-bg); border: 1px solid var(--success-border); color: var(--success-text); border-radius: var(--radius); padding: 10px 12px; font-size: 12.5px; font-weight: 600; }
+
+  /* Thank you */
+  .ty-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px; max-width: 440px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+  .ty-icon-circle { width: 56px; height: 56px; border-radius: 50%; background: var(--success-bg); border: 1px solid var(--success-border); display: flex; align-items: center; justify-content: center; }
+  .ty-icon-circle svg { width: 26px; height: 26px; color: var(--success-text); }
+  .ty-title { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+  .ty-desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; max-width: 280px; }
+  .ty-desc strong { color: var(--text-primary); }
+  .ty-section-label { font-size: 11.5px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin-top: 12px; align-self: flex-start; }
+  .ty-send-row { display: flex; gap: 8px; width: 100%; }
+  .ty-send-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; border-radius: var(--radius); padding: 11px 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); }
+  .ty-send-btn svg { width: 16px; height: 16px; }
+  .ty-send-btn.whatsapp { color: #128C53; border-color: #bbf0cf; background: #f0fdf4; }
+  .ty-send-btn.sent { background: var(--success-bg); border-color: var(--success-border); color: var(--success-text); cursor: default; }
+  .ty-no-contact-note { font-size: 11.5px; color: var(--text-muted); background: var(--bg); border: 1px dashed var(--border); border-radius: var(--radius); padding: 10px 12px; margin-top: 8px; width: 100%; }
+  .ty-done-btn { background: var(--accent); color: var(--accent-fg); border: none; border-radius: var(--radius); padding: 11px 16px; font-size: 13.5px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="proto-controls">
+  ⚠ Prototype only:
+  <select id="roleSelect"></select>
+  <span>| Try email "test@exists.com" for duplicate, or name "Marco Bianchi" for the soft-match warning.</span>
+</div>
+<div id="root"></div>
+
+<script>
+const ICON_PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>';
+const ICON_ARROW_LEFT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>';
+const ICON_INFINITY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.739-8z"/></svg>';
+const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+const ICON_ALERT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>';
+const ICON_WA = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.3A8.9 8.9 0 0 0 12 4a8.9 8.9 0 0 0-7.6 13.6L3 21l3.5-1.3A8.9 8.9 0 0 0 12 21a9 9 0 0 0 5.6-14.7zM12 19.3a7.3 7.3 0 0 1-3.7-1l-.3-.2-2.1.8.7-2-.2-.3A7.3 7.3 0 1 1 19.3 12 7.3 7.3 0 0 1 12 19.3zm4-5.5c-.2-.1-1.3-.6-1.5-.7-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-1.2-.6-2-1-2.8-2.3-.2-.3.2-.3.5-.9.1-.2 0-.3 0-.5l-.6-1.4c-.1-.3-.3-.3-.5-.3h-.4c-.1 0-.4.1-.6.4-.2.3-.8.8-.8 1.9 0 1.1.8 2.2.9 2.3.1.2 1.5 2.4 3.7 3.3 1.8.7 2.2.6 2.6.5.4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1z"/></svg>';
+const ICON_MAIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg>';
+const ICON_CONTACTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+const ICON_WILDCARD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>';
+const ICON_CHECKIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
+
+const DUDE_COMPANY_OPTIONS = ["SRL", "Milano", "London", "Things", "Design", "Originals", "Fondazione/MFF"];
+const CATEGORY_OPTIONS = ["Clients", "Prospects", "Supplier", "Talent", "Partner", "Founders", "Design", "Local Community", "Friend", "exDude", "Event Guest", "Needs Review"];
+
+const ROLE_QUOTA = {
+  manager_ok:        { label: "Manager (quota available)", role: "Manager", quota: 20, used: 12 },
+  manager_exhausted: { label: "Manager (quota exhausted)", role: "Manager", quota: 12, used: 12 },
+  full_access:       { label: "Full access (unlimited)", role: "Full access", quota: null, used: null }
+};
+
+let roleKey = "manager_ok";
+let view = "main"; // main | form | thankyou
+let myWildcards = [
+  { first: "Paolo", last: "Sanna", company: "Milano", category: "Prospects", checkedIn: false },
+  { first: "Ilaria", last: "Ferri", company: "Design", category: "Talent", checkedIn: true }
+];
+let lastCreated = null;
+let sentVia = { whatsapp: false, email: false };
+let formError = null;
+let softMatchPending = false;
+let softMatchConfirmed = false;
+let fieldErrors = { first: false, last: false, contact: false };
+
+function getQuotaCtx() { return ROLE_QUOTA[roleKey]; }
+function quotaRemaining() {
+  const ctx = getQuotaCtx();
+  if (ctx.quota === null) return null;
+  return ctx.quota - ctx.used - myWildcards.filter(w => w.sessionCreated).length;
+}
+
+function sidebarHtml(role) {
+  let badge = "";
+  if (role.quota !== undefined && role.quota !== null) {
+    badge = '<span class="sidebar-badge">' + quotaRemaining() + '</span>';
+  }
+  return (
+    '<div class="sidebar">' +
+      '<div class="sidebar-logo"><div class="sidebar-logo-mark">EM</div>Event Manager</div>' +
+      '<div class="sidebar-nav">' +
+        '<button class="sidebar-nav-item">' + ICON_CONTACTS + '<span>Contacts</span></button>' +
+        '<button class="sidebar-nav-item active">' + ICON_WILDCARD + '<span>Wildcard</span>' + badge + '</button>' +
+        '<button class="sidebar-nav-item">' + ICON_CHECKIN + '<span>Check-in</span></button>' +
+      '</div>' +
+      '<div class="sidebar-user">' +
+        '<div class="sidebar-avatar">' + role.role[0] + '</div>' +
+        '<div><div class="sidebar-user-name">m.rossi@company.com</div><div class="sidebar-role">' + role.role + '</div></div>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+function renderMain() {
+  const ctx = getQuotaCtx();
+  const remaining = quotaRemaining();
+  const isUnlimited = ctx.quota === null;
+  const exhausted = !isUnlimited && remaining <= 0;
+
+  let quotaBlock;
+  if (isUnlimited) {
+    quotaBlock = '<div class="quota-card"><div class="quota-block"><div class="quota-label">Wildcard quota</div><span class="unlimited-pill">' + ICON_INFINITY + ' Unlimited</span></div></div>';
+  } else {
+    const pct = Math.max(0, Math.min(100, (remaining / ctx.quota) * 100));
+    quotaBlock =
+      '<div class="quota-card">' +
+        '<div class="quota-block">' +
+          '<div class="quota-label">Wildcard quota remaining</div>' +
+          '<div class="quota-number' + (remaining <= 2 ? ' low' : '') + '">' + remaining + '</div>' +
+        '</div>' +
+        '<div class="quota-block">' +
+          '<div class="quota-sub">out of ' + ctx.quota + ' assigned to you</div>' +
+          '<div class="quota-bar-track"><div class="quota-bar-fill' + (remaining <= 2 ? ' low' : '') + '" style="width:' + pct + '%"></div></div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  const listHtml = myWildcards.length ? myWildcards.map(w => {
+    const initials = (w.first[0] + w.last[0]).toUpperCase();
+    const pill = w.checkedIn ? '<span class="checkin-pill done">' + ICON_CHECK + 'Checked in</span>' : '<span class="checkin-pill pending">Not checked in</span>';
+    return '<tr><td><div class="row-name-cell"><div class="row-avatar">' + initials + '</div><span class="row-name">' + w.first + ' ' + w.last + '</span></div></td><td class="muted-cell">' + w.company + '</td><td class="muted-cell">' + w.category + '</td><td class="checkin-col">' + pill + '</td></tr>';
+  }).join("") : "";
+
+  const tableHtml = myWildcards.length
+    ? '<table><thead><tr><th>Name</th><th>DUDE Company</th><th>Category</th><th class="checkin-col">Status</th></tr></thead><tbody>' + listHtml + '</tbody></table>'
+    : '<div class="empty-state">You haven\u2019t created any wildcards yet.</div>';
+
+  return (
+    '<div class="main-header"><div class="main-title">Wildcard</div><div class="main-subtitle">Add walk-in guests and track your quota.</div></div>' +
+    '<div class="main-body">' +
+      '<div class="quota-toolbar">' +
+        quotaBlock +
+        '<button class="create-btn" id="createBtn" ' + (exhausted ? 'disabled' : '') + '>' + ICON_PLUS + 'Create a wildcard</button>' +
+      '</div>' +
+      (exhausted ? '<div class="quota-exhausted-note">You\u2019ve used all your assigned wildcards. Contact a super-admin to request more.</div>' : '') +
+      '<div class="section-title">Your wildcards so far</div>' +
+      '<div class="table-wrap">' + tableHtml + '</div>' +
+    '</div>'
+  );
+}
+
+function renderForm() {
+  const assegnazione = "m.rossi";
+  let duplicateError = formError === "duplicate" ? '<div class="field-error-msg">This email is already registered. No new record was created.</div>' : "";
+  let softMatchBlock = softMatchPending && !softMatchConfirmed
+    ? '<div class="warning-banner">' +
+        '<div class="warning-main">' + ICON_ALERT + '<span><strong>A contact with this name already exists</strong> (different email). Do you want to create it anyway?</span></div>' +
+        '<div class="warning-actions"><button type="button" class="cancel-btn" id="softMatchCancel">Cancel</button><button type="button" class="confirm-btn" id="softMatchConfirm">Yes, create anyway</button></div>' +
+      '</div>'
+    : "";
+
+  return (
+    '<div class="main-header">' +
+      '<a class="back-link" id="backBtn">' + ICON_ARROW_LEFT + 'Wildcard</a>' +
+      '<div class="main-title">New wildcard</div>' +
+    '</div>' +
+    '<div class="main-body">' +
+      '<div class="form-card">' +
+        '<form>' +
+          '<div class="field-row-2col">' +
+            '<div class="field-group"><label>First name <span class="required">*</span></label><input id="fFirst" type="text" placeholder="First name" class="' + (fieldErrors.first ? "field-error" : "") + '">' + (fieldErrors.first ? '<div class="field-error-msg">First name is required.</div>' : '') + '</div>' +
+            '<div class="field-group"><label>Last name <span class="required">*</span></label><input id="fLast" type="text" placeholder="Last name" class="' + (fieldErrors.last ? "field-error" : "") + '">' + (fieldErrors.last ? '<div class="field-error-msg">Last name is required.</div>' : '') + '</div>' +
+          '</div>' +
+          '<div class="field-row-2col">' +
+            '<div class="field-group">' +
+              '<label>Email <span class="optional">(optional)</span></label>' +
+              '<input id="fEmail" type="email" placeholder="name@company.com" class="' + (formError === "duplicate" ? "field-error" : "") + '">' +
+              duplicateError +
+            '</div>' +
+            '<div class="field-group"><label>Phone <span class="optional">(optional)</span></label><input id="fPhone" type="tel" placeholder="+39 ..."></div>' +
+          '</div>' +
+          (fieldErrors.contact ? '<div class="warning-banner"><div class="warning-main">' + ICON_ALERT + '<span>Please provide at least an email or a phone number \u2014 one of the two is needed to send the ticket.</span></div></div>' : '') +
+          '<div class="field-row-2col">' +
+            '<div class="field-group"><label>DUDE Company</label><select id="fCompany"><option value="">Select...</option>' + DUDE_COMPANY_OPTIONS.map(o => '<option value="' + o + '">' + o + '</option>').join("") + '</select></div>' +
+            '<div class="field-group"><label>Category <span class="optional">(optional)</span></label><select id="fCategory"><option value="">Select...</option>' + CATEGORY_OPTIONS.map(o => '<option value="' + o + '">' + o + '</option>').join("") + '</select></div>' +
+          '</div>' +
+          '<div class="field-group" style="max-width:260px;">' +
+            '<label>Assegnazione</label>' +
+            '<input type="text" class="readonly-field" value="' + assegnazione + '" readonly>' +
+            '<div class="field-hint">Automatically set from your account — cannot be edited.</div>' +
+          '</div>' +
+          softMatchBlock +
+          '<button type="button" class="submit-btn" id="submitBtn" ' + (softMatchPending && !softMatchConfirmed ? "disabled" : "") + '>Create wildcard</button>' +
+        '</form>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+function renderThankYou() {
+  const hasEmail = !!(lastCreated && lastCreated.email);
+  const hasPhone = !!(lastCreated && lastCreated.phone);
+  let sendSection = "";
+  if (hasEmail || hasPhone) {
+    const waBtn = hasPhone ? '<button class="ty-send-btn whatsapp' + (sentVia.whatsapp ? " sent" : "") + '" id="sendWaBtn">' + (sentVia.whatsapp ? ICON_CHECK + 'Sent' : ICON_WA + 'WhatsApp') + '</button>' : "";
+    const mailBtn = hasEmail ? '<button class="ty-send-btn' + (sentVia.email ? " sent" : "") + '" id="sendMailBtn">' + (sentVia.email ? ICON_CHECK + 'Sent' : ICON_MAIL + 'Email') + '</button>' : "";
+    sendSection = '<div class="ty-section-label">Send ticket via</div><div class="ty-send-row">' + waBtn + mailBtn + '</div>';
+  } else {
+    sendSection = '<div class="ty-no-contact-note">No email or phone on file \u2014 the ticket can\u2019t be sent automatically. Add one from the contact card later.</div>';
+  }
+  return (
+    '<div class="main-header"><div class="main-title">Wildcard</div></div>' +
+    '<div class="main-body" style="align-items:center; justify-content:center;">' +
+      '<div class="ty-card">' +
+        '<div class="ty-icon-circle">' + ICON_CHECK + '</div>' +
+        '<div class="ty-title">Wildcard created</div>' +
+        '<div class="ty-desc"><strong>' + (lastCreated ? lastCreated.first + " " + lastCreated.last : "") + '</strong> has been added to the guest list.</div>' +
+        sendSection +
+        '<button class="ty-done-btn" id="tyDoneBtn">Done</button>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+function render() {
+  const ctx = getQuotaCtx();
+  const inner = view === "main" ? renderMain() : view === "form" ? renderForm() : renderThankYou();
+
+  document.getElementById("root").innerHTML =
+    '<div class="desktop-frame">' +
+      sidebarHtml(ctx) +
+      '<div class="main-area">' + inner + '</div>' +
+    '</div>';
+
+  document.getElementById("roleSelect").addEventListener("change", (e) => { roleKey = e.target.value; render(); });
+
+  if (view === "main") {
+    document.getElementById("createBtn").addEventListener("click", () => {
+      formError = null; softMatchPending = false; softMatchConfirmed = false;
+      fieldErrors = { first: false, last: false, contact: false };
+      view = "form"; render();
+    });
+    document.querySelectorAll("tbody tr").forEach(row => {
+      row.addEventListener("click", () => { alert("Opens the contact detail (desktop variant, to be designed)."); });
+    });
+  } else if (view === "thankyou") {
+    document.getElementById("tyDoneBtn").addEventListener("click", () => { view = "main"; render(); });
+    const sendWaBtn = document.getElementById("sendWaBtn");
+    if (sendWaBtn) sendWaBtn.addEventListener("click", () => { sentVia.whatsapp = true; render(); });
+    const sendMailBtn = document.getElementById("sendMailBtn");
+    if (sendMailBtn) sendMailBtn.addEventListener("click", () => { sentVia.email = true; render(); });
+  } else {
+    document.getElementById("backBtn").addEventListener("click", () => { view = "main"; render(); });
+    const emailInput = document.getElementById("fEmail");
+    const firstInput = document.getElementById("fFirst");
+    const lastInput = document.getElementById("fLast");
+
+    document.getElementById("submitBtn").addEventListener("click", () => {
+      const email = emailInput.value.trim().toLowerCase();
+      const phone = document.getElementById("fPhone").value.trim();
+      const first = firstInput.value.trim();
+      const last = lastInput.value.trim();
+
+      fieldErrors = { first: !first, last: !last, contact: !email && !phone };
+      if (fieldErrors.first || fieldErrors.last || fieldErrors.contact) { formError = null; softMatchPending = false; render(); return; }
+
+      if (email === "test@exists.com") { formError = "duplicate"; softMatchPending = false; render(); return; }
+      formError = null;
+
+      if (!softMatchConfirmed && first.toLowerCase() === "marco" && last.toLowerCase() === "bianchi") { softMatchPending = true; render(); return; }
+
+      const company = document.getElementById("fCompany").value || "—";
+      const category = document.getElementById("fCategory").value || "—";
+      myWildcards.unshift({ first: first, last: last, company: company, category: category, checkedIn: false, sessionCreated: true });
+      lastCreated = { first: first, last: last, email: email || null, phone: phone || null };
+      sentVia = { whatsapp: false, email: false };
+      softMatchPending = false; softMatchConfirmed = false;
+      fieldErrors = { first: false, last: false, contact: false };
+      view = "thankyou"; render();
+    });
+
+    const softMatchConfirmBtn = document.getElementById("softMatchConfirm");
+    if (softMatchConfirmBtn) softMatchConfirmBtn.addEventListener("click", () => { softMatchConfirmed = true; softMatchPending = false; render(); document.getElementById("submitBtn").click(); });
+    const softMatchCancelBtn = document.getElementById("softMatchCancel");
+    if (softMatchCancelBtn) softMatchCancelBtn.addEventListener("click", () => { softMatchPending = false; render(); });
+  }
+}
+
+const select = document.getElementById("roleSelect");
+select.innerHTML = Object.keys(ROLE_QUOTA).map(k => '<option value="' + k + '">' + ROLE_QUOTA[k].label + '</option>').join("");
+
+render();
+</script>
+</body>
+</html>

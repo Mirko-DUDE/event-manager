@@ -61,6 +61,7 @@ export const ActivityLog: CollectionConfig = {
         { label: 'Sync HubSpot', value: 'hubspotSync' },
         { label: 'Upload CSV', value: 'csvUpload' },
         { label: 'Check-in', value: 'checkIn' },
+        { label: 'Annullamento check-in', value: 'checkInUndo' },
         { label: 'Inserimento Wildcard', value: 'wildcardInsert' },
         { label: 'Invio ticket Wildcard', value: 'invioTicketWildcard' },
         { label: 'Invio ticket Resend', value: 'invioTicketResend' },

@@ -154,6 +154,7 @@ export interface ActivityLog {
     | 'hubspotSync'
     | 'csvUpload'
     | 'checkIn'
+    | 'checkInUndo'
     | 'wildcardInsert'
     | 'invioTicketWildcard'
     | 'invioTicketResend'
@@ -215,6 +216,14 @@ export interface User {
    * Disattivazione senza cancellare il record.
    */
   active?: boolean | null;
+  /**
+   * Solo per manager: massimo inserimenti Wildcard consentiti. Default 0 = nessun insert finché non assegnata.
+   */
+  wildcardQuota?: number | null;
+  /**
+   * Contatore incrementato automaticamente a ogni insert Wildcard riuscito. Editabile manualmente da admin.
+   */
+  wildcardUsed?: number | null;
   sub?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -242,6 +251,10 @@ export interface Contatti {
    * Opzionale. Unique con indice sparse se assente (fase-4-import-sync.md §2.1).
    */
   email?: string | null;
+  /**
+   * Opzionale. Solo schema App/Admin — nessun mapping HubSpot in Fase 7 Passo 0.
+   */
+  telefono?: string | null;
   dudeCompany?: string | null;
   category?:
     | (
@@ -453,6 +466,7 @@ export interface ContattiSelect<T extends boolean = true> {
   firstName?: T;
   lastName?: T;
   email?: T;
+  telefono?: T;
   dudeCompany?: T;
   category?: T;
   assegnazione?: T;
@@ -505,6 +519,8 @@ export interface UsersSelect<T extends boolean = true> {
   adminRole?: T;
   appRole?: T;
   active?: T;
+  wildcardQuota?: T;
+  wildcardUsed?: T;
   sub?: T;
   updatedAt?: T;
   createdAt?: T;

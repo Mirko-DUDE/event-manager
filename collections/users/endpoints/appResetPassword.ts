@@ -48,6 +48,8 @@ export const appResetPasswordEndpoint: Endpoint = {
     }
 
     try {
+      req.context = { ...req.context, appPasswordReset: true }
+
       await req.payload.update({
         id: user.id,
         collection: collectionConfig.slug,

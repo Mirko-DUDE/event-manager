@@ -1,16 +1,19 @@
 import type { Payload } from 'payload'
 
-import type { Contatti } from '@/payload-types'
+import type { Contatti, User } from '@/payload-types'
 
 import { normalizeContactCategory, type ContactCategory } from './category'
 import { isValidEmailFormat, normalizeCsvEmail } from './csvParser'
+import { incrementWildcardUsed, loadWildcardQuotaInfo } from './wildcardQuota'
 
 export type WildcardInsertInput = {
   firstName: string
   lastName: string
   email?: string | null
+  telefono?: string | null
   dudeCompany?: string | null
   category?: string | null
+  /** Ignorato lato server: derivato dall'email utente App (parte locale). */
   assegnazione?: string | null
   /** Default false: se nome+cognome matchano un record esistente, ritorna warning senza insert. */
   confermaSoftMatch?: boolean
@@ -21,6 +24,7 @@ export type WildcardSimilarContact = {
   firstName?: string | null
   lastName?: string | null
   email?: string | null
+  telefono?: string | null
   dudeCompany?: string | null
   category?: Contatti['category']
   assegnazione?: string | null
@@ -38,12 +42,14 @@ export type WildcardInsertResult =
   | { esito: 'inserito'; contatto: WildcardInsertedContact }
   | { esito: 'emailEsistente'; contatto?: never; recordSimile?: never }
   | { esito: 'warningSoftMatch'; recordSimile: WildcardSimilarContact }
+  | { esito: 'quotaEsaurita'; contatto?: never; recordSimile?: never }
 
 export type RunWildcardInsertOptions = {
   payload: Payload
   userId: string
-  /** Email del manager (createdBy + log). */
+  /** Email del manager (createdBy + log + assegnazione). */
   userEmail: string
+  appRole: NonNullable<User['appRole']>
   input: WildcardInsertInput
 }
 
@@ -57,12 +63,20 @@ function normalizeName(raw: string): string {
   return raw.trim().toLowerCase()
 }
 
+/** Parte locale dell'email utente App — es. mm@dude.it → mm. */
+export function deriveAssegnazioneFromEmail(userEmail: string): string | undefined {
+  const at = userEmail.indexOf('@')
+  if (at <= 0) return undefined
+  return trimOrUndefined(userEmail.slice(0, at))
+}
+
 function toSimilarContact(doc: Contatti): WildcardSimilarContact {
   return {
     id: doc.id,
     firstName: doc.firstName ?? null,
     lastName: doc.lastName ?? null,
     email: doc.email ?? null,
+    telefono: doc.telefono ?? null,
     dudeCompany: doc.dudeCompany ?? null,
     category: doc.category ?? null,
     assegnazione: doc.assegnazione ?? null,
@@ -156,18 +170,25 @@ async function writeWildcardActivityLog(
 
 /**
  * Inserimento Wildcard — logica propria (§2.11), non usa resolveContactPrecedence.
- * Tre esiti: inserito | emailEsistente | warningSoftMatch.
+ * Esiti: inserito | emailEsistente | warningSoftMatch | quotaEsaurita.
  */
 export async function insertWildcardContact(
   options: RunWildcardInsertOptions,
 ): Promise<WildcardInsertResult> {
-  const { payload, userId, userEmail, input } = options
+  const { payload, userId, userEmail, appRole, input } = options
 
   const firstName = trimOrUndefined(input.firstName)
   const lastName = trimOrUndefined(input.lastName)
 
   if (!firstName || !lastName) {
     throw new Error('Nome e cognome sono obbligatori.')
+  }
+
+  if (appRole === 'manager') {
+    const quotaInfo = await loadWildcardQuotaInfo(payload, userId)
+    if (quotaInfo.exhausted) {
+      return { esito: 'quotaEsaurita' }
+    }
   }
 
   const emailRaw = trimOrUndefined(input.email ?? undefined)
@@ -179,8 +200,9 @@ export async function insertWildcardContact(
     }
   }
 
+  const telefono = trimOrUndefined(input.telefono ?? undefined)
   const dudeCompany = trimOrUndefined(input.dudeCompany ?? undefined)
-  const assegnazione = trimOrUndefined(input.assegnazione ?? undefined)
+  const assegnazione = deriveAssegnazioneFromEmail(userEmail)
   const category: ContactCategory | undefined = normalizeContactCategory(
     input.category ?? undefined,
   )
@@ -209,9 +231,12 @@ export async function insertWildcardContact(
       firstName,
       lastName,
       email,
+      telefono,
       dudeCompany,
       category,
       assegnazione,
+      partyDude: 'SI',
+      partyTtt: 'YES',
       source: 'Wildcard',
       createdBy: userEmail,
       attivo: true,
@@ -220,11 +245,14 @@ export async function insertWildcardContact(
     overrideAccess: true,
   })) as Contatti
 
+  await incrementWildcardUsed(payload, userId)
+
   const emailLabel = email ?? '(senza email)'
+  const telefonoLabel = telefono ? `, telefono ${telefono}` : ''
   await writeWildcardActivityLog(payload, {
     userId,
     contactId: created.id,
-    detail: `Contatto inserito da Wildcard: ${firstName} ${lastName}, email ${emailLabel}${confermaSoftMatch ? ' (soft-match confermato)' : ''}.`,
+    detail: `Contatto inserito da Wildcard: ${firstName} ${lastName}, email ${emailLabel}${telefonoLabel}${confermaSoftMatch ? ' (soft-match confermato)' : ''}.`,
   })
 
   return { esito: 'inserito', contatto: toInsertedContact(created) }

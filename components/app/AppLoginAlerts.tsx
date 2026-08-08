@@ -3,10 +3,11 @@
 import { useSearchParams } from 'next/navigation'
 
 import {
-  LOGIN_FAILURE_MESSAGE,
   LOGIN_FAILURE_QUERY,
   LOGIN_VERIFIED_QUERY,
 } from '@/auth/constants'
+import { AuthAlert } from '@/components/app/auth/AuthAlert'
+import { AUTH_UI } from '@/components/app/auth/authMessages'
 
 /** Messaggi da query string su /app/login (errore OAuth/locale, verifica email OK). */
 export default function AppLoginAlerts() {
@@ -20,16 +21,12 @@ export default function AppLoginAlerts() {
 
   return (
     <div className="flex flex-col gap-3">
-      {showVerified && (
-        <p className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-800" role="status">
-          Email verificata. Ora puoi accedere con email e password.
-        </p>
-      )}
-      {showError && (
-        <p className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
-          {LOGIN_FAILURE_MESSAGE}
-        </p>
-      )}
+      {showVerified ? (
+        <AuthAlert variant="success">{AUTH_UI.login.verified}</AuthAlert>
+      ) : null}
+      {showError ? (
+        <AuthAlert variant="error">{AUTH_UI.login.oauthError}</AuthAlert>
+      ) : null}
     </div>
   )
 }

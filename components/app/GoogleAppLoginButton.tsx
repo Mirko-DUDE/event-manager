@@ -1,14 +1,20 @@
 'use client'
 
 import { GOOGLE_APP_OAUTH } from '@/auth/constants'
+import { GoogleIcon } from '@/components/app/auth/GoogleIcon'
+import { cn } from '@/lib/utils'
 
 export default function GoogleAppLoginButton() {
   return (
     <a
-      className="inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       href={`/api/users${GOOGLE_APP_OAUTH.authorizePath}`}
+      className={cn(
+        'inline-flex w-full items-center justify-center gap-2.5 rounded-[10px] border border-app-border bg-app-surface px-4 py-2.5',
+        'text-[13.5px] font-semibold text-app-text-primary transition-colors hover:bg-[#f4f4f5]',
+      )}
     >
-      Accedi con Google
+      <GoogleIcon />
+      Sign in with Google
     </a>
   )
 }

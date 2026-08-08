@@ -1,9 +1,16 @@
 'use client'
 
-import Link from 'next/link'
+import { Mail } from 'lucide-react'
 import React, { useState } from 'react'
 
-import { APP_FORGOT_PASSWORD_API, LOGIN_FAILURE_MESSAGE } from '@/auth/constants'
+import { APP_FORGOT_PASSWORD_API, APP_LOGIN_PATH } from '@/auth/constants'
+import { AuthAlert } from '@/components/app/auth/AuthAlert'
+import { AuthBackLink } from '@/components/app/auth/AuthBackLink'
+import { AuthBrand } from '@/components/app/auth/AuthBrand'
+import { AuthField } from '@/components/app/auth/AuthField'
+import { AuthIconCircle } from '@/components/app/auth/AuthIconCircle'
+import { AUTH_UI, maskEmail } from '@/components/app/auth/authMessages'
+import { Button } from '@/components/ui/button'
 
 export default function AppForgotPasswordForm() {
   const [email, setEmail] = useState('')
@@ -11,8 +18,8 @@ export default function AppForgotPasswordForm() {
   const [sent, setSent] = useState(false)
   const [showError, setShowError] = useState(false)
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function submitEmail(event?: React.FormEvent<HTMLFormElement>) {
+    event?.preventDefault()
     setSubmitting(true)
     setShowError(false)
 
@@ -38,52 +45,78 @@ export default function AppForgotPasswordForm() {
   }
 
   if (sent) {
+    const masked = maskEmail(email)
+
     return (
-      <div className="flex flex-col gap-4 text-center text-sm text-slate-600">
-        <p>Se l&apos;indirizzo è registrato per l&apos;accesso locale App, riceverai un&apos;email con le istruzioni.</p>
-        <Link className="text-blue-600 hover:underline" href="/app/login">
-          Torna al login
-        </Link>
+      <div className="flex flex-col gap-[18px]">
+        <AuthIconCircle>
+          <Mail className="size-[22px]" aria-hidden />
+        </AuthIconCircle>
+
+        <AuthBrand
+          align="left"
+          title="Check your email"
+          subtitle=""
+        />
+
+        <p className="text-[12.5px] leading-relaxed text-app-text-secondary">
+          {AUTH_UI.forgot.sentIntro(masked)}
+        </p>
+
+        <p className="text-center text-[12.5px] text-app-text-secondary">
+          {AUTH_UI.forgot.didntGet}{' '}
+          <button
+            type="button"
+            onClick={() => submitEmail()}
+            disabled={submitting}
+            className="font-semibold text-app-text-primary underline-offset-2 hover:underline disabled:opacity-60"
+          >
+            {AUTH_UI.forgot.resend}
+          </button>
+        </p>
+
+        <AuthBackLink href={APP_LOGIN_PATH} />
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {showError && (
-        <p className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
-          {LOGIN_FAILURE_MESSAGE}
-        </p>
-      )}
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="forgot-email">
-            Email
-          </label>
-          <input
-            autoComplete="email"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            id="forgot-email"
-            name="email"
-            onChange={(event) => setEmail(event.target.value)}
-            required
-            type="email"
-            value={email}
-          />
-        </div>
-        <button
-          className="inline-flex w-full items-center justify-center rounded-md bg-slate-800 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-60"
-          disabled={submitting}
+    <div className="flex flex-col gap-[18px]">
+      <AuthBackLink href={APP_LOGIN_PATH} />
+
+      <AuthBrand
+        align="left"
+        title="Forgot password"
+        subtitle="Enter your work email: if it's registered, we'll send you a link to reset your password."
+      />
+
+      {showError ? (
+        <AuthAlert variant="error">
+          Something went wrong. Please try again or contact an administrator.
+        </AuthAlert>
+      ) : null}
+
+      <form className="flex flex-col gap-3" onSubmit={submitEmail}>
+        <AuthField
+          id="forgot-email"
+          label="Email"
+          type="email"
+          value={email}
+          onChange={setEmail}
+          placeholder="name@company.com"
+          autoComplete="email"
+          required
+          hasError={showError}
+        />
+
+        <Button
           type="submit"
+          disabled={submitting}
+          className="mt-1 h-auto rounded-[10px] py-2.5 text-[13.5px] font-semibold"
         >
-          {submitting ? 'Invio in corso…' : 'Invia link di reset'}
-        </button>
+          {submitting ? 'Sending…' : 'Send link'}
+        </Button>
       </form>
-      <p className="text-center text-sm text-slate-600">
-        <Link className="text-blue-600 hover:underline" href="/app/login">
-          Torna al login
-        </Link>
-      </p>
     </div>
   )
 }

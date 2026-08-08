@@ -1,24 +1,20 @@
-import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
-export default function AppHomePage() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-8">
-      <div className="w-full max-w-md space-y-4 rounded-lg bg-white p-6 shadow">
-        <h1 className="text-2xl font-semibold text-slate-900">Area App</h1>
-        <p className="text-sm text-slate-600">Sezioni disponibili in base al tuo ruolo App.</p>
-        <ul className="space-y-2 text-sm">
-          <li>
-            <Link href="/app/contatti" className="font-medium text-slate-900 underline">
-              Contatti — lista e resend ticket
-            </Link>
-          </li>
-          <li>
-            <Link href="/app/wildcard" className="font-medium text-slate-900 underline">
-              Wildcard — inserimento contatto
-            </Link>
-          </li>
-        </ul>
-      </div>
-    </main>
-  )
+import { getAuthenticatedAppUser } from '@/auth/app/getAuthenticatedAppUser'
+import { getFirstAccessibleHref } from '@/lib/app/navigation'
+
+/** Auth + DB a runtime — non prerenderizzare in `next build`. */
+export const dynamic = 'force-dynamic'
+
+export default async function AppHomePage() {
+  const user = await getAuthenticatedAppUser()
+
+  if (user?.appRole && user.appRole !== 'none') {
+    const firstHref = getFirstAccessibleHref({ appRole: user.appRole })
+    if (firstHref) {
+      redirect(firstHref)
+    }
+  }
+
+  return null
 }

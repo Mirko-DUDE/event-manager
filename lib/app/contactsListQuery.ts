@@ -1,0 +1,148 @@
+import type { Where } from 'payload'
+
+export const CONTACTS_PAGE_SIZE = 20
+
+export type ContactsCheckInFilter = 'all' | 'checked-in' | 'not-checked-in'
+export type ContactsSortField = 'firstName' | 'lastName'
+export type ContactsSortDir = 'asc' | 'desc'
+
+export type ContactsListParams = {
+  q: string
+  filter: ContactsCheckInFilter
+  sort: ContactsSortField
+  dir: ContactsSortDir
+  page: number
+}
+
+export type ContactsListCounts = {
+  all: number
+  checkedIn: number
+  notCheckedIn: number
+}
+
+const DEFAULT_PARAMS: ContactsListParams = {
+  q: '',
+  filter: 'all',
+  sort: 'lastName',
+  dir: 'asc',
+  page: 1,
+}
+
+function parseCheckInFilter(value: string | undefined): ContactsCheckInFilter {
+  if (value === 'checked-in' || value === 'not-checked-in') return value
+  return 'all'
+}
+
+function parseSortField(value: string | undefined): ContactsSortField {
+  if (value === 'firstName') return 'firstName'
+  return 'lastName'
+}
+
+function parseSortDir(value: string | undefined): ContactsSortDir {
+  if (value === 'desc') return 'desc'
+  return 'asc'
+}
+
+function parsePage(value: string | undefined): number {
+  const parsed = Number.parseInt(value ?? '1', 10)
+  if (!Number.isFinite(parsed) || parsed < 1) return 1
+  return parsed
+}
+
+/** Normalizza i search params URL in valori sicuri per query e UI. */
+export function parseContactsListParams(
+  searchParams: Record<string, string | string[] | undefined>,
+): ContactsListParams {
+  const rawQ = searchParams.q
+  const q = (Array.isArray(rawQ) ? rawQ[0] : rawQ)?.trim() ?? ''
+
+  const rawFilter = searchParams.filter
+  const filter = parseCheckInFilter(Array.isArray(rawFilter) ? rawFilter[0] : rawFilter)
+
+  const rawSort = searchParams.sort
+  const sort = parseSortField(Array.isArray(rawSort) ? rawSort[0] : rawSort)
+
+  const rawDir = searchParams.dir
+  const dir = parseSortDir(Array.isArray(rawDir) ? rawDir[0] : rawDir)
+
+  const rawPage = searchParams.page
+  const page = parsePage(Array.isArray(rawPage) ? rawPage[0] : rawPage)
+
+  return { q, filter, sort, dir, page }
+}
+
+/** Costruisce href bookmarkable per lista contatti (omit undefined = default). */
+export function buildContactsListHref(
+  base: ContactsListParams,
+  patch: Partial<ContactsListParams> = {},
+): string {
+  const next: ContactsListParams = { ...base, ...patch }
+
+  const params = new URLSearchParams()
+  if (next.q) params.set('q', next.q)
+  if (next.filter !== DEFAULT_PARAMS.filter) params.set('filter', next.filter)
+  if (next.sort !== DEFAULT_PARAMS.sort) params.set('sort', next.sort)
+  if (next.dir !== DEFAULT_PARAMS.dir) params.set('dir', next.dir)
+  if (next.page > 1) params.set('page', String(next.page))
+
+  const query = params.toString()
+  return query ? `/app/contatti?${query}` : '/app/contatti'
+}
+
+/** Deep-link scheda contatto preservando i search params della lista. */
+export function buildContactDetailHref(
+  base: ContactsListParams,
+  contactId: string,
+): string {
+  const params = new URLSearchParams()
+  if (base.q) params.set('q', base.q)
+  if (base.filter !== DEFAULT_PARAMS.filter) params.set('filter', base.filter)
+  if (base.sort !== DEFAULT_PARAMS.sort) params.set('sort', base.sort)
+  if (base.dir !== DEFAULT_PARAMS.dir) params.set('dir', base.dir)
+  if (base.page > 1) params.set('page', String(base.page))
+
+  const query = params.toString()
+  return query ? `/app/contatti/${contactId}?${query}` : `/app/contatti/${contactId}`
+}
+
+const ACTIVE_WHERE: Where = {
+  attivo: { not_equals: false },
+}
+
+function buildTextSearchWhere(q: string): Where | null {
+  const trimmed = q.trim()
+  if (!trimmed) return null
+
+  return {
+    or: [
+      { firstName: { contains: trimmed } },
+      { lastName: { contains: trimmed } },
+      { email: { contains: trimmed } },
+    ],
+  }
+}
+
+function buildCheckInFilterWhere(filter: ContactsCheckInFilter): Where | null {
+  if (filter === 'checked-in') return { checkIn: { equals: true } }
+  if (filter === 'not-checked-in') return { checkIn: { not_equals: true } }
+  return null
+}
+
+function combineWhere(...clauses: Array<Where | null>): Where {
+  const and = [ACTIVE_WHERE, ...clauses.filter(Boolean)] as Where[]
+  return and.length === 1 ? and[0]! : { and }
+}
+
+/** Where con ricerca testuale, senza filtro check-in (per conteggi segmentati). */
+export function buildContactsSearchWhere(q: string): Where {
+  return combineWhere(buildTextSearchWhere(q))
+}
+
+/** Where completo per la lista paginata. */
+export function buildContactsListWhere(q: string, filter: ContactsCheckInFilter): Where {
+  return combineWhere(buildTextSearchWhere(q), buildCheckInFilterWhere(filter))
+}
+
+export function buildContactsListSort(sort: ContactsSortField, dir: ContactsSortDir): string {
+  return dir === 'desc' ? `-${sort}` : sort
+}

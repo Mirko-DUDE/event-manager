@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Area App — Access not allowed</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --text-primary: #18181b;
+    --text-secondary: #71717a;
+    --text-muted: #a1a1aa;
+    --accent: #18181b;
+    --accent-fg: #ffffff;
+    --danger-bg: #fef2f2;
+    --danger-text: #b91c1c;
+    --danger-border: #fecaca;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    overflow-x: hidden;
+    background: #f0f0f2;
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 40px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .phone-frame {
+    width: 100%;
+    max-width: min(380px, calc(100vw - 32px));
+    background: var(--bg);
+    min-height: 660px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  .proto-controls {
+    background: #fff7ed;
+    border-bottom: 1px dashed #fdba74;
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .proto-controls select {
+    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    border: 1px solid #fdba74;
+    background: #fff;
+    color: #92400e;
+    font-weight: 600;
+  }
+
+  header.topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .topbar-left { display:flex; align-items:center; gap:10px; }
+  .event-name { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .role-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .avatar-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-fg);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 12px; font-weight: 600;
+    border: none; cursor: pointer;
+  }
+
+  main.content {
+    flex: 1;
+    padding: 40px 24px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+  }
+  main.content.centered { justify-content: center; padding-bottom: 90px; }
+
+  .icon-circle {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+  .icon-circle svg { width: 24px; height: 24px; color: var(--danger-text); }
+
+  .title { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+  .desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; max-width: 260px; }
+  .desc strong { color: var(--text-primary); }
+
+  .primary-btn {
+    background: var(--accent);
+    color: var(--accent-fg);
+    border: none;
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .secondary-btn {
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  nav.bottom-nav {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 6px 6px;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 4px;
+    border-radius: 10px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+  }
+  .nav-item svg { width: 20px; height: 20px; }
+  .nav-item span { font-size: 10.5px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="hint" style="text-align:center; font-size:12px; color:#71717a; max-width: min(380px, calc(100vw - 32px));">
+  The selector just lets you compare the two variants for the prototype.
+</div>
+
+<script>
+const ICON_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>';
+const ICON_CONTATTI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+const ICON_CHECKIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
+
+const VARIANTS = {
+  none_role: { label: "No access (role: none)" },
+  section:   { label: "Section unavailable (inside the shell)" }
+};
+
+let current = "section";
+
+function render() {
+  let html;
+
+  if (current === "none_role") {
+    html =
+      '<main class="content centered">' +
+        '<div class="icon-circle">' + ICON_LOCK + '</div>' +
+        '<div class="title">Access not allowed</div>' +
+        '<div class="desc">Your account <strong>m.rossi@company.com</strong> has no active permissions on this tool. Contact an administrator to request access.</div>' +
+        '<button class="secondary-btn" type="button">Sign out</button>' +
+      '</main>';
+
+  } else {
+    html =
+      '<header class="topbar">' +
+        '<div class="topbar-left">' +
+          '<div class="event-name">Event Manager</div>' +
+          '<div class="role-badge">Hostess</div>' +
+        '</div>' +
+        '<button class="avatar-btn">H</button>' +
+      '</header>' +
+      '<main class="content">' +
+        '<div class="icon-circle" style="margin-top:32px;">' + ICON_LOCK + '</div>' +
+        '<div class="title">Section unavailable</div>' +
+        '<div class="desc">Your role (<strong>Hostess</strong>) doesn\u2019t have access to this section. If you think this is a mistake, contact a manager.</div>' +
+        '<button class="primary-btn" type="button">Back to Contacts</button>' +
+      '</main>' +
+      '<nav class="bottom-nav">' +
+        '<button class="nav-item">' + ICON_CONTATTI + '<span>Contacts</span></button>' +
+        '<button class="nav-item">' + ICON_CHECKIN + '<span>Check-in</span></button>' +
+      '</nav>';
+  }
+
+  document.getElementById("root").innerHTML =
+    '<div class="phone-frame">' +
+      '<div class="proto-controls">' +
+        '⚠ Prototype only:' +
+        '<select id="variantSelect">' +
+          Object.keys(VARIANTS).map(v => '<option value="' + v + '"' + (v === current ? ' selected' : '') + '>' + VARIANTS[v].label + '</option>').join("") +
+        '</select>' +
+      '</div>' +
+      html +
+    '</div>';
+
+  document.getElementById("variantSelect").addEventListener("change", (e) => {
+    current = e.target.value;
+    render();
+  });
+}
+
+render();
+</script>
+</body>
+</html>

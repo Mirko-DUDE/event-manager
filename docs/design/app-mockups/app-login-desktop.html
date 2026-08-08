@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<!--
+  DESKTOP mockup — this is a browser window, NOT a phone/mobile frame.
+  Do not confuse the ".desktop-viewport" browser-chrome container below with the
+  ".phone-frame" containers used in the mobile mockups (app-login.html, app-shell-navigazione-base.html, etc).
+  This screen has no bottom nav and no sidebar because it's the pre-auth login page.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Manager — Desktop login</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --text-primary: #18181b;
+    --text-secondary: #71717a;
+    --text-muted: #a1a1aa;
+    --accent: #18181b;
+    --accent-fg: #ffffff;
+    --danger-bg: #fef2f2;
+    --danger-text: #b91c1c;
+    --danger-border: #fecaca;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    overflow-x: hidden;
+    background: #f0f0f2;
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 32px 16px;
+  }
+
+  .proto-controls {
+    background: #fff7ed;
+    border: 1px dashed #fdba74;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: min(1000px, calc(100vw - 32px));
+    justify-content: center;
+  }
+  .proto-controls select {
+    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    border: 1px solid #fdba74;
+    background: #fff;
+    color: #92400e;
+    font-weight: 600;
+  }
+
+  .desktop-viewport {
+    width: 100%;
+    max-width: min(1000px, calc(100vw - 32px));
+    min-height: 560px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .browser-chrome {
+    background: #eeeeef;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .browser-dots { display: flex; gap: 6px; flex-shrink: 0; }
+  .browser-dots span { width: 10px; height: 10px; border-radius: 50%; background: #d4d4d8; display: block; }
+  .browser-url-bar {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+  }
+  .browser-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .brand { text-align: center; margin-bottom: 2px; }
+  .brand-name { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand-sub { font-size: 13px; color: var(--text-secondary); margin-top: 5px; }
+
+  .error-banner {
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    color: var(--danger-text);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-size: 12.5px;
+    line-height: 1.4;
+  }
+
+  .google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 11px 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+  .google-btn:hover { background: #f4f4f5; }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-muted);
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+  form { display: flex; flex-direction: column; gap: 12px; }
+  label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; display: block; }
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    background: var(--surface);
+    color: var(--text-primary);
+  }
+  input:focus { outline: 2px solid var(--text-primary); outline-offset: 1px; }
+  input.field-error { border-color: var(--danger-text); }
+
+  .forgot-link { align-self: flex-end; font-size: 12px; color: var(--text-secondary); text-decoration: none; margin-top: -4px; }
+
+  .submit-btn {
+    background: var(--accent);
+    color: var(--accent-fg);
+    border: none;
+    border-radius: var(--radius);
+    padding: 11px 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .submit-btn:hover { opacity: 0.9; }
+</style>
+</head>
+<body>
+<div class="proto-controls">
+  ⚠ Prototype only:
+  <select id="stateSelect"></select>
+</div>
+<div id="root"></div>
+<div class="hint" style="text-align:center; font-size:12px; color:#71717a; max-width: min(1000px, calc(100vw - 32px));">
+  Same content as the mobile login, just centered on a full page instead of the app shell (no sidebar — the user isn\u2019t signed in yet).
+</div>
+
+<script>
+const STATES = {
+  default:   { label: "Default (no error)" },
+  bad_creds: { label: "Wrong credentials (local form)" },
+  bad_domain:{ label: "Domain not allowed (Google)" }
+};
+let currentState = "default";
+
+function render() {
+  const errorMessages = {
+    default: "",
+    bad_creds: "Incorrect email or password. Please try again.",
+    bad_domain: "Your Google account isn\u2019t authorized to access this tool. Contact an administrator."
+  };
+  const msg = errorMessages[currentState];
+  const isLocalError = currentState === "bad_creds";
+
+  document.getElementById("root").innerHTML =
+    '<div class="desktop-viewport">' +
+      '<div class="browser-chrome">' +
+        '<div class="browser-dots"><span></span><span></span><span></span></div>' +
+        '<div class="browser-url-bar">app.eventmanager.internal/login</div>' +
+      '</div>' +
+      '<div class="browser-body">' +
+      '<div class="login-card">' +
+        '<div class="brand">' +
+          '<div class="brand-name">Event Manager</div>' +
+          '<div class="brand-sub">Access restricted to staff</div>' +
+        '</div>' +
+        (msg ? '<div class="error-banner">' + msg + '</div>' : '') +
+        '<button class="google-btn" type="button">' +
+          '<svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4 24 4c-7.7 0-14.4 4.4-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.8 14.1-5l-6.5-5.5C29.6 35.4 26.9 36 24 36c-5.3 0-9.6-3.1-11.3-7.6l-6.6 5.1C9.5 39.5 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.5l6.5 5.5C41.5 35.9 44 30.4 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>' +
+          'Sign in with Google' +
+        '</button>' +
+        '<div class="divider">or</div>' +
+        '<form>' +
+          '<div>' +
+            '<label>Email</label>' +
+            '<input type="email" placeholder="name@company.com" class="' + (isLocalError ? 'field-error' : '') + '">' +
+          '</div>' +
+          '<div>' +
+            '<label>Password</label>' +
+            '<input type="password" placeholder="••••••••" class="' + (isLocalError ? 'field-error' : '') + '">' +
+          '</div>' +
+          '<a href="#" class="forgot-link">Forgot password?</a>' +
+          '<button class="submit-btn" type="button">Sign in</button>' +
+        '</form>' +
+      '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+const select = document.getElementById("stateSelect");
+select.innerHTML = Object.keys(STATES).map(s => '<option value="' + s + '">' + STATES[s].label + '</option>').join("");
+select.addEventListener("change", (e) => { currentState = e.target.value; render(); });
+
+render();
+</script>
+</body>
+</html>

@@ -30,3 +30,8 @@ export function canAccessSection(user: UserWithAppRole, section: AppSection): bo
 export function canResendTicket(user: UserWithAppRole): boolean {
   return user.appRole === 'manager' || user.appRole === 'full-access'
 }
+
+/** Undo check-in da scheda contatto (§2.7 / §2.8bis): solo full-access. */
+export function canUndoCheckIn(user: UserWithAppRole): boolean {
+  return user.appRole === 'full-access'
+}

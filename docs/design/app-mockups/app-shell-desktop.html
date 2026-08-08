@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Manager — Desktop shell</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --text-primary: #18181b;
+    --text-secondary: #71717a;
+    --text-muted: #a1a1aa;
+    --accent: #18181b;
+    --accent-fg: #ffffff;
+    --danger-bg: #fef2f2;
+    --danger-text: #b91c1c;
+    --badge-bg: #18181b;
+    --badge-fg: #ffffff;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    overflow-x: hidden;
+    background: #f0f0f2;
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .proto-controls {
+    background: #fff7ed;
+    border-bottom: 1px dashed #fdba74;
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: min(1180px, calc(100vw - 32px));
+    border: 1px dashed #fdba74;
+    border-radius: 10px 10px 0 0;
+    border-bottom: none;
+  }
+  .proto-controls select {
+    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    border: 1px solid #fdba74;
+    background: #fff;
+    color: #92400e;
+    font-weight: 600;
+  }
+
+  .desktop-frame {
+    width: 100%;
+    max-width: min(1180px, calc(100vw - 32px));
+    min-height: 640px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0 0 16px 16px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  .sidebar {
+    width: 232px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0 0;
+  }
+  .sidebar-logo {
+    padding: 0 20px 22px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sidebar-logo-mark {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 12px;
+    flex: 1;
+  }
+  .sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border: none;
+    background: none;
+    text-align: left;
+    width: 100%;
+    position: relative;
+  }
+  .sidebar-nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .sidebar-nav-item.active { background: var(--bg); color: var(--text-primary); }
+  .sidebar-nav-item:hover:not(.active) { background: #fafafa; }
+  .sidebar-badge {
+    margin-left: auto;
+    background: var(--badge-bg);
+    color: var(--badge-fg);
+    font-size: 10.5px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+  }
+
+  .sidebar-user {
+    margin-top: auto;
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    position: relative;
+  }
+  .sidebar-user:hover { background: var(--bg); }
+  .sidebar-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-fg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12.5px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .sidebar-user-info { min-width: 0; flex: 1; }
+  .sidebar-user-name { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sidebar-role { font-size: 11px; color: var(--text-secondary); }
+  .chevron-icon { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
+
+  .user-menu-popover {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 12px;
+    right: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    padding: 6px;
+    z-index: 30;
+  }
+  .user-menu-header { padding: 8px 10px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .user-menu-email { font-size: 12.5px; font-weight: 600; }
+  .user-menu-role { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 7px;
+    border: none;
+    background: none;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+  }
+  .user-menu-item:hover { background: var(--bg); }
+  .user-menu-item svg { width: 15px; height: 15px; }
+
+  .main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    min-width: 0;
+  }
+  .main-header {
+    padding: 22px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .main-title { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+  .main-subtitle { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
+
+  .main-body {
+    padding: 32px;
+    flex: 1;
+  }
+  .content-placeholder {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+  .denied-box {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    font-size: 13.5px;
+    font-weight: 500;
+    max-width: 420px;
+    margin: 40px auto 0;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="hint" style="text-align:center; font-size:12px; color:#71717a; max-width: min(1180px, calc(100vw - 32px));">
+  Prototype: switch role above to see nav items and quota badge change. Content max-width in the real app is 1280px — this preview frame is scaled down to fit the chat window.
+</div>
+
+<script>
+const ICONS = {
+  contacts: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  wildcard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>',
+  checkin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2zM14 19h2M19 14h2"/></svg>'
+};
+
+const ROLES = {
+  hostess:     { label: "Hostess",     nav: ["contacts", "checkin"] },
+  manager:     { label: "Manager",     nav: ["contacts", "wildcard", "checkin"], quota: 12 },
+  "full-access": { label: "Full access", nav: ["contacts", "wildcard", "checkin"], quota: null },
+  none:        { label: "No access", nav: [] }
+};
+
+const NAV_META = {
+  contacts: { label: "Contacts", title: "Contacts list", subtitle: "Browse and search all event guests." },
+  wildcard: { label: "Wildcard", title: "Wildcard", subtitle: "Add walk-in guests and track your quota." },
+  checkin:  { label: "Check-in", title: "Check-in", subtitle: "Look up a guest and confirm their check-in." }
+};
+
+let currentRole = "manager";
+let currentTab = "contacts";
+let userMenuOpen = false;
+const ICON_CHEVRON = '<svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg>';
+const ICON_LOGOUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+
+function render() {
+  const role = ROLES[currentRole];
+  const availableTabs = role.nav;
+  if (!availableTabs.includes(currentTab)) currentTab = availableTabs[0] || null;
+  const initials = currentRole === "none" ? "?" : currentRole[0].toUpperCase();
+
+  const navHtml = availableTabs.map(key => {
+    const meta = NAV_META[key];
+    const active = key === currentTab ? "active" : "";
+    let badge = "";
+    if (key === "wildcard" && role.quota !== undefined && role.quota !== null) {
+      badge = '<span class="sidebar-badge">' + role.quota + '</span>';
+    }
+    return '<button class="sidebar-nav-item ' + active + '" data-tab="' + key + '">' + ICONS[key] + '<span>' + meta.label + '</span>' + badge + '</button>';
+  }).join("");
+
+  let bodyHtml;
+  if (!currentTab) {
+    bodyHtml = '<div class="denied-box">Access not allowed for this role.<br>Contact an administrator.</div>';
+  } else {
+    const meta = NAV_META[currentTab];
+    let extra = "";
+    if (currentTab === "wildcard" && role.quota !== undefined) {
+      extra = role.quota === null
+        ? 'Unlimited wildcards \u2014 no quota to show.'
+        : 'Remaining quota: <strong>' + role.quota + '</strong> \u2014 to be defined together with the desktop Wildcard screen.';
+    } else {
+      extra = 'Screen content \u2014 to be defined in the next iteration.';
+    }
+    bodyHtml = '<div class="content-placeholder">' + extra + '</div>';
+  }
+
+  const headerHtml = currentTab
+    ? '<div class="main-title">' + NAV_META[currentTab].title + '</div><div class="main-subtitle">' + NAV_META[currentTab].subtitle + '</div>'
+    : '<div class="main-title">Event Manager</div>';
+
+  document.getElementById("root").innerHTML =
+    '<div class="proto-controls">' +
+      '⚠ Prototype only:' +
+      '<select id="roleSelect">' +
+        Object.keys(ROLES).map(r => '<option value="' + r + '"' + (r === currentRole ? ' selected' : '') + '>' + ROLES[r].label + '</option>').join("") +
+      '</select>' +
+    '</div>' +
+    '<div class="desktop-frame">' +
+      '<div class="sidebar">' +
+        '<div class="sidebar-logo"><div class="sidebar-logo-mark">EM</div>Event Manager</div>' +
+        '<div class="sidebar-nav">' + navHtml + '</div>' +
+        '<div class="sidebar-user" id="sidebarUser">' +
+          (userMenuOpen ?
+            '<div class="user-menu-popover">' +
+              '<div class="user-menu-header"><div class="user-menu-email">m.rossi@company.com</div><div class="user-menu-role">' + role.label + '</div></div>' +
+              '<button class="user-menu-item" id="signOutBtn">' + ICON_LOGOUT + 'Sign out</button>' +
+            '</div>' : '') +
+          '<div class="sidebar-avatar">' + initials + '</div>' +
+          '<div class="sidebar-user-info"><div class="sidebar-user-name">m.rossi@company.com</div><div class="sidebar-role">' + role.label + '</div></div>' +
+          ICON_CHEVRON +
+        '</div>' +
+      '</div>' +
+      '<div class="main-area">' +
+        '<div class="main-header">' + headerHtml + '</div>' +
+        '<div class="main-body">' + bodyHtml + '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.getElementById("roleSelect").addEventListener("change", (e) => {
+    currentRole = e.target.value;
+    currentTab = null;
+    render();
+  });
+  document.querySelectorAll(".sidebar-nav-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentTab = btn.dataset.tab;
+      userMenuOpen = false;
+      render();
+    });
+  });
+  document.getElementById("sidebarUser").addEventListener("click", (e) => {
+    if (e.target.closest(".user-menu-popover")) return;
+    userMenuOpen = !userMenuOpen;
+    render();
+  });
+  const signOutBtn = document.getElementById("signOutBtn");
+  if (signOutBtn) {
+    signOutBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      alert("Would sign the user out and redirect to /login.");
+    });
+  }
+}
+
+render();
+</script>
+</body>
+</html>

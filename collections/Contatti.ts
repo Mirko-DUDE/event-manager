@@ -26,7 +26,7 @@ export const Contatti: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'email',
-    defaultColumns: ['firstName', 'lastName', 'email', 'category', 'source', 'attivo'],
+    defaultColumns: ['firstName', 'lastName', 'email', 'telefono', 'category', 'source', 'attivo'],
     group: 'Contatti',
   },
   access: {
@@ -53,6 +53,15 @@ export const Contatti: CollectionConfig = {
       label: 'Email',
       admin: {
         description: 'Opzionale. Unique con indice sparse se assente (fase-4-import-sync.md §2.1).',
+      },
+    },
+    {
+      name: 'telefono',
+      type: 'text',
+      label: 'Telefono',
+      admin: {
+        description:
+          'Opzionale. Solo schema App/Admin — nessun mapping HubSpot in Fase 7 Passo 0.',
       },
     },
     {

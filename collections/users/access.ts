@@ -26,6 +26,17 @@ export function canHaveLocalCredentials(data: UserWithRoles): boolean {
   return data.loginMethod === 'local'
 }
 
+/** Su update parziale (es. reset password App) `data` può non includere loginMethod — unire al doc esistente. */
+export function canHaveLocalCredentialsForChange(
+  data: UserWithRoles,
+  originalDoc?: UserWithRoles | null,
+): boolean {
+  if (originalDoc) {
+    return canHaveLocalCredentials({ ...originalDoc, ...data })
+  }
+  return canHaveLocalCredentials(data)
+}
+
 export const adminPanelAccess = ({ req: { user } }: { req: { user: UserWithRoles | null } }): boolean =>
   hasAdminPanelAccess(user)
 

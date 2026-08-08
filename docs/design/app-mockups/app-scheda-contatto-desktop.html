@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<!-- DESKTOP mockup — browser window with sidebar shell, not a phone frame. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Manager — Desktop contact detail</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --text-primary: #18181b;
+    --text-secondary: #71717a;
+    --text-muted: #a1a1aa;
+    --accent: #18181b;
+    --accent-fg: #ffffff;
+    --success-bg: #f0fdf4;
+    --success-text: #15803d;
+    --success-border: #bbf7d0;
+    --pending-text: #a1a1aa;
+    --whatsapp: #25D366;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    overflow-x: hidden;
+    background: #f0f0f2;
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .proto-controls {
+    background: #fff7ed;
+    border: 1px dashed #fdba74;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: min(1180px, calc(100vw - 32px));
+  }
+  .proto-controls select { font-size: 11px; padding: 3px 6px; border-radius: 6px; border: 1px solid #fdba74; background: #fff; color: #92400e; font-weight: 600; }
+  .proto-controls label { display: flex; align-items: center; gap: 4px; }
+
+  .desktop-frame {
+    width: 100%;
+    max-width: min(1180px, calc(100vw - 32px));
+    min-height: 640px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  .sidebar { width: 232px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 0 0; }
+  .sidebar-logo { padding: 0 20px 22px; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+  .sidebar-logo-mark { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: var(--accent-fg); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; flex: 1; }
+  .sidebar-nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: var(--text-secondary); border: none; background: none; width: 100%; text-align: left; }
+  .sidebar-nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .sidebar-nav-item.active { background: var(--bg); color: var(--text-primary); }
+  .sidebar-user { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700; flex-shrink: 0; }
+  .sidebar-user-name { font-size: 12.5px; font-weight: 600; }
+  .sidebar-role { font-size: 11px; color: var(--text-secondary); }
+
+  .main-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-width: 0; }
+  .main-header { padding: 22px 32px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .main-title { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+  .main-subtitle { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
+  .main-body { padding: 28px 32px; flex: 1; }
+
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; max-width: 640px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: left; font-size: 11.5px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--bg); }
+  tbody tr { border-bottom: 1px solid var(--border); cursor: pointer; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg); }
+  tbody td { padding: 12px 20px; font-size: 13.5px; }
+  .row-name-cell { display: flex; align-items: center; gap: 12px; }
+  .row-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 700; color: var(--text-secondary); flex-shrink: 0; }
+  .row-name { font-weight: 600; }
+
+  /* Modal */
+  .dim-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.35); z-index: 20; display: flex; align-items: center; justify-content: center; }
+  .modal-card { background: var(--surface); border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.2); width: 400px; max-height: 82%; overflow-y: auto; display: flex; flex-direction: column; }
+  .modal-header { display: flex; align-items: center; gap: 12px; padding: 20px 20px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .modal-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: var(--text-secondary); flex-shrink: 0; }
+  .modal-title-block { flex: 1; min-width: 0; }
+  .modal-name { font-size: 16px; font-weight: 700; }
+  .modal-checkin-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-top: 4px; }
+  .modal-checkin-pill.done { background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+  .modal-checkin-pill.pending { background: var(--bg); color: var(--pending-text); border: 1px solid var(--border); }
+  .modal-checkin-pill svg { width: 10px; height: 10px; }
+  .modal-close { border: none; background: var(--bg); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); flex-shrink: 0; }
+  .modal-close svg { width: 14px; height: 14px; }
+  .modal-body { padding: 6px 20px 4px; flex: 1; }
+  .field-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .field-row:last-child { border-bottom: none; }
+  .field-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; flex-shrink: 0; }
+  .field-value { font-size: 13px; font-weight: 500; text-align: right; word-break: break-word; }
+  .field-value.muted { color: var(--text-muted); font-weight: 400; }
+  .source-pill { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: var(--bg); border: 1px solid var(--border); color: var(--text-secondary); }
+  .modal-footer { padding: 16px 20px 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+  .checkin-btn { background: var(--accent); color: var(--accent-fg); border: none; border-radius: var(--radius); padding: 12px 16px; font-size: 13.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .checkin-btn svg { width: 15px; height: 15px; }
+  .undo-btn { background: var(--surface); color: var(--text-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 16px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+  .resend-row { display: flex; gap: 8px; }
+  .resend-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--radius); padding: 10px 10px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); }
+  .resend-btn svg { width: 14px; height: 14px; }
+  .resend-btn.whatsapp { color: var(--whatsapp); border-color: #bbf0cf; }
+  .resend-label { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: -2px; }
+</style>
+</head>
+<body>
+<div class="proto-controls">
+  ⚠ Prototype only:
+  <select id="roleSelect"></select>
+  <label><input type="checkbox" id="checkinToggle"> Checked in</label>
+</div>
+<div id="root"></div>
+
+<script>
+const ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>';
+const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+const ICON_WA = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.3A8.9 8.9 0 0 0 12 4a8.9 8.9 0 0 0-7.6 13.6L3 21l3.5-1.3A8.9 8.9 0 0 0 12 21a9 9 0 0 0 5.6-14.7zM12 19.3a7.3 7.3 0 0 1-3.7-1l-.3-.2-2.1.8.7-2-.2-.3A7.3 7.3 0 1 1 19.3 12 7.3 7.3 0 0 1 12 19.3zm4-5.5c-.2-.1-1.3-.6-1.5-.7-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-1.2-.6-2-1-2.8-2.3-.2-.3.2-.3.5-.9.1-.2 0-.3 0-.5l-.6-1.4c-.1-.3-.3-.3-.5-.3h-.4c-.1 0-.4.1-.6.4-.2.3-.8.8-.8 1.9 0 1.1.8 2.2.9 2.3.1.2 1.5 2.4 3.7 3.3 1.8.7 2.2.6 2.6.5.4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1z"/></svg>';
+const ICON_MAIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg>';
+const ICON_CONTACTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+const ICON_WILDCARD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>';
+const ICON_CHECKIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
+
+const CONTACT = {
+  first: "Giulia", last: "Rossi", email: "giulia.rossi@studio.it", phone: "+39 345 123 4567",
+  assegnazione: "m.rossi", company: "Milano", category: "Clients", source: "Hubspot"
+};
+const BACKDROP_LIST = [
+  { first: "Giulia", last: "Rossi", checkedIn: false },
+  { first: "Marco", last: "Bianchi", checkedIn: true },
+  { first: "Luca", last: "Ferrari", checkedIn: false },
+  { first: "Sara", last: "Conti", checkedIn: false }
+];
+
+const ROLES = ["Hostess", "Manager", "Full access"];
+let role = "Manager";
+let checkedIn = false;
+let modalOpen = false;
+
+function render() {
+  const initials = (CONTACT.first[0] + CONTACT.last[0]).toUpperCase();
+
+  const rowsHtml = BACKDROP_LIST.map(w => {
+    const wi = (w.first[0] + w.last[0]).toUpperCase();
+    return '<tr data-open="true"><td><div class="row-name-cell"><div class="row-avatar">' + wi + '</div><span class="row-name">' + w.first + ' ' + w.last + '</span></div></td></tr>';
+  }).join("");
+
+  let modalHtml = "";
+  if (modalOpen) {
+    const checkinPill = checkedIn
+      ? '<span class="modal-checkin-pill done">' + ICON_CHECK + 'Checked in</span>'
+      : '<span class="modal-checkin-pill pending">Not checked in</span>';
+
+    const checkinDateRow = checkedIn
+      ? '<div class="field-row"><span class="field-label">Check-in date</span><span class="field-value">Aug 6, 2026 \u2013 6:42 PM</span></div>' +
+        '<div class="field-row"><span class="field-label">Checked in by</span><span class="field-value">h.desai@company.com</span></div>'
+      : "";
+
+    const canResend = role === "Manager" || role === "Full access";
+    const canUndo = role === "Full access";
+
+    let footer = "";
+    if (!checkedIn) {
+      footer += '<button class="checkin-btn" id="checkinBtn">' + ICON_CHECK + 'Check in</button>';
+    } else if (canUndo) {
+      footer += '<button class="undo-btn" id="undoBtn">Undo check-in</button>';
+    } else {
+      footer += '<div class="field-value muted" style="text-align:left; padding:4px 0 6px;">Only Full access can undo a check-in.</div>';
+    }
+    if (canResend) {
+      footer += '<div class="resend-label">Resend ticket</div><div class="resend-row"><button class="resend-btn whatsapp">' + ICON_WA + 'WhatsApp</button><button class="resend-btn">' + ICON_MAIL + 'Email</button></div>';
+    }
+
+    modalHtml =
+      '<div class="dim-overlay" id="modalOverlay">' +
+        '<div class="modal-card" onclick="event.stopPropagation()">' +
+          '<div class="modal-header">' +
+            '<div class="modal-avatar">' + initials + '</div>' +
+            '<div class="modal-title-block"><div class="modal-name">' + CONTACT.first + ' ' + CONTACT.last + '</div>' + checkinPill + '</div>' +
+            '<button class="modal-close" id="modalCloseBtn">' + ICON_X + '</button>' +
+          '</div>' +
+          '<div class="modal-body">' +
+            '<div class="field-row"><span class="field-label">Email</span><span class="field-value">' + CONTACT.email + '</span></div>' +
+            '<div class="field-row"><span class="field-label">Phone</span><span class="field-value">' + CONTACT.phone + '</span></div>' +
+            '<div class="field-row"><span class="field-label">Assegnazione</span><span class="field-value">' + CONTACT.assegnazione + '</span></div>' +
+            '<div class="field-row"><span class="field-label">DUDE Company</span><span class="field-value">' + CONTACT.company + '</span></div>' +
+            '<div class="field-row"><span class="field-label">Category</span><span class="field-value">' + CONTACT.category + '</span></div>' +
+            '<div class="field-row"><span class="field-label">Source</span><span class="field-value"><span class="source-pill">' + CONTACT.source + '</span></span></div>' +
+            checkinDateRow +
+          '</div>' +
+          '<div class="modal-footer">' + footer + '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  document.getElementById("root").innerHTML =
+    '<div class="desktop-frame">' +
+      '<div class="sidebar">' +
+        '<div class="sidebar-logo"><div class="sidebar-logo-mark">EM</div>Event Manager</div>' +
+        '<div class="sidebar-nav">' +
+          '<button class="sidebar-nav-item active">' + ICON_CONTACTS + '<span>Contacts</span></button>' +
+          '<button class="sidebar-nav-item">' + ICON_WILDCARD + '<span>Wildcard</span></button>' +
+          '<button class="sidebar-nav-item">' + ICON_CHECKIN + '<span>Check-in</span></button>' +
+        '</div>' +
+        '<div class="sidebar-user"><div class="sidebar-avatar">' + role[0] + '</div><div><div class="sidebar-user-name">m.rossi@company.com</div><div class="sidebar-role">' + role + '</div></div></div>' +
+      '</div>' +
+      '<div class="main-area">' +
+        '<div class="main-header"><div class="main-title">Contacts list</div><div class="main-subtitle">Click a name to open the contact detail.</div></div>' +
+        '<div class="main-body"><div class="table-wrap"><table><tbody>' + rowsHtml + '</tbody></table></div></div>' +
+      '</div>' +
+      modalHtml +
+    '</div>';
+
+  document.getElementById("roleSelect").addEventListener("change", (e) => { role = e.target.value; render(); });
+  document.getElementById("checkinToggle").checked = checkedIn;
+  document.getElementById("checkinToggle").addEventListener("change", (e) => { checkedIn = e.target.checked; render(); });
+  document.querySelectorAll('[data-open="true"]').forEach(row => {
+    row.addEventListener("click", () => { modalOpen = true; render(); });
+  });
+  const overlay = document.getElementById("modalOverlay");
+  if (overlay) overlay.addEventListener("click", () => { modalOpen = false; render(); });
+  const closeBtn = document.getElementById("modalCloseBtn");
+  if (closeBtn) closeBtn.addEventListener("click", () => { modalOpen = false; render(); });
+  const checkinBtn = document.getElementById("checkinBtn");
+  if (checkinBtn) checkinBtn.addEventListener("click", () => { checkedIn = true; render(); });
+  const undoBtn = document.getElementById("undoBtn");
+  if (undoBtn) undoBtn.addEventListener("click", () => { checkedIn = false; render(); });
+}
+
+const select = document.getElementById("roleSelect");
+select.innerHTML = ROLES.map(r => '<option>' + r + '</option>').join("");
+select.value = role;
+
+render();
+</script>
+</body>
+</html>

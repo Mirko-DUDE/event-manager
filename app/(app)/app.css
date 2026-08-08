@@ -1,5 +1,161 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 /* Scan solo il route group App (e futuri componenti condivisi), non (payload) */
 @source './**/*.{js,ts,jsx,tsx}';
 @source '../../components/**/*.{js,ts,jsx,tsx}';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Breakpoint desktop Area App: lg (1024px) — default Tailwind, nessun override.
+ * Sotto lg: layout mobile (bottom nav). Sopra lg: sidebar desktop (Passo 2+).
+ */
+
+@theme inline {
+  /* shadcn/ui semantic tokens */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* App mockup palette — utility Tailwind allineate ai token HTML (docs/design/app-mockups/) */
+  --color-app-bg: var(--app-bg);
+  --color-app-surface: var(--app-surface);
+  --color-app-border: var(--app-border);
+  --color-app-text-primary: var(--app-text-primary);
+  --color-app-text-secondary: var(--app-text-secondary);
+  --color-app-text-muted: var(--app-text-muted);
+  --color-app-accent: var(--app-accent);
+  --color-app-accent-fg: var(--app-accent-fg);
+  --color-app-danger-bg: var(--app-danger-bg);
+  --color-app-danger-text: var(--app-danger-text);
+  --color-app-danger-border: var(--app-danger-border);
+  --color-app-warning-bg: var(--app-warning-bg);
+  --color-app-warning-text: var(--app-warning-text);
+  --color-app-warning-border: var(--app-warning-border);
+  --color-app-success-bg: var(--app-success-bg);
+  --color-app-success-text: var(--app-success-text);
+  --color-app-success-border: var(--app-success-border);
+  --color-app-badge-bg: var(--app-badge-bg);
+  --color-app-badge-fg: var(--app-badge-fg);
+}
+
+:root {
+  --radius: 10px;
+
+  /* Palette mockup — valori sorgente (1:1 con app-shell-navigazione-base.html e affini) */
+  --app-bg: #fafafa;
+  --app-surface: #ffffff;
+  --app-border: #e4e4e7;
+  --app-text-primary: #18181b;
+  --app-text-secondary: #71717a;
+  --app-text-muted: #a1a1aa;
+  --app-accent: #18181b;
+  --app-accent-fg: #ffffff;
+  --app-danger-bg: #fef2f2;
+  --app-danger-text: #b91c1c;
+  --app-danger-border: #fecaca;
+  --app-warning-bg: #fffbeb;
+  --app-warning-text: #92400e;
+  --app-warning-border: #fde68a;
+  --app-success-bg: #f0fdf4;
+  --app-success-text: #15803d;
+  --app-success-border: #bbf7d0;
+  --app-badge-bg: #18181b;
+  --app-badge-fg: #ffffff;
+
+  /* Bridge shadcn/ui ← mockup (mapping semantico) */
+  --background: var(--app-bg);
+  --foreground: var(--app-text-primary);
+  --card: var(--app-surface);
+  --card-foreground: var(--app-text-primary);
+  --popover: var(--app-surface);
+  --popover-foreground: var(--app-text-primary);
+  --primary: var(--app-accent);
+  --primary-foreground: var(--app-accent-fg);
+  --secondary: var(--app-bg);
+  --secondary-foreground: var(--app-text-secondary);
+  --muted: var(--app-bg);
+  --muted-foreground: var(--app-text-muted);
+  --accent: var(--app-bg);
+  --accent-foreground: var(--app-text-primary);
+  --destructive: var(--app-danger-text);
+  --destructive-foreground: var(--app-accent-fg);
+  --border: var(--app-border);
+  --input: var(--app-border);
+  --ring: var(--app-text-muted);
+  --chart-1: #18181b;
+  --chart-2: #71717a;
+  --chart-3: #a1a1aa;
+  --chart-4: #15803d;
+  --chart-5: #b91c1c;
+  --sidebar: var(--app-surface);
+  --sidebar-foreground: var(--app-text-primary);
+  --sidebar-primary: var(--app-accent);
+  --sidebar-primary-foreground: var(--app-accent-fg);
+  --sidebar-accent: var(--app-bg);
+  --sidebar-accent-foreground: var(--app-text-primary);
+  --sidebar-border: var(--app-border);
+  --sidebar-ring: var(--app-text-muted);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply overflow-x-hidden bg-background text-foreground antialiased;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+}
+
+@keyframes app-scanline {
+  0% {
+    top: 10px;
+  }
+  50% {
+    top: 205px;
+  }
+  100% {
+    top: 10px;
+  }
+}

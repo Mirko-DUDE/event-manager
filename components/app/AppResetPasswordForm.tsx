@@ -1,10 +1,17 @@
 'use client'
 
 import Link from 'next/link'
+import { AlertTriangle, Lock } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useState } from 'react'
 
-import { APP_RESET_PASSWORD_API, LOGIN_FAILURE_MESSAGE } from '@/auth/constants'
+import { APP_LOGIN_PATH, APP_RESET_PASSWORD_API } from '@/auth/constants'
+import { AuthAlert } from '@/components/app/auth/AuthAlert'
+import { AuthBackLink } from '@/components/app/auth/AuthBackLink'
+import { AuthBrand } from '@/components/app/auth/AuthBrand'
+import { AuthField } from '@/components/app/auth/AuthField'
+import { AuthIconCircle } from '@/components/app/auth/AuthIconCircle'
+import { Button } from '@/components/ui/button'
 
 export default function AppResetPasswordForm() {
   const router = useRouter()
@@ -51,65 +58,81 @@ export default function AppResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="flex flex-col gap-4 text-center text-sm text-slate-600">
-        <p>Link non valido o scaduto.</p>
-        <Link className="text-blue-600 hover:underline" href="/app/login/forgot-password">
-          Richiedi un nuovo link
-        </Link>
+      <div className="flex flex-col gap-[18px]">
+        <AuthIconCircle variant="danger">
+          <AlertTriangle className="size-[22px]" aria-hidden />
+        </AuthIconCircle>
+
+        <AuthBrand
+          align="left"
+          title="Invalid or expired link"
+          subtitle="The link you used is no longer valid. Request a new one to continue."
+        />
+
+        <Button asChild className="h-auto rounded-[10px] py-2.5 text-[13.5px] font-semibold">
+          <Link href="/app/login/forgot-password">Request a new link</Link>
+        </Button>
+
+        <AuthBackLink href={APP_LOGIN_PATH} />
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {showError && (
-        <p className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
-          {LOGIN_FAILURE_MESSAGE}
-        </p>
-      )}
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="new-password">
-            Nuova password
-          </label>
-          <input
-            autoComplete="new-password"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            id="new-password"
-            minLength={8}
-            name="password"
-            onChange={(event) => setPassword(event.target.value)}
-            required
-            type="password"
-            value={password}
-          />
-        </div>
-        <div>
-          <label
-            className="mb-1 block text-sm font-medium text-slate-700"
-            htmlFor="confirm-password"
-          >
-            Conferma password
-          </label>
-          <input
-            autoComplete="new-password"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            id="confirm-password"
-            minLength={8}
-            name="confirm-password"
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            required
-            type="password"
-            value={confirmPassword}
-          />
-        </div>
-        <button
-          className="inline-flex w-full items-center justify-center rounded-md bg-slate-800 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-60"
-          disabled={submitting}
+    <div className="flex flex-col gap-[18px]">
+      <AuthIconCircle>
+        <Lock className="size-[22px]" aria-hidden />
+      </AuthIconCircle>
+
+      <AuthBrand
+        align="left"
+        title="Set a new password"
+        subtitle="Choose a password you haven't already used for this account."
+      />
+
+      {showError ? (
+        <AuthAlert variant="error">
+          {password !== confirmPassword
+            ? 'Passwords do not match.'
+            : 'Could not update your password. The link may have expired.'}
+        </AuthAlert>
+      ) : null}
+
+      <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
+        <AuthField
+          id="new-password"
+          label="New password"
+          type="password"
+          value={password}
+          onChange={setPassword}
+          placeholder="••••••••"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          hasError={showError}
+          hint="At least 8 characters, with a letter or number and a special character."
+        />
+
+        <AuthField
+          id="confirm-password"
+          label="Confirm password"
+          type="password"
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          placeholder="••••••••"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          hasError={showError}
+        />
+
+        <Button
           type="submit"
+          disabled={submitting}
+          className="mt-1 h-auto rounded-[10px] py-2.5 text-[13.5px] font-semibold"
         >
-          {submitting ? 'Salvataggio…' : 'Imposta nuova password'}
-        </button>
+          {submitting ? 'Saving…' : 'Save new password'}
+        </Button>
       </form>
     </div>
   )

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Area App — Shell/Base navigation</title>
+<style>
+  :root {
+    /* Palette neutra SaaS — sostituibile in blocco per un futuro tema aziendale */
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --text-primary: #18181b;
+    --text-secondary: #71717a;
+    --text-muted: #a1a1aa;
+    --accent: #18181b;
+    --accent-fg: #ffffff;
+    --danger-bg: #fef2f2;
+    --danger-text: #b91c1c;
+    --badge-bg: #18181b;
+    --badge-fg: #ffffff;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    overflow-x: hidden;
+    background: #f0f0f2;
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 40px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .phone-frame {
+    width: 100%;
+    max-width: min(380px, calc(100vw - 32px));
+    background: var(--bg);
+    min-height: 660px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  header.topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .topbar-left { display:flex; align-items:center; gap:10px; }
+  .event-name { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .role-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .avatar-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-fg);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 12px; font-weight: 600;
+    border: none; cursor: pointer;
+  }
+
+  .dim-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 30;
+  }
+  .account-sheet {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    background: var(--surface);
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -8px 30px rgba(0,0,0,0.15);
+    z-index: 35;
+    padding: 8px 16px 18px;
+  }
+  .account-handle { display: flex; justify-content: center; padding: 0 0 10px; }
+  .account-handle-bar { width: 36px; height: 4px; border-radius: 4px; background: var(--border); }
+  .account-info { display: flex; align-items: center; gap: 12px; padding: 4px 4px 14px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+  .account-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-fg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .account-email { font-size: 13.5px; font-weight: 700; }
+  .account-role { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .account-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 8px;
+    border-radius: 8px;
+    border: none;
+    background: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+  }
+  .account-menu-item:active { background: var(--bg); }
+  .account-menu-item svg { width: 17px; height: 17px; }
+
+  .proto-controls {
+    background: #fff7ed;
+    border-bottom: 1px dashed #fdba74;
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .proto-controls select {
+    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    border: 1px solid #fdba74;
+    background: #fff;
+    color: #92400e;
+    font-weight: 600;
+  }
+
+  main.content {
+    flex: 1;
+    padding: 24px 16px 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .content-title { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .content-placeholder {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 40px 16px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .denied-box {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 8px;
+  }
+
+  nav.bottom-nav {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 6px 6px;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 4px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    position: relative;
+    transition: background 0.15s;
+  }
+  .nav-item.active { color: var(--text-primary); background: var(--bg); }
+  .nav-item svg { width: 20px; height: 20px; }
+  .nav-item span { font-size: 10.5px; font-weight: 600; }
+  .nav-badge {
+    position: absolute;
+    top: 2px; right: 18%;
+    background: var(--badge-bg);
+    color: var(--badge-fg);
+    font-size: 9px;
+    font-weight: 700;
+    min-width: 15px;
+    height: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+  }
+
+  .hint {
+    text-align: center;
+    font-size: 12px;
+    color: #71717a;
+    max-width: min(380px, calc(100vw - 32px));
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="hint">Mobile-first bottom nav — becomes a sidebar on desktop. The role selector above is prototype-only, not real UI.</div>
+
+<script>
+const ICONS = {
+  contacts: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  wildcard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>',
+  checkin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2zM14 19h2M19 14h2"/></svg>'
+};
+
+const ROLES = {
+  hostess:     { label: "Hostess",     nav: ["contacts", "checkin"] },
+  manager:     { label: "Manager",     nav: ["contacts", "wildcard", "checkin"], quota: 12 },
+  "full-access": { label: "Full access", nav: ["contacts", "wildcard", "checkin"], quota: null },
+  none:        { label: "No access", nav: [] }
+};
+
+const NAV_META = {
+  contacts: { label: "Contacts", title: "Contacts list" },
+  wildcard: { label: "Wildcard", title: "Wildcard" },
+  checkin:  { label: "Check-in", title: "QR check-in" }
+};
+
+let currentRole = "manager";
+let currentTab = "contacts";
+let accountMenuOpen = false;
+const ICON_LOGOUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+
+function render() {
+  const role = ROLES[currentRole];
+  const availableTabs = role.nav;
+  if (!availableTabs.includes(currentTab)) currentTab = availableTabs[0] || null;
+
+  const initials = currentRole === "none" ? "?" : currentRole[0].toUpperCase();
+
+  const navHtml = availableTabs.map(key => {
+    const meta = NAV_META[key];
+    const active = key === currentTab ? "active" : "";
+    let badge = "";
+    if (key === "wildcard" && role.quota !== undefined && role.quota !== null) {
+      badge = '<span class="nav-badge">' + role.quota + '</span>';
+    }
+    return '<button class="nav-item ' + active + '" data-tab="' + key + '">' +
+      ICONS[key] + badge + '<span>' + meta.label + '</span></button>';
+  }).join("");
+
+  let contentHtml;
+  if (!currentTab) {
+    contentHtml = '<div class="content-title">Event Manager</div>' +
+      '<div class="denied-box">Access not allowed for this role.<br>Contact an administrator.</div>';
+  } else {
+    const meta = NAV_META[currentTab];
+    let extra = "";
+    if (currentTab === "wildcard" && role.quota !== undefined) {
+      extra = role.quota === null
+        ? '<div class="content-placeholder">Unlimited wildcards — no quota to show.</div>'
+        : '<div class="content-placeholder">Remaining quota: <strong>' + role.quota + '</strong> — to be defined in the dedicated session.</div>';
+    } else {
+      extra = '<div class="content-placeholder">Screen content — to be defined in the next iteration.</div>';
+    }
+    contentHtml = '<div class="content-title">' + meta.title + '</div>' + extra;
+  }
+
+  document.getElementById("root").innerHTML =
+    '<div class="phone-frame">' +
+      '<header class="topbar">' +
+        '<div class="topbar-left">' +
+          '<div class="event-name">Event Manager</div>' +
+          '<div class="role-badge">' + role.label + '</div>' +
+        '</div>' +
+        '<button class="avatar-btn" id="avatarBtn">' + initials + '</button>' +
+      '</header>' +
+      '<div class="proto-controls">' +
+        '⚠ Prototype only — not real UI:' +
+        '<select id="roleSelect">' +
+          Object.keys(ROLES).map(r => '<option value="' + r + '"' + (r === currentRole ? ' selected' : '') + '>' + ROLES[r].label + '</option>').join("") +
+        '</select>' +
+      '</div>' +
+      '<main class="content">' + contentHtml +
+        (accountMenuOpen ? '<div class="dim-overlay" id="accountDimOverlay"></div>' +
+          '<div class="account-sheet">' +
+            '<div class="account-handle"><div class="account-handle-bar"></div></div>' +
+            '<div class="account-info">' +
+              '<div class="account-avatar">' + initials + '</div>' +
+              '<div><div class="account-email">m.rossi@company.com</div><div class="account-role">' + role.label + '</div></div>' +
+            '</div>' +
+            '<button class="account-menu-item" id="signOutBtn">' + ICON_LOGOUT + 'Sign out</button>' +
+          '</div>' : '') +
+      '</main>' +
+      (availableTabs.length ? '<nav class="bottom-nav">' + navHtml + '</nav>' : '') +
+    '</div>';
+
+  document.getElementById("roleSelect").addEventListener("change", (e) => {
+    currentRole = e.target.value;
+    currentTab = null;
+    render();
+  });
+  document.querySelectorAll(".nav-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentTab = btn.dataset.tab;
+      accountMenuOpen = false;
+      render();
+    });
+  });
+  document.getElementById("avatarBtn").addEventListener("click", () => {
+    accountMenuOpen = true;
+    render();
+  });
+  const accountDimOverlay = document.getElementById("accountDimOverlay");
+  if (accountDimOverlay) accountDimOverlay.addEventListener("click", () => { accountMenuOpen = false; render(); });
+  const signOutBtn = document.getElementById("signOutBtn");
+  if (signOutBtn) signOutBtn.addEventListener("click", () => { alert("Would sign the user out and redirect to /login."); });
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { Mail } from 'lucide-react'
 
 import { executeSendContactResendTicket } from '@/lib/contacts/contactResendActions'
 
@@ -16,33 +17,39 @@ export type ContactResendPanelProps = {
 function emailSendFeedback(status: string, detail?: string): { tone: 'ok' | 'warn' | 'err'; text: string } {
   switch (status) {
     case 'successo':
-      return { tone: 'ok', text: 'Ticket inviato via email.' }
+      return { tone: 'ok', text: 'Ticket sent by email.' }
     case 'bloccato_modalita_test':
       return {
         tone: 'warn',
-        text:
-          'Invio bloccato dalla modalità test: l’indirizzo non è in contattiTest. Nessuna email inviata.',
+        text: 'Send blocked by test mode: address is not in contattiTest. No email was sent.',
       }
     case 'fallito_email_invalida':
-      return { tone: 'err', text: 'Invio fallito: email non valida.' }
+      return { tone: 'err', text: 'Send failed: invalid email.' }
     case 'fallito_errore_invio':
       return {
         tone: 'err',
-        text: detail ? `Invio fallito: ${detail}` : 'Invio fallito per un errore di invio.',
+        text: detail ? `Send failed: ${detail}` : 'Send failed due to a delivery error.',
       }
     default:
-      return { tone: 'err', text: 'Esito invio non riconosciuto.' }
+      return { tone: 'err', text: 'Unrecognized send result.' }
   }
 }
 
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M17.6 6.3A8.9 8.9 0 0 0 12 4a8.9 8.9 0 0 0-7.6 13.6L3 21l3.5-1.3A8.9 8.9 0 0 0 12 21a9 9 0 0 0 5.6-14.7zM12 19.3a7.3 7.3 0 0 1-3.7-1l-.3-.2-2.1.8.7-2-.2-.3A7.3 7.3 0 1 1 19.3 12 7.3 7.3 0 0 1 12 19.3zm4-5.5c-.2-.1-1.3-.6-1.5-.7-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-1.2-.6-2-1-2.8-2.3-.2-.3.2-.3.5-.9.1-.2 0-.3 0-.5l-.6-1.4c-.1-.3-.3-.3-.5-.3h-.4c-.1 0-.4.1-.6.4-.2.3-.8.8-.8 1.9 0 1.1.8 2.2.9 2.3.1.2 1.5 2.4 3.7 3.3 1.8.7 2.2.6 2.6.5.4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1z" />
+    </svg>
+  )
+}
+
 /**
- * Blocco resend email + WhatsApp su scheda contatto (Fase 6 Passo 5 / §2.5).
- * Pattern allineato alla thank-you Wildcard; eventType lato server = invioTicketResend.
+ * Resend ticket (WhatsApp + Email) — mockup scheda contatto Passo 5.
+ * Logica invariata: `executeSendContactResendTicket` → `sendTicketToContact`.
  */
 export function ContactResendPanel({
   contactId,
   email,
-  publicTicketUrl,
   whatsappShareUrl,
   ticketInviatoAt,
 }: ContactResendPanelProps) {
@@ -54,7 +61,6 @@ export function ContactResendPanel({
   const [emailSentOk, setEmailSentOk] = useState(false)
 
   const hasEmail = Boolean(email?.trim())
-  const emailLabel = ticketInviatoAt ? 'Reinvia via email' : 'Invia via email'
 
   function sendEmail() {
     setSendMessage(null)
@@ -73,56 +79,48 @@ export function ContactResendPanel({
   }
 
   return (
-    <div className="space-y-3 border-t border-slate-200 pt-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Resend ticket</p>
+    <div className="space-y-2 pt-1">
+      <p className="text-[11px] font-semibold text-app-text-muted">Resend ticket</p>
 
-      {hasEmail ? (
-        <button
-          type="button"
-          disabled={pending || emailSentOk}
-          onClick={sendEmail}
-          className="w-full rounded bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
-        >
-          {emailSentOk ? 'Email inviata' : pending ? 'Invio email…' : emailLabel}
-        </button>
-      ) : (
-        <p
-          className="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
-          role="status"
-        >
-          Contatto senza email — condividi il biglietto via WhatsApp.
-        </p>
-      )}
-
-      <a
-        href={whatsappShareUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block w-full rounded border border-emerald-700 bg-emerald-700 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-emerald-800"
-      >
-        Condividi su WhatsApp
-      </a>
-
-      <p className="text-xs text-slate-500">
-        Link biglietto:{' '}
+      <div className="flex gap-2">
         <a
-          href={publicTicketUrl}
+          href={whatsappShareUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="underline hover:text-slate-700"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-[#bbf0cf] bg-app-surface px-2.5 py-2.5 text-xs font-bold text-[#25D366] transition-colors hover:bg-app-bg"
         >
-          {publicTicketUrl}
+          <WhatsAppIcon className="size-3.5" />
+          WhatsApp
         </a>
-      </p>
+
+        {hasEmail ? (
+          <button
+            type="button"
+            disabled={pending || emailSentOk}
+            onClick={sendEmail}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-app-border bg-app-surface px-2.5 py-2.5 text-xs font-bold text-app-text-primary transition-colors hover:bg-app-bg disabled:opacity-60"
+          >
+            <Mail className="size-3.5" aria-hidden />
+            {emailSentOk ? 'Email sent' : pending ? 'Sending…' : ticketInviatoAt ? 'Email' : 'Email'}
+          </button>
+        ) : (
+          <span
+            className="flex flex-1 items-center justify-center rounded-[10px] border border-app-border bg-app-bg px-2.5 py-2.5 text-center text-xs font-medium text-app-text-muted"
+            role="status"
+          >
+            No email
+          </span>
+        )}
+      </div>
 
       {sendMessage ? (
         <p
           className={
             sendMessage.tone === 'ok'
-              ? 'rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900'
+              ? 'rounded-[10px] border border-app-success-border bg-app-success-bg px-3 py-2 text-sm text-app-success-text'
               : sendMessage.tone === 'warn'
-                ? 'rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950'
-                : 'rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800'
+                ? 'rounded-[10px] border border-app-warning-border bg-app-warning-bg px-3 py-2 text-sm text-app-warning-text'
+                : 'rounded-[10px] border border-app-danger-border bg-app-danger-bg px-3 py-2 text-sm text-app-danger-text'
           }
           role="status"
         >

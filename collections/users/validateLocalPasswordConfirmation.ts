@@ -11,6 +11,8 @@ type ValidateLocalPasswordConfirmationArgs = {
   data: Record<string, unknown>
   operation: 'create' | 'delete' | 'read' | 'update'
   originalDoc?: Record<string, unknown> | null
+  /** Reset password App: match già validato client-side, nessun campo confirm in payload. */
+  skipConfirmOnUpdate?: boolean
 }
 
 function readPasswordField(data: Record<string, unknown>, key: 'password' | 'confirm-password'): string {
@@ -40,6 +42,7 @@ export function validateLocalPasswordConfirmation({
   data,
   operation,
   originalDoc,
+  skipConfirmOnUpdate = false,
 }: ValidateLocalPasswordConfirmationArgs): void {
   if (operation !== 'create' && operation !== 'update') {
     return
@@ -76,6 +79,10 @@ export function validateLocalPasswordConfirmation({
   }
 
   if (!hasPassword && !hasConfirm) {
+    return
+  }
+
+  if (skipConfirmOnUpdate && hasPassword && !hasConfirm) {
     return
   }
 

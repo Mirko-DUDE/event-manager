@@ -33,6 +33,7 @@ export type WildcardInsertClientResult =
   | WildcardInsertSuccessResult
   | { esito: 'emailEsistente' }
   | { esito: 'warningSoftMatch'; recordSimile: WildcardSimilarContact }
+  | { esito: 'quotaEsaurita' }
 
 export type ExecuteWildcardInsertResult =
   | { ok: true; result: WildcardInsertClientResult }
@@ -72,6 +73,7 @@ export async function executeWildcardInsert(
       payload,
       userId: user.id,
       userEmail: user.email,
+      appRole: user.appRole,
       input,
     })
 

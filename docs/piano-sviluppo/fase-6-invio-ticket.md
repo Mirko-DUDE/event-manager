@@ -23,7 +23,7 @@ Fase 6 copre l'intero ciclo di vita del biglietto, dalla generazione all'invio, 
 
 Tutti e tre i canali di invio (1–3) si appoggiano a un'unica **funzione core di generazione**, condivisa anche dalla pagina pubblica del biglietto — "una sola fonte di verità", coerente col principio già seguito nel progetto per whitelist e log.
 
-**Fuori scope di questo documento** (rimandati a sessioni dedicate, vedi §5): design della pagina pubblica del biglietto e della homepage pubblica; decisioni tecniche del lettore di check-in.
+**Fuori scope di questo documento** (vedi §5): design della pagina pubblica del biglietto e della homepage pubblica (sessione dedicata); implementazione del lettore di check-in (decisioni chiuse in `docs/specifica-lettore-checkin.md`).
 
 ---
 
@@ -306,7 +306,7 @@ Sequenza operativa per dipendenze reali. I passi 4, 5 e 6 dipendono dal completa
 - **Design della pagina pubblica del biglietto e della homepage pubblica** — sessione dedicata, deve seguire `design-system.mdc` della landing page evento (fuori da questo repo) per la pagina biglietto; stile neutro per la homepage. Include testi/copy coerenti con l'evento (oggi placeholder generici bilingue in codice). Annotato di nuovo in verifica Passo 3 (2026-08-07): la pagina funziona con styling minimo; il rifacimento design+copy resta fuori da Fase 6.
 - **CMS per contenuti delle pagine pubbliche** (debito futuro, 2026-08-07): valutare una parte CMS in Payload (Global/collection) per inserire/editare i testi delle superfici pubbliche (homepage, pagina biglietto, eventuali messaggi di errore guest-facing) senza redeploy — non deciso né in scope ora; va pensato insieme alla sessione design sopra.
 - **Template email: Payload vs Resend** (debito futuro, 2026-08-07): analizzare dove gestire i template delle email guest-facing (ticket oggi in `renderTicketEmail.ts` hardcoded; login già in `auth/email/`) — se restare in codice/Payload (Global, rich text, ecc.) oppure usare template Resend (dashboard/API). Stesso criterio di proporzionalità; nessuna scelta presa in questa fase.
-- **Decisioni tecniche del lettore di check-in** (libreria di scansione QR lato client, endpoint di validazione, gestione scan duplicati, comportamento offline) — sessione dedicata separata, da tenere dopo questo documento e prima della relativa implementazione. La UI del check-in è già coperta dai mockup Area App; mancano le decisioni tecniche/di business sottostanti.
+- **Decisioni tecniche del lettore di check-in** — chiuse in `docs/specifica-lettore-checkin.md` (libreria qr-scanner, parsing token, endpoint di validazione, tre stati di risposta, comportamento offline dichiarato come debito accettato). Non più una sessione da tenere; resta da fare solo l'implementazione.
 - **Tracciatura storica completa di tutti gli invii per contatto** (oltre all'ultimo, oggi coperto da `ticketInviatoAt`) — valutare in futuro una collection dedicata o estensione di `activityLog`, se necessario ricostruire lo storico completo per singolo contatto.
 - **Cloud Run Job dedicato** per l'invio massivo — evoluzione futura se il processo diventasse un'operazione ricorrente, non legata a un singolo evento.
 - **Risoluzione `hubspot_owner_id`** (ID grezzo vs nome via Owners API) — debito aperto da Fase 4, non riaperto in questo documento.

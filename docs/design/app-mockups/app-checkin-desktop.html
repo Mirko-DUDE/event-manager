@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<!-- DESKTOP mockup — browser window with sidebar shell, not a phone frame. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Manager — Desktop manual check-in</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --text-primary: #18181b;
+    --text-secondary: #71717a;
+    --text-muted: #a1a1aa;
+    --accent: #18181b;
+    --accent-fg: #ffffff;
+    --danger-bg: #fef2f2;
+    --danger-text: #b91c1c;
+    --danger-border: #fecaca;
+    --warning-bg: #fffbeb;
+    --warning-text: #92400e;
+    --warning-border: #fde68a;
+    --success-bg: #f0fdf4;
+    --success-text: #15803d;
+    --success-border: #bbf7d0;
+    --pending-text: #a1a1aa;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    overflow-x: hidden;
+    background: #f0f0f2;
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .proto-controls {
+    background: #fff7ed;
+    border: 1px dashed #fdba74;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #92400e;
+    width: 100%;
+    max-width: min(1180px, calc(100vw - 32px));
+  }
+
+  .desktop-frame {
+    width: 100%;
+    max-width: min(1180px, calc(100vw - 32px));
+    min-height: 640px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  .sidebar { width: 232px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 0 0; }
+  .sidebar-logo { padding: 0 20px 22px; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+  .sidebar-logo-mark { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: var(--accent-fg); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; flex: 1; }
+  .sidebar-nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: var(--text-secondary); border: none; background: none; width: 100%; text-align: left; }
+  .sidebar-nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .sidebar-nav-item.active { background: var(--bg); color: var(--text-primary); }
+  .sidebar-user { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700; flex-shrink: 0; }
+  .sidebar-user-name { font-size: 12.5px; font-weight: 600; }
+  .sidebar-role { font-size: 11px; color: var(--text-secondary); }
+
+  .main-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-width: 0; }
+  .main-header { padding: 22px 32px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .main-title { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+  .main-subtitle { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
+
+  .main-body { padding: 32px; flex: 1; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+
+  .search-box {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; width: 100%; max-width: 480px;
+  }
+  .search-box svg { width: 18px; height: 18px; color: var(--text-muted); flex-shrink: 0; }
+  .search-box input { border: none; outline: none; font-size: 15px; flex: 1; background: transparent; color: var(--text-primary); }
+  .search-box .clear-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; display: none; padding: 2px; }
+  .search-box .clear-btn.show { display: flex; }
+  .search-box .clear-btn svg { width: 14px; height: 14px; }
+
+  .results-wrap { width: 100%; max-width: 480px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .result-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .result-row:last-child { border-bottom: none; }
+  .result-row:hover { background: var(--bg); }
+  .result-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--text-secondary); flex-shrink: 0; }
+  .result-info { flex: 1; min-width: 0; }
+  .result-name { font-size: 13.5px; font-weight: 600; }
+  .result-email { font-size: 11.5px; color: var(--text-muted); }
+  .checkin-pill { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; flex-shrink: 0; }
+  .checkin-pill.done { background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+  .checkin-pill.pending { background: var(--bg); color: var(--pending-text); border: 1px solid var(--border); }
+  .checkin-pill svg { width: 10px; height: 10px; }
+
+  .idle-hint { text-align: center; color: var(--text-muted); font-size: 13px; margin-top: 40px; max-width: 320px; }
+  .idle-hint svg { width: 32px; height: 32px; color: var(--text-muted); margin-bottom: 10px; }
+
+  .dim-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.35); z-index: 20; display: flex; align-items: center; justify-content: center; }
+  .modal-card { background: var(--surface); border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.2); width: 380px; max-height: 80%; overflow-y: auto; }
+  .modal-header { display: flex; align-items: center; gap: 12px; padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+  .modal-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--text-secondary); flex-shrink: 0; }
+  .modal-title-block { flex: 1; min-width: 0; }
+  .modal-name { font-size: 15px; font-weight: 700; }
+  .modal-close { border: none; background: var(--bg); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); flex-shrink: 0; }
+  .modal-close svg { width: 14px; height: 14px; }
+  .modal-body { padding: 6px 20px 4px; }
+  .field-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .field-row:last-child { border-bottom: none; }
+  .field-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; flex-shrink: 0; }
+  .field-value { font-size: 13px; font-weight: 500; text-align: right; }
+  .source-pill { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: var(--bg); border: 1px solid var(--border); color: var(--text-secondary); }
+  .modal-footer { padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+  .checkin-confirm-btn { background: var(--accent); color: var(--accent-fg); border: none; border-radius: var(--radius); padding: 12px 16px; font-size: 13.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .checkin-confirm-btn svg { width: 15px; height: 15px; }
+  .duplicate-warning { background: var(--warning-bg); border: 1px solid var(--warning-border); color: var(--warning-text); border-radius: var(--radius); padding: 12px 14px; font-size: 12.5px; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; margin: 4px 20px 16px; }
+  .duplicate-warning svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+</style>
+</head>
+<body>
+<div class="proto-controls">⚠ Prototype only: type a name to search. "Marco" is already checked in — try it to see the duplicate warning.</div>
+<div id="root"></div>
+
+<script>
+const ICON_SEARCH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>';
+const ICON_CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>';
+const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+const ICON_ALERT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>';
+const ICON_CONTACTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+const ICON_WILDCARD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>';
+const ICON_CHECKIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
+
+const CONTACTS = [
+  { first: "Marco", last: "Bianchi", email: "marco.bianchi@acme.it", phone: "+39 345 111 2222", company: "Milano", category: "Clients", source: "Hubspot", checkedIn: true, checkedInAt: "6:12 PM" },
+  { first: "Giulia", last: "Rossi", email: "giulia.rossi@studio.it", phone: "+39 345 123 4567", company: "Milano", category: "Clients", source: "Hubspot", checkedIn: false },
+  { first: "Luca", last: "Ferrari", email: "luca.ferrari@techco.it", phone: "+39 345 222 3333", company: "Things", category: "Partner", source: "Upload", checkedIn: false },
+  { first: "Sara", last: "Conti", email: "sara.conti@brand.it", phone: "+39 345 333 4444", company: "Design", category: "Talent", source: "Wildcard", checkedIn: false }
+];
+
+let query = "";
+let selected = null;
+let justCheckedIn = false;
+
+function matches(c) {
+  const q = query.trim().toLowerCase();
+  return c.first.toLowerCase().includes(q) || c.last.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
+}
+
+function render() {
+  const results = query.trim() ? CONTACTS.filter(matches) : [];
+
+  let bodyInner;
+  if (!query.trim()) {
+    bodyInner = '<div class="idle-hint">' + ICON_SEARCH + '<div>Search for a guest by name or email to check them in manually.</div></div>';
+  } else if (!results.length) {
+    bodyInner = '<div class="idle-hint">No guest found matching "' + query + '".</div>';
+  } else {
+    bodyInner = '<div class="results-wrap">' + results.map((c) => {
+      const initials = (c.first[0] + c.last[0]).toUpperCase();
+      const pill = c.checkedIn ? '<span class="checkin-pill done">' + ICON_CHECK + 'Checked in</span>' : '<span class="checkin-pill pending">Not checked in</span>';
+      return '<div class="result-row" data-idx="' + CONTACTS.indexOf(c) + '"><div class="result-avatar">' + initials + '</div><div class="result-info"><div class="result-name">' + c.first + ' ' + c.last + '</div><div class="result-email">' + c.email + '</div></div>' + pill + '</div>';
+    }).join("") + '</div>';
+  }
+
+  let modalHtml = "";
+  if (selected !== null) {
+    const c = CONTACTS[selected];
+    const initials = (c.first[0] + c.last[0]).toUpperCase();
+    const alreadyIn = c.checkedIn && !justCheckedIn;
+
+    const duplicateHtml = alreadyIn
+      ? '<div class="duplicate-warning">' + ICON_ALERT + '<span><strong>' + c.first + ' ' + c.last + '</strong> was already checked in at ' + c.checkedInAt + '.</span></div>'
+      : "";
+
+    const footerBtn = justCheckedIn
+      ? '<button class="checkin-confirm-btn" disabled style="background:var(--success-bg); color:var(--success-text); border:1px solid var(--success-border); cursor:default;">' + ICON_CHECK + 'Checked in</button>'
+      : (alreadyIn ? "" : '<button class="checkin-confirm-btn" id="confirmCheckinBtn">' + ICON_CHECK + 'Check in</button>');
+
+    modalHtml =
+      '<div class="dim-overlay" id="modalOverlay">' +
+        '<div class="modal-card" onclick="event.stopPropagation()">' +
+          '<div class="modal-header">' +
+            '<div class="modal-avatar">' + initials + '</div>' +
+            '<div class="modal-title-block"><div class="modal-name">' + c.first + ' ' + c.last + '</div></div>' +
+            '<button class="modal-close" id="modalCloseBtn">' + ICON_CLOSE + '</button>' +
+          '</div>' +
+          duplicateHtml +
+          '<div class="modal-body">' +
+            '<div class="field-row"><span class="field-label">Email</span><span class="field-value">' + c.email + '</span></div>' +
+            '<div class="field-row"><span class="field-label">Phone</span><span class="field-value">' + c.phone + '</span></div>' +
+            '<div class="field-row"><span class="field-label">DUDE Company</span><span class="field-value">' + c.company + '</span></div>' +
+            '<div class="field-row"><span class="field-label">Category</span><span class="field-value">' + c.category + '</span></div>' +
+            '<div class="field-row"><span class="field-label">Source</span><span class="field-value"><span class="source-pill">' + c.source + '</span></span></div>' +
+          '</div>' +
+          '<div class="modal-footer">' + footerBtn + '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  document.getElementById("root").innerHTML =
+    '<div class="desktop-frame">' +
+      '<div class="sidebar">' +
+        '<div class="sidebar-logo"><div class="sidebar-logo-mark">EM</div>Event Manager</div>' +
+        '<div class="sidebar-nav">' +
+          '<button class="sidebar-nav-item">' + ICON_CONTACTS + '<span>Contacts</span></button>' +
+          '<button class="sidebar-nav-item">' + ICON_WILDCARD + '<span>Wildcard</span></button>' +
+          '<button class="sidebar-nav-item active">' + ICON_CHECKIN + '<span>Check-in</span></button>' +
+        '</div>' +
+        '<div class="sidebar-user"><div class="sidebar-avatar">M</div><div><div class="sidebar-user-name">m.rossi@company.com</div><div class="sidebar-role">Manager</div></div></div>' +
+      '</div>' +
+      '<div class="main-area">' +
+        '<div class="main-header"><div class="main-title">Check-in</div><div class="main-subtitle">No camera on desktop — look up a guest and confirm manually.</div></div>' +
+        '<div class="main-body">' +
+          '<div class="search-box">' + ICON_SEARCH +
+            '<input id="searchInput" type="text" placeholder="Search by name or email" value="' + query.replace(/"/g,"&quot;") + '" autofocus>' +
+            '<button class="clear-btn ' + (query ? "show" : "") + '" id="clearBtn">' + ICON_CLOSE + '</button>' +
+          '</div>' +
+          bodyInner +
+        '</div>' +
+      '</div>' +
+      modalHtml +
+    '</div>';
+
+  const input = document.getElementById("searchInput");
+  input.addEventListener("input", (e) => {
+    query = e.target.value;
+    const pos = e.target.selectionStart;
+    render();
+    const ni = document.getElementById("searchInput");
+    ni.focus(); ni.setSelectionRange(pos, pos);
+  });
+  document.getElementById("clearBtn").addEventListener("click", () => { query = ""; render(); document.getElementById("searchInput").focus(); });
+  document.querySelectorAll(".result-row").forEach(row => {
+    row.addEventListener("click", () => { selected = parseInt(row.dataset.idx, 10); justCheckedIn = false; render(); });
+  });
+  const overlay = document.getElementById("modalOverlay");
+  if (overlay) overlay.addEventListener("click", () => { selected = null; render(); });
+  const closeBtn = document.getElementById("modalCloseBtn");
+  if (closeBtn) closeBtn.addEventListener("click", () => { selected = null; render(); });
+  const confirmBtn = document.getElementById("confirmCheckinBtn");
+  if (confirmBtn) confirmBtn.addEventListener("click", () => {
+    CONTACTS[selected].checkedIn = true;
+    justCheckedIn = true;
+    render();
+  });
+}
+
+render();
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@ import crypto from 'node:crypto'
 import type { CollectionBeforeChangeHook } from 'payload'
 import { ValidationError } from 'payload'
 
-import { canHaveLocalCredentials } from './access'
+import { canHaveLocalCredentials, canHaveLocalCredentialsForChange } from './access'
 
 const APP_PASSWORD_REQUIRED_MESSAGE =
   'Password obbligatoria per utenti con accesso locale.'
@@ -60,7 +60,7 @@ export const hashLocalCredentials: CollectionBeforeChangeHook = async ({
     })
   }
 
-  if (!canHaveLocalCredentials(data)) {
+  if (!canHaveLocalCredentialsForChange(data, originalDoc)) {
     delete data.password
     if ('confirm-password' in data) {
       delete data['confirm-password']

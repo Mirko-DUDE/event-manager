@@ -5,6 +5,7 @@ import {
   adminOrSuperAdminAccess,
   adminPanelAccess,
   canHaveLocalCredentials,
+  canHaveLocalCredentialsForChange,
 } from './users/access'
 import { createGoogleOAuthCallbackEndpoint } from '../auth/google/createGoogleOAuthCallbackEndpoint'
 import { superAdminLocalLoginEndpoint } from './users/endpoints/superAdminLocalLogin'
@@ -64,7 +65,7 @@ export const Users: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'email',
-    defaultColumns: ['email', 'loginMethod', 'adminRole', 'appRole', 'active'],
+    defaultColumns: ['email', 'loginMethod', 'adminRole', 'appRole', 'wildcardQuota', 'wildcardUsed', 'active'],
   },
   access: {
     admin: adminPanelAccess,
@@ -187,6 +188,30 @@ export const Users: CollectionConfig = {
       },
     },
     {
+      name: 'wildcardQuota',
+      type: 'number',
+      label: 'Quota Wildcard',
+      defaultValue: 0,
+      min: 0,
+      admin: {
+        condition: (_data, siblingData) => siblingData?.appRole === 'manager',
+        description:
+          'Solo per manager: massimo inserimenti Wildcard consentiti. Default 0 = nessun insert finché non assegnata.',
+      },
+    },
+    {
+      name: 'wildcardUsed',
+      type: 'number',
+      label: 'Wildcard usate',
+      defaultValue: 0,
+      min: 0,
+      admin: {
+        condition: (_data, siblingData) => siblingData?.appRole === 'manager',
+        description:
+          'Contatore incrementato automaticamente a ogni insert Wildcard riuscito. Editabile manualmente da admin.',
+      },
+    },
+    {
       // ID Google OAuth: impostato automaticamente al primo login Google (plugin payload-oauth2).
       name: 'sub',
       type: 'text',
@@ -215,15 +240,20 @@ export const Users: CollectionConfig = {
     afterLogout: [logLogoutActivity],
     beforeValidate: [
       guardLoginMethod,
-      ({ data, operation, originalDoc }) => {
+      ({ data, operation, originalDoc, req }) => {
         if (!data) return data
 
-        validateLocalPasswordConfirmation({ data, operation, originalDoc })
+        validateLocalPasswordConfirmation({
+          data,
+          operation,
+          originalDoc,
+          skipConfirmOnUpdate: req.context?.appPasswordReset === true,
+        })
 
         const password = data.password
         const hasPassword = typeof password === 'string' && password.length > 0
 
-        if (hasPassword && !canHaveLocalCredentials(data)) {
+        if (hasPassword && !canHaveLocalCredentialsForChange(data, originalDoc)) {
           delete data.password
           if ('confirm-password' in data) {
             delete data['confirm-password']
