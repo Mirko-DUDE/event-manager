@@ -68,3 +68,13 @@
 - `app/(frontend)/ticket/[qrToken]/page.tsx` (metadata Next.js — export `metadata` o `generateMetadata`)
 - Favicon: root `app/` (o `app/(frontend)/`) — file `favicon.ico` / `icon.png`
 - Componente `Select` shadcn condiviso (`components/ui/select.tsx`) usato da filtro lista contatti e select Wildcard
+
+---
+
+## Esito verifica post-fix (2026-08-17, iPhone reale)
+
+| # | Fix | Esito | Note |
+|---|-----|-------|------|
+| 1 | Zoom automatico input iOS Safari | ✅ OK | Nessuno zoom al tap sui campi elencati |
+| 2 | Preview/favicon condivisione WhatsApp | ✅ OK | Anteprima con titolo e immagine; titolo e `og:image` restano segnaposto — sostituzione prevista in sessione design pagina pubblica (`preparazione-design-app.md`) |
+| 3 | Chevron select attaccato al bordo | ✅ OK | Margine coerente dal bordo destro |
