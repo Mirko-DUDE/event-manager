@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
+import { getServerURL } from '@/auth/google/getServerURL'
 import { loadPublicTicketByToken } from '@/lib/tickets/loadPublicTicket'
 
 import styles from './page.module.css'
@@ -13,8 +14,50 @@ type PageProps = {
 /** Lookup DB + QR on-the-fly — non prerenderizzare in `next build`. */
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  title: 'Il tuo biglietto / Your ticket',
+const OG_DESCRIPTION =
+  'Il tuo biglietto evento / Your event ticket — presenta il QR al check-in. / Present this QR code at check-in.'
+
+const OG_DESCRIPTION_UNAVAILABLE =
+  'Il link non è valido oppure il biglietto non esiste. / This link is invalid or the ticket does not exist.'
+
+function buildOpenGraphMetadata(title: string, description: string): Metadata {
+  const ogImageUrl = `${getServerURL()}/og-ticket.png`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: 'Event Manager' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImageUrl],
+    },
+  }
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { qrToken } = await params
+  const payload = await getPayload({ config })
+  const ticket = await loadPublicTicketByToken(payload, qrToken)
+
+  if (!ticket) {
+    return buildOpenGraphMetadata(
+      'Biglietto non disponibile / Ticket unavailable',
+      OG_DESCRIPTION_UNAVAILABLE,
+    )
+  }
+
+  const location = ticket.locationEvento?.trim() || 'Event Manager'
+  const fullName = `${ticket.firstName} ${ticket.lastName}`.trim()
+  const title = fullName ? `${location} — ${fullName}` : location
+
+  return buildOpenGraphMetadata(title, OG_DESCRIPTION)
 }
 
 /**

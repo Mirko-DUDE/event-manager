@@ -21,6 +21,10 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Fixed
 
+- **Fase 7 § Passo 8/9 — Fix mobile post test iPhone reale (2026-08-17) — Zoom automatico input iOS Safari**: `font-size` portato a `16px` (`text-base`) su mobile per campi ricerca `/app/contatti`, form auth (`AuthField`: login, forgot/reset password) e form Wildcard (`fieldInputClass`/`selectClass`); dimensioni desktop invariate sotto `md`/`lg`. Nessun `user-scalable=no` nel viewport (accessibilità WCAG 1.4.4).
+- **Fase 7 § Passo 8/9 — Fix mobile post test iPhone reale (2026-08-17) — Preview/favicon condivisione WhatsApp**: `generateMetadata` su `app/(frontend)/ticket/[qrToken]` con Open Graph (`og:title` da `locationEvento`/nome, `og:description` bilingue neutro, `og:image` segnaposto). Asset `public/og-ticket.png`; favicon esplicita in metadata layout `(frontend)` e `(app)`. Design pagina pubblica non toccato.
+- **Fase 7 § Passo 8/9 — Fix mobile post test iPhone reale (2026-08-17) — Chevron select attaccato al bordo**: `pr-8`/`pr-9` sui native `<select>` in `ContactsListToolbar` (sort) e `WildcardInsertForm` (DUDE Company / Category) per margine coerente dalla freccia nativa del browser.
+
 - **Fase 7 § Passo 8 — Verifica responsive (2026-08-08)**: fix overflow/layout emersi dalla revisione 375px e soglia `lg` 1024px — `overflow-x-hidden` su body App e shell; email accesso negato con `break-all`; scheda contatto mobile (valori campo `min-w-0`/`break-words`, nome `truncate`, footer sheet `safe-area-inset-bottom`); alert check-in con `break-words`; tabelle desktop lista contatti/wildcard `table-fixed` + `truncate`; drawer account mobile safe-area.
 
 ### Changed
@@ -48,6 +52,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Tests
 
+- **Fase 7 § Passo 8/9 — Fix mobile post test iPhone reale (2026-08-17) — Validazione codice**: `pnpm exec tsc --noEmit`, `pnpm lint` OK (solo warning preesistenti); `pnpm build` OK (metadata OG ticket + favicon). Verifica su iPhone reale (zoom input, anteprima WhatsApp, select) **non eseguita in questa sessione** — da rieseguire su device.
 - **Fase 7 § Passo 8 — Test umano spot-check dev (2026-08-08)**: checklist 375px — overflow, testi lunghi, select/badge, overlay scheda, wildcard form/thank-you, alert check-in OK. Paginazione lista vs header/bottom nav (checklist #4) **non verificata** — dataset attuale insufficiente; da rieseguire con >20 contatti (incluso in debito Passo 9 post Cloud Run).
 - **Fase 7 § Passo 9 — Debito test (2026-08-08)**: verifica chiusura fase su device reali rimandata **dopo** deploy Cloud Run; Passo 9 resta 🔲 in piano — non blocca commit Passi 0–8.
 - **Fase 7 § Passo 8 — Verifica responsive (2026-08-08)**: revisione codice + mockup su tutte le schermate §2.1 (login, forgot/reset, accesso negato, shell, contatti, scheda overlay, wildcard main/form/thank-you, check-in mobile/desktop). Breakpoint `useIsDesktop` / `lg:` 1024px coerente con §2.9 (bottom nav + scanner sotto soglia; sidebar + ricerca manuale sopra). Compromesso tablet landscape ≥1024px senza fotocamera — atteso, non bug. Alert sheet check-in posizionato come mockup (absolute nel viewport scanner, sopra bottom nav). Fix applicati (vedi Fixed).

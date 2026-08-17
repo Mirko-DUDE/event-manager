@@ -51,7 +51,8 @@ type WildcardInsertFormProps = {
 
 function fieldInputClass(hasError?: boolean) {
   return cn(
-    'h-auto rounded-[10px] border-app-border bg-app-surface px-3 py-2.5 text-[13.5px] shadow-none focus-visible:border-app-text-primary focus-visible:ring-2 focus-visible:ring-app-text-primary/20',
+    // text-base su mobile: iOS Safari zooma se font-size < 16px (fix-mobile-iphone §1).
+    'h-auto rounded-[10px] border-app-border bg-app-surface px-3 py-2.5 text-base shadow-none focus-visible:border-app-text-primary focus-visible:ring-2 focus-visible:ring-app-text-primary/20 lg:text-[13.5px]',
     hasError && 'border-app-danger-text',
   )
 }
@@ -60,7 +61,8 @@ function selectClass() {
   return cn(
     fieldInputClass(),
     // I native select ignorano spesso py-* — altezza esplicita allineata agli Input del form.
-    'h-[42px] min-h-[42px] w-full leading-normal',
+    // pr-9: spazio per la freccia nativa del browser (fix-mobile-iphone §3).
+    'h-[42px] min-h-[42px] w-full pr-9 leading-normal',
   )
 }
 

@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Event Manager',
   description: 'Gestione eventi corporate',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function FrontendLayout({

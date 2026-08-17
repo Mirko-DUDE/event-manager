@@ -100,7 +100,9 @@ function SortControl({
           value={params.sort}
           onChange={(event) => onSortChange(event.target.value as ContactsListParams['sort'])}
           className={cn(
-            'min-w-0 flex-1 border-0 bg-transparent text-[12.5px] font-semibold text-app-text-primary outline-none',
+            // text-base su mobile: iOS Safari zooma se font-size < 16px (fix-mobile-iphone §1).
+            // pr-8: spazio per la freccia nativa del browser (fix-mobile-iphone §3).
+            'min-w-0 flex-1 border-0 bg-transparent pr-8 text-base font-semibold text-app-text-primary outline-none lg:text-[12.5px]',
             selectClassName,
           )}
         >
@@ -180,7 +182,7 @@ export function ContactsListToolbar({ params, counts }: ContactsListToolbarProps
           defaultValue={params.q}
           placeholder="Search by first name, last name or email"
           onChange={(event) => navigate({ q: event.target.value.trim(), page: 1 }, true)}
-          className="min-w-0 flex-1 border-0 bg-transparent text-sm text-app-text-primary outline-none placeholder:text-app-text-muted lg:text-[13.5px]"
+          className="min-w-0 flex-1 border-0 bg-transparent text-base text-app-text-primary outline-none placeholder:text-app-text-muted lg:text-[13.5px]"
           autoComplete="off"
           enterKeyHint="search"
         />

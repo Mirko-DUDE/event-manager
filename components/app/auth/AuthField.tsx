@@ -46,7 +46,8 @@ export function AuthField({
         minLength={minLength}
         aria-invalid={hasError || undefined}
         className={cn(
-          'h-auto rounded-[10px] border-app-border bg-app-surface px-3 py-2.5 text-[13.5px] shadow-none focus-visible:border-app-text-primary focus-visible:ring-2 focus-visible:ring-app-text-primary/20',
+          // text-base su mobile: iOS Safari zooma se font-size < 16px (fix-mobile-iphone §1).
+          'h-auto rounded-[10px] border-app-border bg-app-surface px-3 py-2.5 text-base shadow-none focus-visible:border-app-text-primary focus-visible:ring-2 focus-visible:ring-app-text-primary/20 md:text-[13.5px]',
           hasError && 'border-app-danger-text',
         )}
       />
