@@ -19,6 +19,18 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ## [Unreleased]
 
+### Added
+
+- **Fase 8 § Passo 0–3 — Contenuti reali evento (email ticket + pagina pubblica)**: template email per-evento mono-lingua EN in `renderTicketEmail.ts` (tabella email-safe, copy DUDE, link Maps, backup `publicTicketUrl`); logo evento via CID (`logo-dude`) oltre al QR in `sendTicketEmail.ts`; asset `public/ticket-logo-dude.png`. Pagina `/ticket/[qrToken]` ridisegnata (Archivo Black, stati valido/errore neutro bilingue). Mockup di riferimento in `docs/design/ticket-mockups/`. Documento `fase-8-contenuti-evento.md`; amendment lingua guest-facing per-evento su `fase-6-invio-ticket.md` §2.1/§2.2 e chiusura debiti CMS/template email §5.
+
+### Changed
+
+- **Fase 8 § post-test email (2026-08-20)**: allineamento spaziature e dimensioni ai mockup aggiornati — card email 480px, logo email 126px / pagina 112px (−30%), gap verticali uniformi (40/26/26/44px).
+
+### Tests
+
+- **Fase 8 § Passo 3 — Validazione codice (2026-08-20)**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK (solo warning preesistenti). Stato errore pagina verificato via dev (`/ticket/invalid-token-test`); CSS compilato con valori aggiornati. Test umano multi-client email + pagina mobile/desktop — **non chiuso** (§9 fase-8).
+
 ### Fixed
 
 - **Fase 7 § Passo 8/9 — Fix mobile post test iPhone reale (2026-08-17) — Zoom automatico input iOS Safari**: `font-size` portato a `16px` (`text-base`) su mobile per campi ricerca `/app/contatti`, form auth (`AuthField`: login, forgot/reset password) e form Wildcard (`fieldInputClass`/`selectClass`); dimensioni desktop invariate sotto `md`/`lg`. Nessun `user-scalable=no` nel viewport (accessibilità WCAG 1.4.4).

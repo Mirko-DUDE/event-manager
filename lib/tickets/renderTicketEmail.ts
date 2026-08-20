@@ -3,6 +3,17 @@ import type { GeneratedTicket } from './generateTicket'
 /** Content-ID dell'allegato QR inline (deve coincidere con src="cid:..." e content_id Resend). */
 export const TICKET_QR_CID = 'ticket-qr'
 
+/** Content-ID dell'allegato logo inline (Fase 8 §6). */
+export const TICKET_LOGO_CID = 'logo-dude'
+
+/** Copy e link hardcoded per-evento (Fase 8 §4). */
+const TICKET_MAPS_URL = 'https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6'
+const TICKET_ADDRESS = 'Via Argelati 33, Milan'
+const TICKET_TIME = 'From 6 PM'
+
+const DISPLAY_FONT =
+  "'Archivo Black', 'Arial Black', Arial, Helvetica, sans-serif"
+
 export type TicketEmailContent = {
   subject: string
   html: string
@@ -10,8 +21,8 @@ export type TicketEmailContent = {
 }
 
 /**
- * Template bilingue IT → EN per l'email ticket (fase-6 §2.1).
- * QR via CID (non data URI); link di backup alla pagina pubblica.
+ * Template email ticket per-evento (Fase 8 §4).
+ * Mono-lingua EN; QR e logo via CID; link di backup alla pagina pubblica.
  */
 export function renderTicketEmail(args: {
   ticket: GeneratedTicket
@@ -19,68 +30,107 @@ export function renderTicketEmail(args: {
 }): TicketEmailContent {
   const { ticket, publicTicketUrl } = args
   const fullName = `${ticket.firstName} ${ticket.lastName}`.trim()
-  const location = ticket.locationEvento || '—'
 
-  const subject = `Il tuo biglietto / Your ticket — ${fullName}`
+  const subject = `Your ticket — ${fullName}`
 
-  const text = `Ciao ${fullName},
+  const text = `${fullName}
 
-ecco il tuo biglietto per l'evento.
+This is your official adult certification.
+Use it to enter the party.
 
-Location: ${location}
+${TICKET_ADDRESS} — ${TICKET_TIME}
+${TICKET_MAPS_URL}
 
-Problemi a vedere il QR? Apri il tuo biglietto qui:
-${publicTicketUrl}
-
----
-
-Hello ${fullName},
-
-here is your ticket for the event.
-
-Location: ${location}
-
-Having trouble viewing the QR? Open your ticket here:
+Trouble seeing the QR code?
+Open your ticket here:
 ${publicTicketUrl}
 `
 
   const html = `<!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
   <title>${escapeHtml(subject)}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&amp;display=swap" rel="stylesheet" />
 </head>
-<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f1f5f9;padding:32px 16px;">
+<body style="margin:0;padding:0;background-color:#000000;font-family:Arial, Helvetica, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#000000;">
     <tr>
-      <td align="center">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:480px;background-color:#ffffff;border-radius:8px;padding:32px 28px;">
+      <td align="center" style="padding:24px 16px;">
+
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="width:480px; max-width:480px; background-color:#F5F5F5; border-collapse:collapse;">
           <tr>
-            <td style="color:#0f172a;">
-              <p style="margin:0 0 8px;font-size:13px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#64748b;">Event Manager</p>
-              <h1 style="margin:0 0 8px;font-size:22px;line-height:1.3;font-weight:700;">Il tuo biglietto</h1>
-              <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#475569;">Ciao ${escapeHtml(fullName)}, ecco il QR da presentare al check-in.</p>
-              <p style="margin:0 0 8px;font-size:14px;line-height:1.5;color:#64748b;"><strong style="color:#0f172a;">Location:</strong> ${escapeHtml(location)}</p>
-              <p style="margin:24px 0;text-align:center;">
-                <img src="cid:${TICKET_QR_CID}" alt="QR code biglietto" width="240" height="240" style="display:inline-block;width:240px;height:240px;border:0;" />
+            <td style="padding:12px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#000000;">
+
+                <tr>
+                  <td align="center" style="padding:36px 24px 0 24px;">
+                    <img src="cid:${TICKET_LOGO_CID}" width="126" alt="DUDE — A Totally 18+ Adult Party" style="display:block; width:126px; max-width:126px; height:auto; border:0;" />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align="center" style="padding:40px 28px 0 28px;">
+                    <p style="margin:0; color:#FF9000; font-family:${DISPLAY_FONT}; font-size:18px; line-height:1.2; font-weight:900; letter-spacing:0.5px; text-transform:uppercase;">
+                      ${escapeHtml(fullName)}
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align="center" style="padding:26px 28px 0 28px;">
+                    <p style="margin:0; color:#FFFFFF; font-family:${DISPLAY_FONT}; font-size:26px; line-height:1.18; font-weight:900; letter-spacing:0.5px; text-transform:uppercase;">
+                      This is your official<br />adult certification.
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align="center" style="padding:26px 28px 0 28px;">
+                    <p style="margin:0; color:#FF9000; font-family:${DISPLAY_FONT}; font-size:22px; line-height:1.22; font-weight:900; letter-spacing:0.5px; text-transform:uppercase;">
+                      Use it to enter<br />the party.
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align="center" style="padding:44px 24px 36px 24px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" style="background-color:#F5F5F5;">
+                      <tr>
+                        <td style="padding:16px;">
+                          <img src="cid:${TICKET_QR_CID}" width="180" height="180" alt="QR code — show this at the entrance" style="display:block; width:180px; height:180px; border:0;" />
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:22px 24px 26px 24px;">
+              <p style="margin:0; color:#000000; font-family:${DISPLAY_FONT}; font-size:19px; line-height:1.3; font-weight:900; letter-spacing:0.3px; text-transform:uppercase;">
+                <a href="${escapeHtml(TICKET_MAPS_URL)}" style="color:#000000; text-decoration:none;">${escapeHtml(TICKET_ADDRESS)}</a><br />${escapeHtml(TICKET_TIME)}
               </p>
-              <p style="margin:0 0 28px;font-size:14px;line-height:1.6;color:#475569;">
-                Problemi a vedere il QR?
-                <a href="${escapeHtml(publicTicketUrl)}" style="color:#2563eb;font-weight:600;">Apri il tuo biglietto qui</a>
-              </p>
-              <hr style="border:none;border-top:1px solid #e2e8f0;margin:28px 0;" />
-              <h2 style="margin:0 0 8px;font-size:20px;line-height:1.3;font-weight:700;">Your ticket</h2>
-              <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#475569;">Hello ${escapeHtml(fullName)}, here is the QR code to present at check-in.</p>
-              <p style="margin:0 0 8px;font-size:14px;line-height:1.5;color:#64748b;"><strong style="color:#0f172a;">Location:</strong> ${escapeHtml(location)}</p>
-              <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#475569;">
-                Having trouble viewing the QR?
-                <a href="${escapeHtml(publicTicketUrl)}" style="color:#2563eb;font-weight:600;">Open your ticket here</a>
-              </p>
-              <p style="margin:24px 0 0;font-size:12px;line-height:1.5;color:#cbd5e1;word-break:break-all;">${escapeHtml(publicTicketUrl)}</p>
             </td>
           </tr>
         </table>
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center" style="padding:24px 16px 4px 16px;">
+              <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:1.6; color:#AAAAAA;">
+                Trouble seeing the QR code?<br />
+                <a href="${escapeHtml(publicTicketUrl)}" style="color:#FFFFFF; text-decoration:underline;">Open your ticket here.</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+
       </td>
     </tr>
   </table>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Archivo_Black } from 'next/font/google'
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
@@ -6,6 +7,17 @@ import { getServerURL } from '@/auth/google/getServerURL'
 import { loadPublicTicketByToken } from '@/lib/tickets/loadPublicTicket'
 
 import styles from './page.module.css'
+
+const archivoBlack = Archivo_Black({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-archivo-black',
+})
+
+/** Copy e link hardcoded per-evento (Fase 8 §4/§5). */
+const TICKET_MAPS_URL = 'https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6'
+const TICKET_ADDRESS = 'Via Argelati 33, Milan'
+const TICKET_TIME = 'From 6 PM'
 
 type PageProps = {
   params: Promise<{ qrToken: string }>
@@ -15,7 +27,7 @@ type PageProps = {
 export const dynamic = 'force-dynamic'
 
 const OG_DESCRIPTION =
-  'Il tuo biglietto evento / Your event ticket — presenta il QR al check-in. / Present this QR code at check-in.'
+  'Your event ticket — present this QR code at check-in.'
 
 const OG_DESCRIPTION_UNAVAILABLE =
   'Il link non è valido oppure il biglietto non esiste. / This link is invalid or the ticket does not exist.'
@@ -53,15 +65,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     )
   }
 
-  const location = ticket.locationEvento?.trim() || 'Event Manager'
   const fullName = `${ticket.firstName} ${ticket.lastName}`.trim()
-  const title = fullName ? `${location} — ${fullName}` : location
+  const title = fullName ? `${fullName} — Your ticket` : 'Your ticket'
 
   return buildOpenGraphMetadata(title, OG_DESCRIPTION)
 }
 
 /**
- * Pagina pubblica del biglietto (`fase-6` §2.2 / Passo 3).
+ * Pagina pubblica del biglietto (Fase 8 §5).
  * Area pubblica `(frontend)/` — nessuna autenticazione.
  */
 export default async function PublicTicketPage({ params }: PageProps) {
@@ -72,18 +83,14 @@ export default async function PublicTicketPage({ params }: PageProps) {
   if (!ticket) {
     return (
       <div className={styles.page}>
-        <main className={`${styles.card} ${styles.unavailable}`}>
-          <p className={styles.eyebrow}>Event Manager</p>
-          <h1 className={styles.title}>Biglietto non disponibile</h1>
-          <p className={styles.lead}>
-            Il link non è valido oppure il biglietto non esiste. Se pensi sia un errore, contatta
-            l&apos;organizzazione dell&apos;evento.
+        <main className={styles.errorPage}>
+          <p className={styles.errorEn}>Ticket not found.</p>
+          <p className={styles.errorIt}>Biglietto non trovato.</p>
+          <p className={styles.errorSecondaryEn}>
+            Please check the link or contact the event organizer.
           </p>
-          <hr className={styles.divider} />
-          <h2 className={styles.titleEn}>Ticket unavailable</h2>
-          <p className={styles.lead}>
-            This link is invalid or the ticket does not exist. If you believe this is a mistake,
-            please contact the event organizers.
+          <p className={styles.errorSecondaryIt}>
+            Controlla il link o contatta l&apos;organizzatore dell&apos;evento.
           </p>
         </main>
       </div>
@@ -91,40 +98,50 @@ export default async function PublicTicketPage({ params }: PageProps) {
   }
 
   const fullName = `${ticket.firstName} ${ticket.lastName}`.trim() || '—'
-  const location = ticket.locationEvento || '—'
   const qrDataUri = `data:image/png;base64,${ticket.qrPng.toString('base64')}`
 
   return (
-    <div className={styles.page}>
-      <main className={styles.card}>
-        <p className={styles.eyebrow}>Event Manager</p>
-        <h1 className={styles.title}>Il tuo biglietto</h1>
-        <p className={styles.name}>{fullName}</p>
-        <p className={styles.meta}>
-          <strong>Location:</strong> {location}
-        </p>
-        <p className={styles.lead}>Presenta questo QR al check-in.</p>
-
-        <div className={styles.qrWrap}>
-          {/* data URI ammesso in pagina pubblica; vietato solo nell'email (Outlook). */}
+    <div className={`${styles.page} ${archivoBlack.variable}`}>
+      <main className={styles.ticketPage}>
+        <div className={styles.ticketCard}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            className={styles.qr}
-            src={qrDataUri}
-            alt={`QR code biglietto di ${fullName}`}
-            width={240}
-            height={240}
+            className={styles.ticketLogo}
+            src="/ticket-logo-dude.png"
+            alt="DUDE — A Totally 18+ Adult Party"
           />
+          <p className={styles.guestName}>{fullName}</p>
+          <p className={styles.headline}>
+            This is your official
+            <br />
+            adult certification.
+          </p>
+          <p className={styles.subheadline}>
+            Use it to enter
+            <br />
+            the party.
+          </p>
+          <div className={styles.qrBox}>
+            {/* data URI ammesso in pagina pubblica; vietato solo nell'email (Outlook). */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className={styles.qr}
+              src={qrDataUri}
+              alt="QR code — show this at the entrance"
+              width={170}
+              height={170}
+            />
+          </div>
         </div>
-
-        <hr className={styles.divider} />
-
-        <h2 className={styles.titleEn}>Your ticket</h2>
-        <p className={styles.name}>{fullName}</p>
-        <p className={styles.meta}>
-          <strong>Location:</strong> {location}
-        </p>
-        <p className={styles.lead}>Present this QR code at check-in.</p>
+        <div className={styles.ticketFooter}>
+          <p className={styles.ticketFooterText}>
+            <a className={styles.mapsLink} href={TICKET_MAPS_URL}>
+              {TICKET_ADDRESS}
+            </a>
+            <br />
+            {TICKET_TIME}
+          </p>
+        </div>
       </main>
     </div>
   )

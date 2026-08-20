@@ -1,5 +1,23 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { ResendTicketError } from './resendErrors'
-import { TICKET_QR_CID, type TicketEmailContent } from './renderTicketEmail'
+import {
+  TICKET_LOGO_CID,
+  TICKET_QR_CID,
+  type TicketEmailContent,
+} from './renderTicketEmail'
+
+const TICKET_LOGO_PATH = join(process.cwd(), 'public/ticket-logo-dude.png')
+
+let cachedLogoPng: Buffer | null = null
+
+function getTicketLogoPng(): Buffer {
+  if (!cachedLogoPng) {
+    cachedLogoPng = readFileSync(TICKET_LOGO_PATH)
+  }
+  return cachedLogoPng
+}
 
 /**
  * Invio email ticket via API REST Resend (stesso provider dell'adapter Payload).
@@ -24,6 +42,8 @@ export async function sendTicketEmailViaResend(args: {
     throw new ResendTicketError(400, 'RESEND_API_KEY assente — impossibile inviare il ticket.')
   }
 
+  const logoPng = getTicketLogoPng()
+
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -41,6 +61,12 @@ export async function sendTicketEmailViaResend(args: {
           filename: 'ticket-qr.png',
           content: qrPng.toString('base64'),
           content_id: TICKET_QR_CID,
+          content_type: 'image/png',
+        },
+        {
+          filename: 'ticket-logo-dude.png',
+          content: logoPng.toString('base64'),
+          content_id: TICKET_LOGO_CID,
           content_type: 'image/png',
         },
       ],

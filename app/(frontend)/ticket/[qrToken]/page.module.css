@@ -1,94 +1,135 @@
+/* Design system biglietto — namespace separato dall'Area App (Fase 8 §3) */
 .page {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 16px;
-  background: #f1f5f9;
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-  color: #0f172a;
+  min-height: 100vh;
+  padding: 24px 16px;
+  background: #000000;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.card {
+.ticketPage {
   width: 100%;
   max-width: 420px;
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 32px 28px;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 6%);
+  background: #f5f5f5;
+  padding: 12px;
 }
 
-.eyebrow {
-  margin: 0 0 8px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+.ticketCard {
+  background: #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 24px 32px;
+}
+
+.ticketLogo {
+  width: 112px;
+  height: auto;
+  margin-bottom: 0;
+  display: block;
+}
+
+.display {
+  font-family: var(--font-archivo-black), 'Arial Black', Arial, sans-serif;
   text-transform: uppercase;
-  color: #64748b;
-}
-
-.title {
-  margin: 0 0 8px;
-  font-size: 22px;
-  line-height: 1.3;
-  font-weight: 700;
-}
-
-.name {
-  margin: 0 0 12px;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.meta {
-  margin: 0 0 8px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #64748b;
-}
-
-.meta strong {
-  color: #0f172a;
-  font-weight: 600;
-}
-
-.lead {
-  margin: 0 0 20px;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #475569;
-}
-
-.qrWrap {
-  margin: 24px 0;
   text-align: center;
+  margin: 0;
+  font-weight: 900;
+}
+
+.guestName {
+  composes: display;
+  color: #ff9000;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  margin: 40px 0 0;
+}
+
+.headline {
+  composes: display;
+  color: #ffffff;
+  font-size: 24px;
+  line-height: 1.18;
+  margin-top: 26px;
+}
+
+.subheadline {
+  composes: display;
+  color: #ff9000;
+  font-size: 20px;
+  line-height: 1.2;
+  margin-top: 26px;
+}
+
+.qrBox {
+  background: #f5f5f5;
+  padding: 16px;
+  margin-top: 44px;
 }
 
 .qr {
-  display: inline-block;
-  width: 240px;
-  height: 240px;
+  width: 170px;
+  height: 170px;
+  display: block;
 }
 
-.divider {
-  border: none;
-  border-top: 1px solid #e2e8f0;
-  margin: 28px 0;
+.ticketFooter {
+  background: #f5f5f5;
+  text-align: center;
+  padding: 20px 20px 22px;
 }
 
-.titleEn {
-  margin: 0 0 8px;
-  font-size: 20px;
+.ticketFooterText {
+  composes: display;
+  color: #000000;
+  font-size: 18px;
   line-height: 1.3;
-  font-weight: 700;
 }
 
-.unavailable {
+.mapsLink {
+  color: #000000;
+  text-decoration: none;
+}
+
+/* Stato errore — grafica neutra, bilingue (Fase 8 §5) */
+.errorPage {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  padding: 56px 32px;
   text-align: center;
 }
 
-.unavailable .title {
-  margin-bottom: 12px;
+.errorEn {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #222222;
+  line-height: 1.5;
+  margin: 0 0 6px;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.errorIt {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #666666;
+  line-height: 1.5;
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.errorSecondaryEn {
+  composes: errorEn;
+  margin-top: 18px;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.errorSecondaryIt {
+  composes: errorIt;
+  font-size: 13px;
 }

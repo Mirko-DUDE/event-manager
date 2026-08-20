@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Pagina pubblica ticket</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ticket-neutral-900: #000000;
+    --ticket-neutral-800: #1F1F1F;
+    --ticket-neutral-100: #F5F5F5;
+    --ticket-neutral-0:   #FFFFFF;
+    --ticket-orange-500:  #FF9000;
+    --ticket-rosso-0:     #FF0000;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #000000; padding: 24px 0; }
+  .mockup-note {
+    max-width: 480px; margin: 0 auto 20px auto; font-size: 12px; color: #555;
+    background: #fff; padding: 12px 16px; border-radius: 6px; border: 1px solid #ddd; line-height: 1.55;
+  }
+  .mockup-note strong { color:#000; }
+  .mockup-note code { background:#f0f0f0; padding:1px 5px; border-radius:3px; font-family:'Courier New',monospace; }
+  .screen-label {
+    max-width: 480px; margin: 32px auto 8px auto; font-size: 11px; letter-spacing: 1px;
+    text-transform: uppercase; color: #AAAAAA; padding: 0 4px;
+  }
+
+  /* ---- Stato 1: ticket valido ---- */
+  .ticket-page { max-width: 420px; margin: 0 auto 8px auto; background: var(--ticket-neutral-100); padding: 12px; }
+  .ticket-card { background: var(--ticket-neutral-900); display: flex; flex-direction: column; align-items: center; padding: 36px 24px 32px 24px; }
+  .ticket-logo { width: 112px; height: auto; margin-bottom: 0; display:block; }
+  .display { font-family: 'Archivo Black', 'Arial Black', Arial, sans-serif; text-transform: uppercase; text-align: center; margin: 0; font-weight: 900; }
+  .headline { color: var(--ticket-neutral-0); font-size: 24px; line-height: 1.18; margin-top: 26px; }
+  .subheadline { color: var(--ticket-orange-500); font-size: 20px; line-height: 1.2; margin-top: 26px; }
+  .qr-box { background: var(--ticket-neutral-100); padding: 16px; margin-top: 44px; }
+  .qr-box img { width: 170px; height: 170px; display:block; }
+  .guest-name {
+    font-family: 'Archivo Black', 'Arial Black', Arial, sans-serif; text-transform: uppercase;
+    color: var(--ticket-orange-500); font-size: 18px; font-weight: 900;
+    letter-spacing: 0.5px; margin: 40px 0 0 0; text-align:center;
+  }
+  .ticket-footer { background: var(--ticket-neutral-100); text-align: center; padding: 20px 20px 22px 20px; }
+  .ticket-footer p { color:#000; font-size:18px; line-height:1.3; }
+
+  /* ---- Stato 2: errore generico (token non valido) ---- */
+  .error-page {
+    max-width: 420px; margin: 0 auto 40px auto; background: #FFFFFF;
+    border: 1px solid #E0E0E0; padding: 56px 32px; text-align: center;
+  }
+  .error-page p { font-family: Arial, Helvetica, sans-serif; color: #222222; line-height: 1.5; margin: 0 0 6px 0; }
+  .error-page .en { font-weight: 700; font-size: 16px; }
+  .error-page .it { color: #666; font-size: 14px; }
+  .error-page .secondary { margin-top: 18px; }
+  .error-page .secondary.en { font-weight: 400; font-size: 14px; }
+  .error-page .secondary.it { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="mockup-note">
+  <strong>Mockup — pagina pubblica <code>/ticket/[qrToken]</code>.</strong> Stessa identità visiva dell'email, come pagina web reale (CSS moderno, non tabella — qui non serve compatibilità email). QR come data URI (Fase 6 §2.2, non CID: vincolo email-only). Nome/cognome ospite ora prima della headline, stessa posizione dell'email — deciso in sessione (2026-08-20), sostituisce la vecchia ipotesi "solo pagina, non email": ora appare in entrambe. Link indirizzo→Maps con stile inline (no sottolineatura/colore browser di default). <strong>Correzioni post-test (2026-08-20)</strong>: logo -30% (160px→112px), spaziature interne aumentate come nell'email (logo→nome 40px, nome→headline 26px, headline→subheadline 26px, subheadline→QR 44px) — larghezza card invariata (420px, non richiesta per la pagina).
+</div>
+
+<div class="screen-label">Stato 1 — ticket valido</div>
+<div class="ticket-page">
+  <div class="ticket-card">
+    <img class="ticket-logo" src="data:image/png;base64,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" alt="DUDE — A Totally 18+ Adult Party">
+    <p class="guest-name">Jane Doe</p>
+    <p class="display headline">This is your official<br>adult certification.</p>
+    <p class="display subheadline">Use it to enter<br>the party.</p>
+    <div class="qr-box">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASgAAAEoAQAAAADDfFG0AAAB/klEQVR4nO2aW24rMQxDD4vZ/5bZD8qPJr1Av2IB10qQOh4CJQSbpuTI/CG+/gK6qIt6iweUkQGBVd/k9aQr+yP5wgACJWXOX8vzSVf2h1CSABkbI4SSqnrSm/1HUc82FtjyWGZHeXVFPa8TloVfTs2u7A/la2QnWi8L1aRP8eqKepgHJFZeGbM96cr+8yitnZc1VcJVMnaMV1fUk/0H2CjJkmsu80d4dUbJgCUZY2RprLurX7+gLBsx/LyTJpd11TFeTVEW2Y2QkxEre3HKWWP2B1AGSa6UkSRZqiPg1kNbrFOwxH2ckhGyuNe27A/pfSrGiD2O8gNo7MrO7D+LerLELM+1JqNlYXX160fY4BSMXm/bc4jdlf0Z/ZouFVieQjEU93x8R7mUajZUrZh8rv96CXl8xnjV2aixwLh6/4ZSFUOzhW8R9+VqSXdm/1lUqZR3Hdt7q9mTXdmf8vcWw3RFycQoiaS7H7dIP1qO6VLZCkbb8NaPr+E0cSjXVYZrNvAN139t8bO/CqN6zIXtaLN2ZX+mHsrIXr61Gjoa37uyP3M+roa98GjhMFfa7U9s8cC46QBmujyL7uu//olS6VYMK6nFdfuFe+z320bj1wB1A5Ls9WV/KF/jLmgJfv2wqUxYW/aH+l8ZVC9s9cMYM9d/zdhvsT/zHy/qf0J9A7H9+jPO+w1vAAAAAElFTkSuQmCC" alt="QR code — show this at the entrance">
+    </div>
+  </div>
+  <div class="ticket-footer">
+    <p class="display"><a href="https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6" style="color:#000000; text-decoration:none;">Via Argelati 33, Milan</a><br>From 6 PM</p>
+  </div>
+</div>
+
+<div class="screen-label">Stato 2 — token non trovato/non valido (messaggio generico, bilingue, grafica neutra — mai lo stile/branding dell'evento)</div>
+<div class="error-page">
+  <p class="en">Ticket not found.</p>
+  <p class="it">Biglietto non trovato.</p>
+  <p class="secondary en">Please check the link or contact the event organizer.</p>
+  <p class="secondary it">Controlla il link o contatta l'organizzatore dell'evento.</p>
+</div>
+
+</body>
+</html>
