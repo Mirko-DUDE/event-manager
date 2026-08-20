@@ -63,6 +63,8 @@ Motivazione: il contenuto guest-facing è specifico dell'evento (già deciso: la
 ## 4. Contenuti — Email ticket
 
 **Copy (inglese, testo esatto per questo evento):**
+- **Oggetto email**: `DUDEHUB - This is your ticket` (fisso, senza nome ospite — decisione 2026-08-20).
+- **Mittente** (`fromName`, solo flusso invio ticket): `DUDEHUB` — hardcoded in `sendTicket.ts`, non eredita `RESEND_FROM_NAME` né `defaultFromName` Payload (per-evento; le altre email di sistema restano su «Event Manager»).
 - Nome/cognome ospite: `{{firstName}} {{lastName}}` — riga discreta, subito prima della headline (decisione 2026-08-20, sostituisce l'ipotesi precedente "solo pagina, non email": ora appare **in entrambe le superfici**, stessa posizione). **Stile confermato**: stesso font display (Archivo Black) del resto del testo, colore accent `orange-500` (non testo muto grigio come nella prima bozza).
 - Headline: `This is your official adult certification.`
 - Subheadline: `Use it to enter the party.`
@@ -89,6 +91,8 @@ Motivazione: il contenuto guest-facing è specifico dell'evento (già deciso: la
 ## 5. Contenuti — Pagina pubblica ticket (`/ticket/[qrToken]`)
 
 Stessa identità visiva dell'email, come pagina web (CSS moderno consentito, non serve compatibilità client email).
+
+**Titolo pagina** (`<title>` / Open Graph, ticket valido): `DUDEHUB - This is your ticket` (fisso, senza nome ospite — decisione 2026-08-20). Lo stato errore mantiene titolo bilingue di sistema (§2).
 
 **Nome e cognome ospite**: stessa posizione dell'email, subito prima della headline (§4) — non più sotto il QR come nella prima bozza del mockup pagina. Soddisfa il requisito di `fase-6-invio-ticket.md` §2.2 ("contenuto minimo: nome e cognome").
 
@@ -147,4 +151,4 @@ Motivazione (gestione progetto + anti-spam):
 - [ ] Test umano invio email su almeno 3 client reali + verifica pagina pubblica mobile/desktop, entrambi gli stati
 - [ ] `00-piano-generale.md` aggiornato a chiusura
 
-**Note implementazione (2026-08-20)**: dopo test email reale, mockup e codice allineati a correzioni spaziatura (logo −30%, gap verticali logo→nome 40px, nome→headline 26px, headline→subheadline 26px, subheadline→QR 44px) e larghezza card email 480px (pagina 420px invariata).
+**Note implementazione (2026-08-20)**: dopo test email reale, mockup e codice allineati a correzioni spaziatura (logo −30%, gap verticali logo→nome 40px, nome→headline 26px, headline→subheadline 26px, subheadline→QR 44px) e larghezza card email 480px (pagina 420px invariata). Branding mittente/oggetto/titolo pagina unificato su **DUDEHUB** (`DUDEHUB - This is your ticket` per oggetto email e titolo pagina ticket valido).

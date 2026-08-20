@@ -10,6 +10,7 @@ export const TICKET_LOGO_CID = 'logo-dude'
 const TICKET_MAPS_URL = 'https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6'
 const TICKET_ADDRESS = 'Via Argelati 33, Milan'
 const TICKET_TIME = 'From 6 PM'
+const TICKET_EMAIL_SUBJECT = 'DUDEHUB - This is your ticket'
 
 const DISPLAY_FONT =
   "'Archivo Black', 'Arial Black', Arial, Helvetica, sans-serif"
@@ -30,8 +31,7 @@ export function renderTicketEmail(args: {
 }): TicketEmailContent {
   const { ticket, publicTicketUrl } = args
   const fullName = `${ticket.firstName} ${ticket.lastName}`.trim()
-
-  const subject = `Your ticket — ${fullName}`
+  const subject = TICKET_EMAIL_SUBJECT
 
   const text = `${fullName}
 

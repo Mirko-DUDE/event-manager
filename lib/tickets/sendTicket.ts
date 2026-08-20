@@ -220,7 +220,7 @@ export async function sendTicketToContact(options: SendTicketOptions): Promise<S
     const publicTicketUrl = `${baseUrl}${ticket.publicTicketPath}`
     const content = renderTicketEmail({ ticket, publicTicketUrl })
 
-    const fromName = payload.email.defaultFromName || process.env.RESEND_FROM_NAME || 'Event Manager'
+    const fromName = 'DUDEHUB'
     const fromAddress =
       payload.email.defaultFromAddress || process.env.RESEND_FROM_ADDRESS || 'noreply@example.com'
     const apiKey = process.env.RESEND_API_KEY || ''

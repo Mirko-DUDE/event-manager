@@ -26,6 +26,8 @@ type PageProps = {
 /** Lookup DB + QR on-the-fly — non prerenderizzare in `next build`. */
 export const dynamic = 'force-dynamic'
 
+const TICKET_PAGE_TITLE = 'DUDEHUB - This is your ticket'
+
 const OG_DESCRIPTION =
   'Your event ticket — present this QR code at check-in.'
 
@@ -65,10 +67,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     )
   }
 
-  const fullName = `${ticket.firstName} ${ticket.lastName}`.trim()
-  const title = fullName ? `${fullName} — Your ticket` : 'Your ticket'
-
-  return buildOpenGraphMetadata(title, OG_DESCRIPTION)
+  return buildOpenGraphMetadata(TICKET_PAGE_TITLE, OG_DESCRIPTION)
 }
 
 /**
