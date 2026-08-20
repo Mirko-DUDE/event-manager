@@ -25,10 +25,14 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Changed
 
+- **Fase 3 — Whitelist CSRF dual-origin (2026-08-20)**: `payload.config.ts` espone `csrf` esplicito da `SERVER_URL` + `CLOUD_RUN_URL` (env opzionale, deduplicata). Consente login locale (App, super-admin `/admin/login/local`) anche via URL nativo `*.run.app` se `events.dude.it` è irraggiungibile. `SERVER_URL` resta unica fonte per OAuth, cookie `secure`, email e link pubblici — login Google su `*.run.app` resta fuori scope (limitazione nota). **Passaggio umano Cloud Run**: impostare `CLOUD_RUN_URL=https://event-manager-757912956991.europe-west1.run.app` (env var normale, non Secret Manager) insieme a `SERVER_URL=https://events.dude.it`; in locale lasciare `CLOUD_RUN_URL` vuota.
+
 - **Fase 8 § post-test email (2026-08-20)**: allineamento spaziature e dimensioni ai mockup aggiornati — card email 480px, logo email 126px / pagina 112px (−30%), gap verticali uniformi (40/26/26/44px).
 - **Fase 8 § branding DUDEHUB (2026-08-20)**: oggetto email ticket fisso `DUDEHUB - This is your ticket` (senza nome ospite); mittente ticket `DUDEHUB` (hardcoded in `sendTicket.ts`, solo flusso ticket); titolo pagina `/ticket/[qrToken]` (ticket valido) stesso testo. Altre email di sistema invariate su «Event Manager».
 
 ### Tests
+
+- **Fase 3 — Whitelist CSRF dual-origin (2026-08-20)**: `pnpm exec tsc --noEmit`, `pnpm lint` OK (solo warning preesistenti). Smoke login locale su `*.run.app` in produzione — **non eseguito** (richiede deploy + `CLOUD_RUN_URL` su Cloud Run).
 
 - **Fase 8 § Passo 3 — Validazione codice (2026-08-20)**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK (solo warning preesistenti). Stato errore pagina verificato via dev (`/ticket/invalid-token-test`); CSS compilato con valori aggiornati. Test umano multi-client email + pagina mobile/desktop — **non chiuso** (§9 fase-8).
 

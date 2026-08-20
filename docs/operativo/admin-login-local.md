@@ -10,7 +10,8 @@ Serve quando:
 
 - Google Login non è disponibile (problema OAuth, Workspace, ecc.);
 - l'allow-list domini non è configurata o non copre il dominio necessario;
-- serve recuperare l'accesso Admin senza dipendere da Google.
+- serve recuperare l'accesso Admin senza dipendere da Google;
+- **`events.dude.it` è irraggiungibile** (DNS/certificato): usare l'URL nativo Cloud Run (`*.run.app`) — richiede `CLOUD_RUN_URL` impostata su Cloud Run (vedi `fase-3-deploy.md` Amendment 2026-08-20). Login **locale** only su quel host; Google OAuth resta su `events.dude.it`.
 
 ## URL
 

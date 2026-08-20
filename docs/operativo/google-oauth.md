@@ -38,10 +38,14 @@ Placeholder di riferimento in `.env.example` (senza valori reali).
   |---|---|---|
   | locale | Admin | `http://localhost:3000/api/users/oauth/google-admin/callback` ✅ registrato e testato |
   | locale | App (§ 2.5) | `http://localhost:3000/api/users/oauth/google-app/callback` ✅ registrato e testato |
-  | produzione (Cloud Run) | Admin | `https://event-manager-757912956991.europe-west1.run.app/api/users/oauth/google-admin/callback` ✅ |
-  | produzione (Cloud Run) | App | `https://event-manager-757912956991.europe-west1.run.app/api/users/oauth/google-app/callback` ✅ |
+  | produzione (Cloud Run, storico § 3.3) | Admin | `https://event-manager-757912956991.europe-west1.run.app/api/users/oauth/google-admin/callback` ✅ |
+  | produzione (Cloud Run, storico § 3.3) | App | `https://event-manager-757912956991.europe-west1.run.app/api/users/oauth/google-app/callback` ✅ |
+  | produzione (canonico) | Admin | `https://events.dude.it/api/users/oauth/google-admin/callback` — registrare su Google Cloud Console |
+  | produzione (canonico) | App | `https://events.dude.it/api/users/oauth/google-app/callback` — registrare su Google Cloud Console |
 
-  **`SERVER_URL` produzione**: `https://event-manager-757912956991.europe-west1.run.app` (env var Cloud Run, § 3.3 Parte A ✅).
+  **`SERVER_URL` produzione (canonico)**: `https://events.dude.it` — OAuth, link email e `serverURL` Payload (env var Cloud Run).
+
+  **`CLOUD_RUN_URL` produzione (solo CSRF, login locale di emergenza)**: `https://event-manager-757912956991.europe-west1.run.app` — whitelist Payload per auth cookie-based; **non** usata per OAuth né link email. Vedi `fase-3-deploy.md` Amendment 2026-08-20 e `.env.example`.
 
   Avvio OAuth Admin: `GET /api/users/oauth/google-admin` (bottone su `/admin/login`).
   Avvio OAuth App: `GET /api/users/oauth/google-app` (bottone su `/app/login`).

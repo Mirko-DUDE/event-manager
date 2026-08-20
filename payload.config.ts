@@ -17,8 +17,18 @@ import { TicketConfig } from './globals/TicketConfig'
 import { googleAdminOAuth } from './plugins/googleAdminOAuth'
 import { googleAppOAuth } from './plugins/googleAppOAuth'
 
+/** Origini ammesse per auth cookie-based (login locale). Payload aggiunge anche serverURL. */
+const csrfOrigins = [
+  ...new Set(
+    [process.env.SERVER_URL, process.env.CLOUD_RUN_URL].filter((url): url is string =>
+      Boolean(url),
+    ),
+  ),
+]
+
 export default buildConfig({
   serverURL: process.env.SERVER_URL || 'http://localhost:3000',
+  csrf: csrfOrigins,
   admin: {
     user: Users.slug,
     components: {

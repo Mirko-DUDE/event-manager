@@ -89,7 +89,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 
   **Nota RESEND_FROM_ADDRESS (variabile non-secret, non in questa tabella)**: valore di produzione ancora da confermare — punto lasciato esplicitamente aperto, vedi Parte C.
 
-- [x] `RESEND_FROM_ADDRESS` e `SERVER_URL` **non vanno in Secret Manager** — sono variabili d'ambiente normali su Cloud Run (Parte C).
+- [x] `RESEND_FROM_ADDRESS`, `SERVER_URL` e `CLOUD_RUN_URL` **non vanno in Secret Manager** — sono variabili d'ambiente normali su Cloud Run (Parte C). `CLOUD_RUN_URL` aggiunta post-chiusura fase (2026-08-20): vedi § Amendment dominio personalizzato.
 - [x] IAM: assegnare `roles/secretmanager.secretAccessor` al service account runtime (creato in Parte C) **solo sui 7 secret specifici**, non a livello di progetto — evita che il servizio possa leggere secret futuri non pertinenti. *(Eseguito insieme alla creazione del SA in Parte C.)*
 
 ### Parte C — Configurazione e deploy Cloud Run (umano, dipende da Parte A + B)
@@ -175,7 +175,7 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 - [x] § 3.3 marcato ✅ in questo file e in `00-piano-generale.md`.
 - [x] Voce in `CHANGELOG.md` con esito spike e fix cookie `Secure`.
 
-**Attenzione per il futuro** (solo da tenere a mente, nessuna azione ora): quando verrà collegato un dominio personalizzato aziendale (esplicitamente rimandato, fuori scope), sia `SERVER_URL` sia le redirect URI andranno aggiornate di nuovo — ripetere questa sottofase.
+**Attenzione per il futuro** (aggiornamento 2026-08-20): collegato dominio personalizzato `events.dude.it` — vedi § Amendment dominio personalizzato (fine file). La configurazione § 3.3 resta riferimento storico con URL `*.run.app`.
 
 ---
 
@@ -222,7 +222,36 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 
 ---
 
+## Amendment — dominio personalizzato e login locale di emergenza (2026-08-20)
+
+**Contesto**: il servizio è raggiungibile sia su `https://events.dude.it` (dominio canonico) sia sull'URL nativo Cloud Run `https://event-manager-757912956991.europe-west1.run.app`. Fase di transizione: entrambi restano attivi.
+
+**Variabili Cloud Run** (env var normali, non Secret Manager):
+
+| Variabile | Valore produzione | Uso |
+|---|---|---|
+| `SERVER_URL` | `https://events.dude.it` | OAuth Google, link email/WhatsApp/OG, `cookies.secure`, `serverURL` Payload |
+| `CLOUD_RUN_URL` | `https://event-manager-757912956991.europe-west1.run.app` | Solo whitelist CSRF Payload — login locale (App + `/admin/login/local`) via URL nativo se `events.dude.it` irraggiungibile |
+
+In locale: `CLOUD_RUN_URL` **assente/vuota** (nessun secondo origin CSRF).
+
+**Limitazioni accettate (non bug da correggere ora)**:
+
+- Login **Google OAuth** funziona solo sul dominio coincidente con `SERVER_URL` (`events.dude.it`). Su `*.run.app` resta disponibile il login **locale** (email/password), incluso super-admin su `/admin/login/local`.
+- Redirect URI OAuth su Google Cloud Console: registrare quelle su `events.dude.it` (canonico); le URI su `*.run.app` possono restare per compatibilità transitoria ma OAuth non è garantito su quel host.
+
+**Checklist umana post-deploy** (da eseguire dopo push su `main`):
+
+- [ ] Impostare/verificare `SERVER_URL=https://events.dude.it` su Cloud Run
+- [ ] Impostare `CLOUD_RUN_URL=https://event-manager-757912956991.europe-west1.run.app` su Cloud Run
+- [ ] Deploy nuova revisione
+- [ ] Smoke: login locale App su `events.dude.it` e su `*.run.app`; login Google solo su `events.dude.it`
+
+**Codice**: `payload.config.ts` — `csrf` esplicito da `SERVER_URL` + `CLOUD_RUN_URL` (deduplicato). Vedi `CHANGELOG.md` [Unreleased].
+
+---
+
 ## Note di apertura fase
 
-- **Fuori scope Fase 3** (esplicitamente rimandato, salvo richiesta esplicita): dominio personalizzato/DNS avanzato, CDN, monitoring dedicato oltre agli alert minimi di § 3.5, migrazione Atlas M0 → tier a pagamento (annotare quando ci si avvicina all'uso reale, § 3.1).
+- **Fuori scope Fase 3** (esplicitamente rimandato, salvo richiesta esplicita): CDN, monitoring dedicato oltre agli alert minimi di § 3.5, migrazione Atlas M0 → tier a pagamento (annotare quando ci si avvicina all'uso reale, § 3.1). Dominio personalizzato: vedi Amendment sopra (2026-08-20).
 - **Proporzionalità**: nessuna duplicazione dev/staging/prod con seed o guardrail diversi non previsti in documentazione — un solo script di seed, un solo utente DB, un solo set di guardrail, validi ovunque.
