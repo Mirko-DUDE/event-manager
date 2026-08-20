@@ -21,6 +21,16 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Added
 
+- **Fase 9 § Passo 0–3 — Homepage pubblica `/`**: `app/(frontend)/page.tsx` sostituisce il placeholder Next.js con eyebrow «Event Manager», heading «Seleziona un'area», due bottoni `<Button asChild>` shadcn/ui: «Event Manager App» (`variant="default"`, colore `--de-blue` `#053643`) → `/app` e «Admin» (`variant="outline"`, bordo `--de-azure` `#00698F`) → `/admin`. Token `--de-blue`/`--de-azure`/`--de-black`/`--de-white`/`--de-muted` in `page.module.css` (namespace separato da Area App e biglietto). Mockup di riferimento: `docs/design/ticket-mockups/mockup-homepage.html`.
+
+### Changed
+
+- **Fase 9 § CSS bleed client-side (2026-08-20)**: `(frontend)/layout.tsx` importa `app/(app)/app.css` (stesso foglio del layout `(app)`) per eliminare alla radice la differenza di aspetto causata dal bleed CSS durante la navigazione client-side di Next.js — con CSS base diversi tra route group, una pagina appare diversamente a seconda dell'ordine di visita. `globals.css` rimosso da `(frontend)` (conteneva `body { display: flex }` e variabili `:root` che rompevano `/admin` e `/app` durante la navigazione client-side). Bottoni con specificità CSS doppia (`.btnDefault.btnDefault`, `0-2-0`) per sovrascrivere in modo affidabile le utility Tailwind a specificità singola iniettate da `app.css`.
+
+### Tests
+
+- **Fase 9 § Passo 3 — Validazione codice (2026-08-20)**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK (solo warning preesistenti). Verifica link via curl: `href="/app"` e `href="/admin"` corretti. Controllo visivo desktop: bottoni stessa larghezza (220px), testo bianco su primario, bordo azure su outline, nessun bleed CSS su `/admin` e `/app`. Controllo visivo mobile/desktop formale — **non eseguito** (🔲 checklist §5 Fase 9).
+
 - **Fase 8 § Passo 0–3 — Contenuti reali evento (email ticket + pagina pubblica)**: template email per-evento mono-lingua EN in `renderTicketEmail.ts` (tabella email-safe, copy DUDE, link Maps, backup `publicTicketUrl`); logo evento via CID (`logo-dude`) oltre al QR in `sendTicketEmail.ts`; asset `public/ticket-logo-dude.png`. Pagina `/ticket/[qrToken]` ridisegnata (Archivo Black, stati valido/errore neutro bilingue). Mockup di riferimento in `docs/design/ticket-mockups/`. Documento `fase-8-contenuti-evento.md`; amendment lingua guest-facing per-evento su `fase-6-invio-ticket.md` §2.1/§2.2 e chiusura debiti CMS/template email §5.
 
 ### Changed

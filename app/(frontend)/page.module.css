@@ -1,142 +1,88 @@
+/* Design system homepage pubblica — namespace dude.it (Fase 9 §2), separato da Area App e biglietto */
 .page {
-  --background: #fafafa;
-  --foreground: #fff;
+  --de-blue: #053643;
+  --de-azure: #00698F;
+  --de-black: #000000;
+  --de-white: #ffffff;
+  --de-muted: #6b7280;
 
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
-  display: flex;
   flex: 1;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
+  min-height: 100vh;
+  padding: 24px;
+  text-align: center;
+  background: var(--de-white);
+  color: var(--de-black);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
 }
 
-.main {
-  display: flex;
-  flex: 1;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
-}
-
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
-}
-
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
+.eyebrow {
+  margin: 0 0 10px;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--de-muted);
 }
 
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
+.heading {
+  margin: 0 0 40px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--de-black);
 }
 
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.ctas {
+.actions {
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
-  font-size: 14px;
-}
-
-.ctas a {
-  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: 14px;
+}
+
+/* I bottoni: layout e colori gestiti interamente qui, senza dipendere da Tailwind.
+   Le classi shadcn/ui generate dal componente Button non hanno effetto perché
+   Tailwind non è caricato su (frontend) — evita il bleed CSS su /admin e /app. */
+/* Specificità doppia (.cls.cls) per vincere sulle utility Tailwind a specificità singola
+   iniettate da app.css (es. bg-primary, text-primary-foreground, border, h-9, px-4). */
+.btnDefault.btnDefault,
+.btnOutline.btnOutline {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 220px;
   height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  padding: 0;
+  box-shadow: none;
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
-  gap: 8px;
+.btnDefault.btnDefault {
+  background-color: var(--de-blue);
+  color: var(--de-white);
+  border: 1px solid transparent;
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
+.btnDefault.btnDefault:hover {
+  background-color: var(--de-azure);
+  color: var(--de-white);
 }
 
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
-
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
+.btnOutline.btnOutline {
+  background-color: transparent;
+  color: var(--de-blue);
+  border: 1px solid var(--de-azure);
 }
 
-@media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
-  }
-
-  .intro {
-    gap: 16px;
-  }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
-
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
-  }
+.btnOutline.btnOutline:hover {
+  background-color: rgba(0, 105, 143, 0.08);
+  color: var(--de-blue);
 }

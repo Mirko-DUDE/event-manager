@@ -22,7 +22,8 @@
 | Fase 5 | Reset contatti e log: Global "Zona pericolosa", Reset generale/solo contatti, procedura GDPR | ✅ fatto (Passo 0–5) | `fase-5-reset-gdpr.md` |
 | Fase 6 | Generazione e invio ticket: funzione core, pagina pubblica biglietto, invio Wildcard/resend/massivo, WhatsApp | ✅ fatto (Passo 0–9) | `fase-6-invio-ticket.md` |
 | Fase 7 | Area App UI/UX: shell, auth, lista/scheda contatti, wildcard, check-in (shadcn/ui + Tailwind) | 🔶 in corso (Passo 0–8 ✅, Passo 9 🔲) | `fase-7-area-app-ui.md` |
-| Fase 8 | Contenuti reali evento: grafica e copy email ticket + pagina pubblica biglietto (per-evento, non riusabile as-is) | 🔶 in corso (Passo 0–3 ✅, chiusura §9 test umano 🔲) | `fase-8-contenuti-evento.md` |
+| Fase 8 | Contenuti reali evento: grafica e copy email ticket + pagina pubblica biglietto (per-evento, non riusabile as-is) | 🔶 in corso (decisioni chiuse, Passo 0–3 🔲 da implementare) | `fase-8-contenuti-evento.md` |
+| Fase 9 | Homepage pubblica (`/`): due bottoni verso App/Admin, identità corporate dude.it (stabile, non per-evento) | 🔶 in corso (Passo 0–3 ✅, verifica visiva mobile/desktop 🔲) | `fase-9-homepage-pubblica.md` |
 
 ## Fase 1 — Setup, panoramica sottofasi
 

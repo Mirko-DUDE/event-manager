@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Homepage pubblica</title>
+<style>
+  :root {
+    /* Palette completa dude.it (fornita 2026-08-20) — namespace separato sia dall'Area
+       App (fase-7) sia dal design system del biglietto (fase-8, black/orange party).
+       Usati per questa homepage: solo --de-blue e --de-azure (colori "corporate"
+       generici del sito). Gli altri sono di sotto-brand/campagna specifici
+       (fest, things, tis = The Impossible Society, fdn = Fondazione Dude) —
+       NON pertinenti a una homepage neutra di un tool interno, riportati solo
+       per completezza/riferimento futuro, non usarli qui.
+    */
+    --de-azure: #00698F;
+    --de-black: #000000;
+    --de-blue: #053643;         /* = theme-color ufficiale del sito, confermato */
+    --de-cream: #F0D8B3;        /* non usato qui — sotto-brand */
+    --de-fest: #F03A41;         /* non usato qui — sotto-brand "fest" */
+    --de-fest-dark: #C63F3F;    /* non usato qui — sotto-brand "fest" */
+    --de-green: #84C879;        /* non usato qui */
+    --de-orange: #FF7842;       /* non usato qui — diverso dall'orange-500 del biglietto */
+    --de-skeleton: rgba(0,0,0,.1);
+    --de-things-dark: #242424;  /* non usato qui — sotto-brand "things" */
+    --de-things-gray: #E0E0E0;  /* non usato qui — sotto-brand "things" */
+    --de-tis-cream: #E8E5D2;    /* non usato qui — sotto-brand "tis" */
+    --de-tis-cream-dark: #DDD9C1;
+    --de-tis-dark: #13171B;
+    --de-tis-red: #BA2030;
+    --de-fdn-pink: #FF8484;     /* non usato qui — sotto-brand "fdn" (Fondazione Dude) */
+    --de-fdn-blu: #053643;
+    --de-white: #FFFFFF;
+    --de-yellow: #F5C702;       /* non usato qui */
+
+    --de-background: var(--de-white);
+    --de-foreground: var(--de-black);
+    --de-muted: #6B7280;
+    --de-border: #E5E7EB;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--de-background);
+    color: var(--de-foreground);
+  }
+  .mockup-note {
+    max-width: 640px; margin: 20px auto 0 auto; font-size: 12px; color: #555;
+    background: #FAFAFA; padding: 12px 16px; border-radius: 6px; border: 1px solid #E5E5E5; line-height: 1.55;
+  }
+  .mockup-note strong { color:#000; }
+  .mockup-note code { background:#F0F0F0; padding:1px 5px; border-radius:3px; font-family:'Courier New',monospace; }
+
+  .page {
+    min-height: 82vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--de-muted); margin: 0 0 10px 0; font-weight: 600;
+  }
+  .heading {
+    font-size: 22px; font-weight: 600; margin: 0 0 40px 0; color: var(--de-foreground);
+  }
+  .actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+
+  /* Bottoni shadcn/ui — variant "default" e "outline", stessa geometria del componente Button, larghezza fissa uguale */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 220px; border-radius: 8px; font-size: 14px; font-weight: 500;
+    height: 40px; text-decoration: none;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+    cursor: pointer;
+  }
+  .btn-default {
+    background: var(--de-blue); color: var(--de-white); border: 1px solid transparent;
+  }
+  .btn-default:hover { background: var(--de-azure); }
+  .btn-outline {
+    background: transparent; color: var(--de-blue); border: 1px solid var(--de-azure);
+  }
+  .btn-outline:hover { background: rgba(0, 105, 143, 0.08); }
+</style>
+</head>
+<body>
+
+<div class="mockup-note">
+  <strong>Mockup — homepage pubblica <code>/</code>.</strong> Bottoni riprodotti nella geometria dello shadcn/ui <code>Button</code> (variant <code>default</code> per l'azione primaria, <code>outline</code> per la secondaria) — in produzione vanno i componenti reali <code>&lt;Button&gt;</code>, non questo CSS. Larghezza fissa uguale (220px) per entrambi. Colori: palette completa reale di dude.it fornita in sessione (2026-08-20) — usati qui solo <code>--blue</code> (<code>#053643</code>, il theme-color ufficiale del sito, conferma la scelta precedente) e <code>--azure</code> (<code>#00698F</code>); tutti gli altri token (fest, things, tis, fdn) sono di sotto-brand/campagna specifici e non pertinenti a questa homepage neutra — riportati in <code>:root</code> solo come riferimento futuro, non usarli qui.
+</div>
+
+<div class="page">
+  <p class="eyebrow">Event Manager</p>
+  <h1 class="heading">Seleziona un'area</h1>
+  <div class="actions">
+    <a href="/app" class="btn btn-default">Event Manager App</a>
+    <a href="/admin" class="btn btn-outline">Admin</a>
+  </div>
+</div>
+
+</body>
+</html>
