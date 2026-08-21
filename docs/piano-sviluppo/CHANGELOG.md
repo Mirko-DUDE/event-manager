@@ -43,6 +43,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 - **Fase 8 § post-test email (2026-08-20)**: allineamento spaziature e dimensioni ai mockup aggiornati — card email 480px, logo email 126px / pagina 112px (−30%), gap verticali uniformi (40/26/26/44px).
 - **Fase 8 § branding DUDEHUB (2026-08-20)**: oggetto email ticket fisso `DUDEHUB - This is your ticket` (senza nome ospite); mittente ticket `DUDEHUB` (hardcoded in `sendTicket.ts`, solo flusso ticket); titolo pagina `/ticket/[qrToken]` (ticket valido) stesso testo. Altre email di sistema invariate su «Event Manager».
+- **Fine-tuning biglietto DUDE (2026-08-21)**: pagina `/ticket/[qrToken]` e email ticket — nome ospite allineato alla subheadline (20px pagina / 22px email); data evento `10 September 2026` (UK English) nel footer sopra l'indirizzo; disclaimer personal/non-transferable/single entry sotto la cornice (pagina, bianco su nero) e in email prima del link backup QR.
 
 ### Tests
 

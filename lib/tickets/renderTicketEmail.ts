@@ -8,8 +8,11 @@ export const TICKET_LOGO_CID = 'logo-dude'
 
 /** Copy e link hardcoded per-evento (Fase 8 §4). */
 const TICKET_MAPS_URL = 'https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6'
+const TICKET_DATE = '10 September 2026'
 const TICKET_ADDRESS = 'Via Argelati 33, Milan'
 const TICKET_TIME = 'From 6 PM'
+const TICKET_DISCLAIMER_LINE_1 = 'This ticket is personal and non-transferable.'
+const TICKET_DISCLAIMER_LINE_2 = 'Valid for one entry only.'
 const TICKET_EMAIL_SUBJECT = 'DUDEHUB - This is your ticket'
 
 const DISPLAY_FONT =
@@ -38,8 +41,13 @@ export function renderTicketEmail(args: {
 This is your official adult certification.
 Use it to enter the party.
 
-${TICKET_ADDRESS} — ${TICKET_TIME}
+${TICKET_DATE}
+${TICKET_ADDRESS}
+${TICKET_TIME}
 ${TICKET_MAPS_URL}
+
+${TICKET_DISCLAIMER_LINE_1}
+${TICKET_DISCLAIMER_LINE_2}
 
 Trouble seeing the QR code?
 Open your ticket here:
@@ -73,7 +81,7 @@ ${publicTicketUrl}
 
                 <tr>
                   <td align="center" style="padding:40px 28px 0 28px;">
-                    <p style="margin:0; color:#FF9000; font-family:${DISPLAY_FONT}; font-size:18px; line-height:1.2; font-weight:900; letter-spacing:0.5px; text-transform:uppercase;">
+                    <p style="margin:0; color:#FF9000; font-family:${DISPLAY_FONT}; font-size:22px; line-height:1.22; font-weight:900; letter-spacing:0.5px; text-transform:uppercase;">
                       ${escapeHtml(fullName)}
                     </p>
                   </td>
@@ -114,6 +122,7 @@ ${publicTicketUrl}
           <tr>
             <td align="center" style="padding:22px 24px 26px 24px;">
               <p style="margin:0; color:#000000; font-family:${DISPLAY_FONT}; font-size:19px; line-height:1.3; font-weight:900; letter-spacing:0.3px; text-transform:uppercase;">
+                ${escapeHtml(TICKET_DATE)}<br />
                 <a href="${escapeHtml(TICKET_MAPS_URL)}" style="color:#000000; text-decoration:none;">${escapeHtml(TICKET_ADDRESS)}</a><br />${escapeHtml(TICKET_TIME)}
               </p>
             </td>
@@ -123,6 +132,17 @@ ${publicTicketUrl}
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           <tr>
             <td align="center" style="padding:24px 16px 4px 16px;">
+              <p style="margin:0; color:#FFFFFF; font-family:${DISPLAY_FONT}; font-size:13px; line-height:1.5; font-weight:900; letter-spacing:0.3px; text-transform:uppercase;">
+                ${escapeHtml(TICKET_DISCLAIMER_LINE_1)}<br />
+                ${escapeHtml(TICKET_DISCLAIMER_LINE_2)}
+              </p>
+            </td>
+          </tr>
+        </table>
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center" style="padding:16px 16px 4px 16px;">
               <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:1.6; color:#AAAAAA;">
                 Trouble seeing the QR code?<br />
                 <a href="${escapeHtml(publicTicketUrl)}" style="color:#FFFFFF; text-decoration:underline;">Open your ticket here.</a>

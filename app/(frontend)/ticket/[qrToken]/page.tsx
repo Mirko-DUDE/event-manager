@@ -16,8 +16,11 @@ const archivoBlack = Archivo_Black({
 
 /** Copy e link hardcoded per-evento (Fase 8 §4/§5). */
 const TICKET_MAPS_URL = 'https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6'
+const TICKET_DATE = '10 September 2026'
 const TICKET_ADDRESS = 'Via Argelati 33, Milan'
 const TICKET_TIME = 'From 6 PM'
+const TICKET_DISCLAIMER_LINE_1 = 'This ticket is personal and non-transferable.'
+const TICKET_DISCLAIMER_LINE_2 = 'Valid for one entry only.'
 
 type PageProps = {
   params: Promise<{ qrToken: string }>
@@ -101,8 +104,9 @@ export default async function PublicTicketPage({ params }: PageProps) {
 
   return (
     <div className={`${styles.page} ${archivoBlack.variable}`}>
-      <main className={styles.ticketPage}>
-        <div className={styles.ticketCard}>
+      <main className={styles.ticketLayout}>
+        <div className={styles.ticketPage}>
+          <div className={styles.ticketCard}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className={styles.ticketLogo}
@@ -134,6 +138,8 @@ export default async function PublicTicketPage({ params }: PageProps) {
         </div>
         <div className={styles.ticketFooter}>
           <p className={styles.ticketFooterText}>
+            {TICKET_DATE}
+            <br />
             <a className={styles.mapsLink} href={TICKET_MAPS_URL}>
               {TICKET_ADDRESS}
             </a>
@@ -141,6 +147,12 @@ export default async function PublicTicketPage({ params }: PageProps) {
             {TICKET_TIME}
           </p>
         </div>
+        </div>
+        <p className={styles.ticketDisclaimer}>
+          {TICKET_DISCLAIMER_LINE_1}
+          <br />
+          {TICKET_DISCLAIMER_LINE_2}
+        </p>
       </main>
     </div>
   )
