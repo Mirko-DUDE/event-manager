@@ -181,7 +181,8 @@ Vedi §2.3: campo telefono (+ verifica Admin), select `dudeCompany`, `assegnazio
 - Check-in e annulla check-in (solo full-access): scrittura reale secondo §2.8bis — **implementata qui**, non al Passo 7. Estendere l'enum `eventType` di `activityLog` con `checkInUndo` (oltre a `checkIn` se non già presente) **in questo passo**: il bottone "Check in"/"Undo" vive nella scheda contatto, indipendentemente da come ci si arriva (scan, ricerca desktop, o click diretto da Lista/Wildcard) — l'endpoint di scrittura è completo e testabile già qui, senza aspettare il Passo 7.
 - Reinvio ticket (riuso §2.4, non la superficie minima attuale).
 - **Esito (2026-08-08)**: overlay `ContactDetailOverlay` — bottom sheet (`vaul`) sotto `lg`, modale centrata (`shadcn Dialog`) da desktop (`useIsDesktop`: un solo componente montato, evita overlay doppio del portal vaul). Deep-link con search params preservati; chiusura → lista con stessi params. Check-in/undo via `mutateContactCheckIn` + `activityLog` `checkIn`/`checkInUndo`. Resend ridisegnato; **nascosto se contatto già check-in** (decisione test 2026-08-08). Sidebar desktop hostess senza voce Check-in (`filterDesktopSidebarNavItems`). Helper `loadContactDetail`, `loadContactsListPageData`, `buildContactDetailHref`; `canUndoCheckIn` in `canAccessSection.ts`.
-- **Test umano (2026-08-08)**: check-in OK + record Admin; contatto check-in senza bottone Check in; undo full-access OK; hostess/manager vedono nota undo; manager resend WhatsApp/email + modalità test OK; hostess senza resend; deep-link/chiusura con `?filter=not-checked-in` OK; layout mobile/desktop OK. Non rieseguito in sessione: doppio click Check in (race), evento `checkInUndo` verificato solo via undo UI, bottom nav mobile hostess.
+- **Test umano (2026-08-08)**: check-in OK + record Admin; contatto check-in senza bottone Check in; undo full-access OK; hostess/manager vedono nota undo; manager resend WhatsApp/email + modalità test OK; hostess senza resend; deep-link/chiusura con `?filter=not-checked-in` OK; layout mobile/desktop OK. Non rieseguito in sessione: doppio click Check in (race).
+- **Test umano supplementare (2026-08-21)**: bottom nav mobile hostess OK (Contacts + Check-in, no Wildcard); record `checkInUndo` verificato esplicitamente in Admin OK; access denied con `appRole: none` OK.
 
 ### Passo 6 — Wildcard ✅
 - Vista principale + badge quota, form con i campi estesi al Passo 0, thank-you page (§2.6) che richiama `executeSendWildcardTicket`/`whatsappShare.ts` già esistenti.
@@ -201,10 +202,10 @@ Vedi §2.3: campo telefono (+ verifica Admin), select `dudeCompany`, `assegnazio
 - **Esito (2026-08-08)**: revisione sistematica di tutte le route Area App (§2.1) vs mockup e regole §2.9 — breakpoint `lg` 1024px (`useIsDesktop` / Tailwind) confermato coerente (mobile/tablet sotto soglia: bottom nav, scanner QR; sopra: sidebar, ricerca manuale check-in). Compromesso §2.9 documentato: tablet landscape ≥1024px perde fotocamera — comportamento atteso, non bug. Fix CSS mirati emersi dalla verifica: `overflow-x-hidden` su shell/body App; email lunga con `break-all` (`AccessDeniedPage`); valori scheda contatto con `min-w-0`/`max-w-[62%]` + `break-words`, nome con `truncate`, footer sheet con `safe-area-inset-bottom`; alert check-in con `break-words`; tabelle desktop `table-fixed` + `truncate` (lista contatti, wildcard); drawer account mobile safe-area. Nessun problema bloccante aperto.
 - **Test umano spot-check dev (2026-08-08)**: checklist 375px — punti 1–3, 5–7 OK. Punto 4 (header + bottom nav vs paginazione/contenuto in fondo lista) **non verificato** con dataset attuale — da rieseguire quando ci sono più contatti e paginazione visibile.
 
-### Passo 9 — Verifica di chiusura fase 🔲 *(debito test post Cloud Run)*
-- Conferma umana su almeno un device mobile reale, un tablet reale (entrambi gli orientamenti) e desktop.
-- **Rimandato**: esecuzione **dopo** deploy su Cloud Run (ambiente produzione/staging reale, dataset contatti pieno). Include checklist Passo 8 #4 (paginazione vs bottom nav) e chiusura formale fase in `00-piano-generale.md`.
-- Non blocca il commit dell’implementazione UI (Passi 0–8).
+### Passo 9 — Verifica di chiusura fase 🔶 *(quasi chiuso — resta paginazione Cloud Run)*
+- Conferma umana su device reali, bottom nav hostess, `checkInUndo` Admin, access denied `appRole: none` — ✅ *(2026-08-21)*.
+- **Resta da fare**: checklist Passo 8 #4 — paginazione lista contatti su **Cloud Run** (`events.dude.it`) con **>20 contatti**: verificare che header + bottom nav non coprano i controlli in fondo alla lista.
+- Dopo OK paginazione: chiusura formale fase in `00-piano-generale.md` (Passo 9 → ✅).
 
 ---
 

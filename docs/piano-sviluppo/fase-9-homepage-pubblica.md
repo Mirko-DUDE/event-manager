@@ -74,8 +74,8 @@ Nessun logo, nessuna immagine, nessun altro elemento — pagina minima per desig
 ## 5. Verifica di chiusura fase
 
 - [x] Passi 0–3 completati e validati *(2026-08-20 — vedi note implementative sotto)*
-- [ ] Controllo visivo su mobile e desktop
-- [x] `00-piano-generale.md` aggiornato a chiusura (stato 🔶, passo visivo mobile/desktop ancora aperto)
+- [x] Controllo visivo su mobile e desktop *(2026-08-21)*
+- [x] `00-piano-generale.md` aggiornato a chiusura *(2026-08-21 — Fase 9 ✅)*
 
 ### Note implementative — Passi 0–3 (2026-08-20)
 

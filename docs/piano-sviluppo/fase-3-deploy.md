@@ -242,10 +242,10 @@ In locale: `CLOUD_RUN_URL` **assente/vuota** (nessun secondo origin CSRF).
 
 **Checklist umana post-deploy** (da eseguire dopo push su `main`):
 
-- [ ] Impostare/verificare `SERVER_URL=https://events.dude.it` su Cloud Run
-- [ ] Impostare `CLOUD_RUN_URL=https://event-manager-757912956991.europe-west1.run.app` su Cloud Run
-- [ ] Deploy nuova revisione
-- [ ] Smoke: login locale App su `events.dude.it` e su `*.run.app`; login Google solo su `events.dude.it`
+- [x] Impostare/verificare `SERVER_URL=https://events.dude.it` su Cloud Run
+- [x] Impostare `CLOUD_RUN_URL=https://event-manager-757912956991.europe-west1.run.app` su Cloud Run *(2026-08-21)*
+- [x] Deploy nuova revisione
+- [x] Smoke produzione *(2026-08-21)*: Google OAuth da `*.run.app` → redirect canonico `events.dude.it` (atteso); login locale App e super-admin su `*.run.app` senza redirect (fallback emergenza); Google OAuth su `events.dude.it` OK
 
 **Codice**: `payload.config.ts` — `csrf` esplicito da `SERVER_URL` + `CLOUD_RUN_URL` (deduplicato). Vedi `CHANGELOG.md` [Unreleased].
 

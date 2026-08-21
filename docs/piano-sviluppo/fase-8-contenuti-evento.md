@@ -148,7 +148,8 @@ Motivazione (gestione progetto + anti-spam):
 
 - [x] Passi 0–3 completati e validati (`pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build`)
 - [x] Domande aperte (§8) risolte e questo documento aggiornato di conseguenza
-- [ ] Test umano invio email su almeno 3 client reali + verifica pagina pubblica mobile/desktop, entrambi gli stati
-- [ ] `00-piano-generale.md` aggiornato a chiusura
+- [x] Verifica pagina pubblica `/ticket/[qrToken]` mobile/desktop, entrambi gli stati *(2026-08-21)*
+- [ ] Test umano invio email su almeno 3 client reali (Gmail, Outlook, Apple Mail — logo CID, QR inline, copy DUDEHUB)
+- [ ] `00-piano-generale.md` aggiornato a chiusura (dopo test email)
 
 **Note implementazione (2026-08-20)**: dopo test email reale, mockup e codice allineati a correzioni spaziatura (logo −30%, gap verticali logo→nome 40px, nome→headline 26px, headline→subheadline 26px, subheadline→QR 44px) e larghezza card email 480px (pagina 420px invariata). Branding mittente/oggetto/titolo pagina unificato su **DUDEHUB** (`DUDEHUB - This is your ticket` per oggetto email e titolo pagina ticket valido).
