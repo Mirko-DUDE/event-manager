@@ -31,7 +31,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Tests
 
-- **Fase 10 § Passo 6 — Validazione codice e test (2026-08-21)**: `pnpm generate:types`, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK. Dev locale: `Referrer-Policy: same-origin` su `curl -I /`; `/robots.txt` corretto; meta `robots noindex,nofollow` su `/`, `/app/login`, `/admin`. Test manuali dev: `scadenzaBiglietto` passato → pagina «non trovato», futuro/vuoto → normale; check-in con scadenza nel passato → scan valido (indipendenza confermata). Verifica anteprima OG WhatsApp/Facebook — **rimandata a produzione/live** (🔲, non bloccante — vedi nota §6 Passo 6).
+- **Fase 10 § Passo 6 — Validazione codice e test (2026-08-21)**: `pnpm generate:types`, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK. Dev locale: `Referrer-Policy: same-origin` su `curl -I /`; `/robots.txt` corretto; meta `robots noindex,nofollow` su `/`, `/app/login`, `/admin`. Test manuali dev: `scadenzaBiglietto` passato → pagina «non trovato», futuro/vuoto → normale; check-in con scadenza nel passato → scan valido (indipendenza confermata). Produzione/live: condivisione link ticket su WhatsApp → anteprima OG OK (conferma indipendenza da `noindex`).
 
 - **Fase 9 § Passo 3 — Validazione codice (2026-08-20)**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK (solo warning preesistenti). Verifica link via curl: `href="/app"` e `href="/admin"` corretti. Controllo visivo desktop: bottoni stessa larghezza (220px), testo bianco su primario, bordo azure su outline, nessun bleed CSS su `/admin` e `/app`. Controllo visivo mobile/desktop formale — **non eseguito** (🔲 checklist §5 Fase 9).
 

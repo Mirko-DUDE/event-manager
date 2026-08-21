@@ -107,5 +107,5 @@ Richiamo delle conclusioni di `../sicurezza-indicizzazione-area-pubblica.md` §2
 - [x] Validazione codice Passo 6: `pnpm generate:types`, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK (2026-08-21)
 - [x] Verifica automatica Passo 6 (dev locale): `curl -I` → `Referrer-Policy: same-origin`; `/robots.txt` corretto; meta `robots noindex,nofollow` su `/`, `/app/login`, `/admin` (2026-08-21)
 - [x] Test manuali Passo 6 (dev locale, 2026-08-21): `scadenzaBiglietto` nel passato → pagina pubblica «non trovato»; nel futuro/vuoto → pagina normale; check-in con scadenza nel passato → scan ancora valido (indipendenza confermata)
-- [ ] Verifica anteprima OG WhatsApp/Facebook su link `/ticket/[qrToken]` — **rimandata a produzione/live** (nota §6 Passo 6: meccanismo indipendente da `noindex`, non bloccante)
+- [x] Verifica anteprima OG WhatsApp su link `/ticket/[qrToken]` in produzione/live (2026-08-21): anteprima OK — conferma che `noindex` non interferisce con il fetch OG (nota §6 Passo 6)
 - [x] `00-piano-generale.md` aggiornato a chiusura formale fase (2026-08-21)

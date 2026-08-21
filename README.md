@@ -86,7 +86,7 @@ Fonte di verità: `docs/piano-sviluppo/00-piano-generale.md`. Cronologia: `docs/
 | 7 Area App UI/UX | 🔶 Passi 0–8 ✅ — **Passo 9** (test chiusura su device reali post Cloud Run) 🔲 |
 | 8 Contenuti evento (email + pagina ticket) | 🔶 Passi 0–3 ✅ — test email client reali 🔲 |
 | 9 Homepage pubblica | 🔶 Passi 0–3 ✅ — verifica visiva mobile/desktop 🔲 |
-| 10 Sicurezza / indicizzazione / scadenza ticket | ✅ (verifica OG WhatsApp su live 🔲) |
+| 10 Sicurezza / indicizzazione / scadenza ticket | ✅ |
 
 ## Documentazione
 
