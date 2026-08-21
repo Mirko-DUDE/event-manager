@@ -29,6 +29,14 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(dirname),
   },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [{ key: 'Referrer-Policy', value: 'same-origin' }],
+      },
+    ]
+  },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

@@ -22,6 +22,17 @@ export const TicketConfig: GlobalConfig = {
       },
     },
     {
+      name: 'scadenzaBiglietto',
+      type: 'date',
+      label: 'Scadenza pagina pubblica biglietto',
+      required: false,
+      admin: {
+        date: { pickerAppearance: 'dayAndTime' },
+        description:
+          'Solo la pagina pubblica del biglietto smette di mostrare i dati dopo questa data/ora — il check-in in ingresso non è influenzato e resta valido fino al Reset GDPR.',
+      },
+    },
+    {
       name: 'qrContentModeDefault',
       type: 'select',
       label: 'Modalità contenuto QR (default)',

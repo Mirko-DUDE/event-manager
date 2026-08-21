@@ -84,13 +84,19 @@ Fonte di verità: `docs/piano-sviluppo/00-piano-generale.md`. Cronologia: `docs/
 | 5 Reset contatti e log (GDPR) | ✅ |
 | 6 Generazione e invio ticket | ✅ |
 | 7 Area App UI/UX | 🔶 Passi 0–8 ✅ — **Passo 9** (test chiusura su device reali post Cloud Run) 🔲 |
+| 8 Contenuti evento (email + pagina ticket) | 🔶 Passi 0–3 ✅ — test email client reali 🔲 |
+| 9 Homepage pubblica | 🔶 Passi 0–3 ✅ — verifica visiva mobile/desktop 🔲 |
+| 10 Sicurezza / indicizzazione / scadenza ticket | ✅ (verifica OG WhatsApp su live 🔲) |
 
 ## Documentazione
+
+**Panoramica funzionale:** `FUNZIONALITA.md` — cosa fa il software per Admin, App e area pubblica (senza dettaglio implementativo).
 
 **Piano e specifiche**
 
 - Piano generale: `docs/piano-sviluppo/00-piano-generale.md`
-- Fase corrente: `docs/piano-sviluppo/fase-7-area-app-ui.md`
+- Fase corrente: `docs/piano-sviluppo/fase-7-area-app-ui.md` (e fasi 8–10 in `docs/piano-sviluppo/`)
+- Sicurezza e indicizzazione area pubblica (analisi + decisioni): `docs/sicurezza-indicizzazione-area-pubblica.md` — implementazione in `docs/piano-sviluppo/fase-10-sicurezza-indicizzazione.md`
 - Come condurre le sessioni con l'agente: `docs/piano-sviluppo/00-come-eseguire-il-piano.md`
 
 **Guide operative** (`docs/operativo/`)

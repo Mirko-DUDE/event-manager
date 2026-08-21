@@ -84,10 +84,12 @@ Un Global (`apiCredentials`) gestisce le chiavi usate dai sistemi esterni per in
 
 ### 3.6 Configurazione e invio ticket
 
-Un Global (`ticketConfig`) centralizza tutto ciò che riguarda il biglietto: il nome/location dell'evento mostrato sul ticket, la modalità di contenuto del QR di default, e due protezioni operative pensate perché il progetto non ha un ambiente di staging separato:
+Un Global (`ticketConfig`) centralizza tutto ciò che riguarda il biglietto: il nome/location dell'evento mostrato sul ticket, la modalità di contenuto del QR di default, la **scadenza opzionale della pagina pubblica** (data e ora, vedi sotto), e due protezioni operative pensate perché il progetto non ha un ambiente di staging separato:
 
 - **Modalità test invio** (attiva di default): quando accesa, le email partono solo verso indirizzi in una whitelist di test — protegge da invii accidentali a ospiti reali durante lo sviluppo.
 - **Piano Resend attivo**: un flag che va acceso manualmente solo dopo l'upgrade del piano email a Pro — l'invio massivo si rifiuta di partire se questo flag è spento, indipendentemente dal piano reale.
+
+**Scadenza pagina pubblica biglietto** (`scadenzaBiglietto`, opzionale): se impostata, dopo quella data/ora la pagina `/ticket/[qrToken]` smette di mostrare i dati dell'ospite e risponde come per un token non valido (stesso messaggio generico bilingue, senza UI dedicata). Se non impostata, il link resta valido fino al Reset generale GDPR di fine evento, come prima. **Il check-in in ingresso non è influenzato**: un QR scansionabile resta utilizzabile allo scanner anche dopo la scadenza della pagina web, finché il contatto esiste e non è stato resettato — pagina pubblica e ingresso evento sono due percorsi indipendenti.
 
 Dallo stesso Global si avvia l'**invio massivo dei ticket** a tutti i contatti attivi con email: procede a lotti (100 contatti, ~5 email/secondo, pausa di 3 secondi tra lotti) con retry automatico sugli errori temporanei, salta chi ha già ricevuto il ticket (ripartibile in caso di interruzione), e si interrompe subito e senza retry se Resend segnala quota giornaliera esaurita. Al termine mostra un report con i conteggi (inviati, saltati, falliti, bloccati da modalità test), una tabella dei falliti con motivo, e un bottone per copiare la lista delle email non andate a buon fine.
 
@@ -144,7 +146,7 @@ Vetrina generica di ingresso al dominio pubblico dell'applicazione. Design ancor
 
 ### 5.2 Pagina biglietto (`/ticket/[qrToken]`)
 
-Il biglietto vero e proprio, raggiungibile dal link contenuto nell'email o condiviso via WhatsApp: mostra nome, cognome, location dell'evento e il QR code (contenuto bilingue italiano/inglese). Un token inesistente o non valido mostra un messaggio generico, senza dettagli tecnici. Nessun limite di frequenza sulle richieste (il token è un UUID non enumerabile). Il design visivo è oggi minimale/segnaposto: la sessione di rifinitura grafica, allineata allo stile della landing page dell'evento, è ancora da tenere.
+Il biglietto vero e proprio, raggiungibile dal link contenuto nell'email o condiviso via WhatsApp: mostra nome, cognome, location dell'evento e il QR code. Un token inesistente, non valido, **oppure scaduto** (se in Admin è impostata una `scadenzaBiglietto` già passata) mostra lo stesso messaggio generico bilingue, senza dettagli tecnici — l'ospite non distingue tra «token sbagliato» e «pagina scaduta». Nessun limite di frequenza sulle richieste (il token è un UUID non enumerabile). La scadenza riguarda **solo questa pagina**: il QR resta scansionabile in check-in fino al reset dati (vedi §3.6 e §4.3).
 
 ### 5.3 Verifica invito (`POST /api/check-invite`)
 
@@ -163,7 +165,7 @@ Il ciclo del ticket attraversa tutte e tre le aree ed è utile vederlo per inter
    - **Reinvio singolo** (App, Contatti): manuale, riservato a manager/full-access.
    - **Invio massivo** (Admin): verso tutti i contatti attivi con email, a lotti.
    L'email arriva con il QR come immagine incorporata (non come link) più un link di backup alla pagina pubblica; i contenuti sono bilingue italiano/inglese. Un quarto "canale", la condivisione WhatsApp, non è un invio automatico: apre semplicemente l'app di messaggistica con un link precompilato al biglietto pubblico, così funziona anche per chi non ha un'email.
-4. **Check-in**: allo scanner o alla ricerca manuale corrisponde sempre lo stesso identico meccanismo di scrittura, azionato solo dal bottone "Check in" nella scheda contatto — mai automaticamente dallo scan.
+4. **Check-in**: allo scanner o alla ricerca manuale corrisponde sempre lo stesso identico meccanismo di scrittura, azionato solo dal bottone "Check in" nella scheda contatto — mai automaticamente dallo scan. Non dipende dalla scadenza della pagina pubblica: se l'organizzatore ha impostato una data di scadenza web, l'ingresso resta possibile finché il contatto non viene cancellato con il reset GDPR.
 
 Ogni passaggio rilevante (invio riuscito o bloccato, check-in, annullamento) lascia traccia nel log attività, consultabile da Admin.
 
@@ -171,4 +173,4 @@ Ogni passaggio rilevante (invio riuscito o bloccato, check-in, annullamento) las
 
 ## 7. Stato del progetto
 
-Al momento di questa scrittura: Fasi 1–6 (setup, login, deploy, import/sync contatti, reset GDPR, generazione/invio ticket) completate. Fase 7 (interfaccia Area App) completa nell'implementazione; resta aperta solo la verifica finale su device reali dopo il deploy con dataset completo, oltre ad alcuni debiti tecnici non bloccanti già annotati (design definitivo delle pagine pubbliche, scelta del CMS per i relativi testi, tracciamento storico completo degli invii per contatto). Per lo stato aggiornato e il dettaglio di ogni fase, fare riferimento a `docs/piano-sviluppo/00-piano-generale.md` e a `docs/piano-sviluppo/CHANGELOG.md`.
+Al momento di questa scrittura: Fasi 1–6 e **10** (sicurezza area pubblica: indicizzazione, Referrer-Policy, scadenza pagina biglietto) completate; Fasi 7–9 in corso con verifiche umane residue (test device post deploy, email su client reali, homepage mobile/desktop). Per lo stato aggiornato e il dettaglio di ogni fase, fare riferimento a `docs/piano-sviluppo/00-piano-generale.md` e a `docs/piano-sviluppo/CHANGELOG.md`. Panoramica funzionale completa: questo file; analisi sicurezza/indicizzazione area pubblica: `docs/sicurezza-indicizzazione-area-pubblica.md`.

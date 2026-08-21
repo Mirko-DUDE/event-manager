@@ -31,6 +31,14 @@ export async function loadPublicTicketByToken(
     overrideAccess: true,
   })
 
+  const scadenzaBiglietto = ticketConfig.scadenzaBiglietto
+  if (scadenzaBiglietto) {
+    const expiryMs = new Date(scadenzaBiglietto).getTime()
+    if (!Number.isNaN(expiryMs) && Date.now() > expiryMs) {
+      return null
+    }
+  }
+
   const qrContentMode: QrContentMode = doc.qrContentMode === 'fullData' ? 'fullData' : 'token'
   const locationEvento =
     typeof ticketConfig.locationEvento === 'string' ? ticketConfig.locationEvento : ''

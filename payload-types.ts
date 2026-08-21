@@ -688,6 +688,10 @@ export interface TicketConfig {
    */
   locationEvento?: string | null;
   /**
+   * Solo la pagina pubblica del biglietto smette di mostrare i dati dopo questa data/ora — il check-in in ingresso non è influenzato e resta valido fino al Reset GDPR.
+   */
+  scadenzaBiglietto?: string | null;
+  /**
    * Valore applicato ai nuovi contatti (e al backfill) se qrContentMode non è ancora valorizzato.
    */
   qrContentModeDefault?: ('token' | 'fullData') | null;
@@ -801,6 +805,7 @@ export interface ResetContattiELogSelect<T extends boolean = true> {
  */
 export interface TicketConfigSelect<T extends boolean = true> {
   locationEvento?: T;
+  scadenzaBiglietto?: T;
   qrContentModeDefault?: T;
   pianoResendPro?: T;
   modalitaTestInvio?: T;
