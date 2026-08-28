@@ -31,11 +31,15 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Tests
 
+- **Fase 8 § invio massivo test produzione (2026-08-25)**: 30 contatti attivi (Upload+Wildcard, `qrToken`) su Cloud Run; invio massivo da Ticket Config OK (`pianoResendPro` on, `modalitaTestInvio` off — DB solo contatti test/interni, nessun HubSpot); piano Resend Free. Deliverability: invio percepito OK; insight Resend su link Maps (`maps.app.goo.gl`) vs dominio mittente e su `noreply@services.dude.it` — **non bloccanti**, nessuna modifica codice in questa sessione. Resta checklist §9: rendering su **Gmail, Outlook, Apple Mail** (logo CID, QR inline, copy DUDEHUB).
+
+- **Fase 7 § Passo 9 — paginazione (2026-08-25)**: dataset prod ~30 contatti sblocca Passo 8 #4; test paginazione vs header/bottom nav su `/app/contatti` — **non eseguito** (🔲 unico residuo Passo 9).
+
 - **Fase 9 § chiusura — Verifica visiva mobile/desktop (2026-08-21)**: controllo formale homepage `/` su mobile e desktop OK — bottoni stessa larghezza, link `/app` e `/admin`, nessun bleed CSS. Fase 9 chiusa in piano.
 
-- **Fase 8 § verifica pagina (2026-08-21)**: pagina `/ticket/[qrToken]` verificata visivamente su mobile e desktop, entrambi gli stati (ticket valido / token non trovato) OK. Test umano invio email su almeno 3 client reali (Gmail, Outlook, Apple Mail) — **non eseguito** (🔲 §9 fase-8).
+- **Fase 8 § verifica pagina (2026-08-21)**: pagina `/ticket/[qrToken]` verificata visivamente su mobile e desktop, entrambi gli stati (ticket valido / token non trovato) OK.
 
-- **Fase 7 § Passo 9 parziale — Test produzione (2026-08-21)**: bottom nav mobile hostess OK (solo Contacts + Check-in, no Wildcard/resend); record `checkInUndo` verificato in Admin OK; access denied con `appRole: none` OK. Paginazione lista contatti vs header/bottom nav (Passo 8 #4, >20 contatti su Cloud Run) — **non eseguito** (🔲 unico residuo Passo 9).
+- **Fase 7 § Passo 9 parziale — Test produzione (2026-08-21)**: bottom nav mobile hostess OK (solo Contacts + Check-in, no Wildcard/resend); record `checkInUndo` verificato in Admin OK; access denied con `appRole: none` OK.
 
 - **Fase 3 § Amendment CSRF dual-origin — Smoke produzione (2026-08-21)**: `CLOUD_RUN_URL` impostata su Cloud Run ✅. Google OAuth: accesso da `*.run.app` possibile ma redirect canonico verso `events.dude.it` (atteso — `SERVER_URL` canonico). Login locale senza redirect su host nativo (fallback emergenza). Dev locale: login senza redirect come prima.
 

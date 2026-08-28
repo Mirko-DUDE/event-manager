@@ -200,11 +200,11 @@ Vedi §2.3: campo telefono (+ verifica Admin), select `dudeCompany`, `assegnazio
 - Test a 375px su tutte le schermate; test tablet in entrambi gli orientamenti (comportamento breakpoint layout+fotocamera, §2.9).
 - *Verifica, non richiede nuove decisioni salvo emergano problemi non previsti — in quel caso, fermarsi e chiedere prima di improvvisare.*
 - **Esito (2026-08-08)**: revisione sistematica di tutte le route Area App (§2.1) vs mockup e regole §2.9 — breakpoint `lg` 1024px (`useIsDesktop` / Tailwind) confermato coerente (mobile/tablet sotto soglia: bottom nav, scanner QR; sopra: sidebar, ricerca manuale check-in). Compromesso §2.9 documentato: tablet landscape ≥1024px perde fotocamera — comportamento atteso, non bug. Fix CSS mirati emersi dalla verifica: `overflow-x-hidden` su shell/body App; email lunga con `break-all` (`AccessDeniedPage`); valori scheda contatto con `min-w-0`/`max-w-[62%]` + `break-words`, nome con `truncate`, footer sheet con `safe-area-inset-bottom`; alert check-in con `break-words`; tabelle desktop `table-fixed` + `truncate` (lista contatti, wildcard); drawer account mobile safe-area. Nessun problema bloccante aperto.
-- **Test umano spot-check dev (2026-08-08)**: checklist 375px — punti 1–3, 5–7 OK. Punto 4 (header + bottom nav vs paginazione/contenuto in fondo lista) **non verificato** con dataset attuale — da rieseguire quando ci sono più contatti e paginazione visibile.
+- **Test umano spot-check dev (2026-08-08)**: checklist 375px — punti 1–3, 5–7 OK. Punto 4 (header + bottom nav vs paginazione/contenuto in fondo lista) **non verificato** in dev (dataset insufficiente). **2026-08-25**: DB produzione ~30 contatti attivi (Upload+Wildcard) — test Passo 8 #4 ora eseguibile su `events.dude.it/app/contatti`.
 
 ### Passo 9 — Verifica di chiusura fase 🔶 *(quasi chiuso — resta paginazione Cloud Run)*
 - Conferma umana su device reali, bottom nav hostess, `checkInUndo` Admin, access denied `appRole: none` — ✅ *(2026-08-21)*.
-- **Resta da fare**: checklist Passo 8 #4 — paginazione lista contatti su **Cloud Run** (`events.dude.it`) con **>20 contatti**: verificare che header + bottom nav non coprano i controlli in fondo alla lista.
+- **Resta da fare**: checklist Passo 8 #4 — paginazione lista contatti su **Cloud Run** (`events.dude.it`) con **>20 contatti** (~30 in prod dal 2026-08-25): verificare che header + bottom nav non coprano i controlli in fondo alla lista.
 - Dopo OK paginazione: chiusura formale fase in `00-piano-generale.md` (Passo 9 → ✅).
 
 ---
