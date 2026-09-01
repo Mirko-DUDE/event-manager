@@ -29,6 +29,10 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Changed
 
+- **Copy biglietto — città (2026-09-01)**: footer da `Via Argelati 33, Milan` a `Via Argelati 33, Milano` (email e pagina pubblica). Allineati `fase-8-contenuti-evento.md` §4 e mockup. Le email già inviate restano invariate.
+
+- **Copy biglietto — ordine footer (2026-09-01)**: indirizzo, data, orario (`Via Argelati 33, Milano` / `10 September 2026` / `From 7 PM`) su email e pagina pubblica. Allineati `fase-8-contenuti-evento.md` §4 e mockup. Le email già inviate restano invariate.
+
 - **Copy biglietto — orario (2026-09-01)**: footer email e pagina pubblica da `From 6 PM` a `From 7 PM` (`TICKET_TIME` in `renderTicketEmail.ts` e `ticket/[qrToken]/page.tsx`). Allineati `fase-8-contenuti-evento.md` §4 e mockup. Le email già inviate restano invariate.
 
 - **Fase 9 § CSS bleed client-side (2026-08-20)**: `(frontend)/layout.tsx` importa `app/(app)/app.css` (stesso foglio del layout `(app)`) per eliminare alla radice la differenza di aspetto causata dal bleed CSS durante la navigazione client-side di Next.js — con CSS base diversi tra route group, una pagina appare diversamente a seconda dell'ordine di visita. `globals.css` rimosso da `(frontend)` (conteneva `body { display: flex }` e variabili `:root` che rompevano `/admin` e `/app` durante la navigazione client-side). Bottoni con specificità CSS doppia (`.btnDefault.btnDefault`, `0-2-0`) per sovrascrivere in modo affidabile le utility Tailwind a specificità singola iniettate da `app.css`.

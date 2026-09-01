@@ -17,7 +17,7 @@ const archivoBlack = Archivo_Black({
 /** Copy e link hardcoded per-evento (Fase 8 §4/§5). */
 const TICKET_MAPS_URL = 'https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6'
 const TICKET_DATE = '10 September 2026'
-const TICKET_ADDRESS = 'Via Argelati 33, Milan'
+const TICKET_ADDRESS = 'Via Argelati 33, Milano'
 const TICKET_TIME = 'From 7 PM'
 const TICKET_DISCLAIMER_LINE_1 = 'This ticket is personal and non-transferable.'
 const TICKET_DISCLAIMER_LINE_2 = 'Valid for one entry only.'
@@ -138,11 +138,11 @@ export default async function PublicTicketPage({ params }: PageProps) {
         </div>
         <div className={styles.ticketFooter}>
           <p className={styles.ticketFooterText}>
-            {TICKET_DATE}
-            <br />
             <a className={styles.mapsLink} href={TICKET_MAPS_URL}>
               {TICKET_ADDRESS}
             </a>
+            <br />
+            {TICKET_DATE}
             <br />
             {TICKET_TIME}
           </p>

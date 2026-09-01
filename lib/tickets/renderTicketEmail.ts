@@ -9,7 +9,7 @@ export const TICKET_LOGO_CID = 'logo-dude'
 /** Copy e link hardcoded per-evento (Fase 8 §4). */
 const TICKET_MAPS_URL = 'https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6'
 const TICKET_DATE = '10 September 2026'
-const TICKET_ADDRESS = 'Via Argelati 33, Milan'
+const TICKET_ADDRESS = 'Via Argelati 33, Milano'
 const TICKET_TIME = 'From 7 PM'
 const TICKET_DISCLAIMER_LINE_1 = 'This ticket is personal and non-transferable.'
 const TICKET_DISCLAIMER_LINE_2 = 'Valid for one entry only.'
@@ -41,8 +41,8 @@ export function renderTicketEmail(args: {
 This is your official adult certification.
 Use it to enter the party.
 
-${TICKET_DATE}
 ${TICKET_ADDRESS}
+${TICKET_DATE}
 ${TICKET_TIME}
 ${TICKET_MAPS_URL}
 
@@ -122,8 +122,8 @@ ${publicTicketUrl}
           <tr>
             <td align="center" style="padding:22px 24px 26px 24px;">
               <p style="margin:0; color:#000000; font-family:${DISPLAY_FONT}; font-size:19px; line-height:1.3; font-weight:900; letter-spacing:0.3px; text-transform:uppercase;">
-                ${escapeHtml(TICKET_DATE)}<br />
-                <a href="${escapeHtml(TICKET_MAPS_URL)}" style="color:#000000; text-decoration:none;">${escapeHtml(TICKET_ADDRESS)}</a><br />${escapeHtml(TICKET_TIME)}
+                <a href="${escapeHtml(TICKET_MAPS_URL)}" style="color:#000000; text-decoration:none;">${escapeHtml(TICKET_ADDRESS)}</a><br />
+                ${escapeHtml(TICKET_DATE)}<br />${escapeHtml(TICKET_TIME)}
               </p>
             </td>
           </tr>
