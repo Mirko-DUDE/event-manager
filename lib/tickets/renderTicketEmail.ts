@@ -8,7 +8,7 @@ export const TICKET_LOGO_CID = 'logo-dude'
 
 /** Copy e link hardcoded per-evento (Fase 8 §4). */
 const TICKET_MAPS_URL = 'https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6'
-const TICKET_DATE = '10 September 2026'
+const TICKET_DATE = 'Thursday, September 10'
 const TICKET_ADDRESS = 'Via Argelati 33, Milano'
 const TICKET_TIME = 'From 7 PM'
 const TICKET_DISCLAIMER_LINE_1 = 'This ticket is personal and non-transferable.'

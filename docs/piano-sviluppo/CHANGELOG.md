@@ -29,9 +29,11 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Changed
 
+- **Copy biglietto — data (2026-09-01)**: footer da `10 September 2026` a `Thursday, September 10` (email e pagina pubblica). Allineati `fase-8-contenuti-evento.md` §4 e mockup. Le email già inviate restano invariate.
+
 - **Copy biglietto — città (2026-09-01)**: footer da `Via Argelati 33, Milan` a `Via Argelati 33, Milano` (email e pagina pubblica). Allineati `fase-8-contenuti-evento.md` §4 e mockup. Le email già inviate restano invariate.
 
-- **Copy biglietto — ordine footer (2026-09-01)**: indirizzo, data, orario (`Via Argelati 33, Milano` / `10 September 2026` / `From 7 PM`) su email e pagina pubblica. Allineati `fase-8-contenuti-evento.md` §4 e mockup. Le email già inviate restano invariate.
+- **Copy biglietto — ordine footer (2026-09-01)**: indirizzo, data, orario (`Via Argelati 33, Milano` / `Thursday, September 10` / `From 7 PM`) su email e pagina pubblica. Allineati `fase-8-contenuti-evento.md` §4 e mockup. Le email già inviate restano invariate.
 
 - **Copy biglietto — orario (2026-09-01)**: footer email e pagina pubblica da `From 6 PM` a `From 7 PM` (`TICKET_TIME` in `renderTicketEmail.ts` e `ticket/[qrToken]/page.tsx`). Allineati `fase-8-contenuti-evento.md` §4 e mockup. Le email già inviate restano invariate.
 
