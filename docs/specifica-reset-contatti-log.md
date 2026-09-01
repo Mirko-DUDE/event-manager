@@ -15,8 +15,8 @@ Due esigenze distinte, stesso meccanismo:
 
 | Azione | Cosa svuota | Cosa NON tocca |
 |---|---|---|
-| **Reset generale** | `contatti` + `conflittiImport` + `activityLog` (hard delete reale) | `users`, Global (`hubspotSyncConfig`, `apiCredentials`, allow-list domini) |
-| **Reset solo contatti** | `contatti` + `conflittiImport` (hard delete reale) | `activityLog`, `users`, Global |
+| **Reset generale** | `contatti` + `conflittiImport` + `activityLog` + `inviteCheckSuccess` (hard delete reale) | `users`, Global (`hubspotSyncConfig`, `apiCredentials`, allow-list domini, `stats`, …) |
+| **Reset solo contatti** | `contatti` + `conflittiImport` (hard delete reale) | `activityLog`, `inviteCheckSuccess`, `users`, Global |
 
 ### Deroga esplicita al principio "nessuna cancellazione fisica"
 
@@ -37,9 +37,10 @@ Tutto il resto del progetto usa solo soft-delete (`attivo = false`) — mai `del
 
 ### Meccanismo di conferma
 
-1. Riepilogo con **conteggi reali** (query al momento del click: numero contatti, conflitti, — e per il reset generale — voci di log) mostrato prima di poter confermare.
+1. Riepilogo con **conteggi reali** (query al momento del click: numero contatti, conflitti, — e per il reset generale — voci di log e verifiche invito) mostrato prima di poter confermare.
    - **Perimetro del conteggio "contatti"**: include **tutti** i record della collection, sia `attivo = true` sia `attivo = false` (soft-deleted) — l'hard delete li cancella comunque entrambi, quindi il conteggio deve rifletterlo per evitare sorprese operative (es. "cancellati 3000 contatti" quando 500 erano già soft-deleted e non visibili nell'uso quotidiano).
    - **Perimetro del conteggio "log" (solo reset generale)**: include **tutte** le voci di `activityLog`, non solo quelle relative ai contatti — quindi anche i log di autenticazione (`login`/`logout`/`accessDenied`), che il Reset generale cancella insieme al resto (vedi nota sotto in "Traccia dell'operazione").
+   - **Perimetro del conteggio "verifiche invito" (solo reset generale)**: include **tutti** i documenti di `inviteCheckSuccess` (statistiche check-invite con esito positivo — vedi `docs/operativo/check-invite.md` § «Statistiche verifiche invito riuscite»). Contiene email (dato personale): va cancellata col Reset generale di fine evento, **non** col Reset solo contatti — stesso criterio già adottato per `activityLog`.
 2. Campo di testo con frase di conferma **specifica per azione**, case-sensitive, match esatto (nessuna normalizzazione):
    - `RESET GENERALE` per il reset generale
    - `RESET CONTATTI` per il reset solo contatti
@@ -47,7 +48,7 @@ Tutto il resto del progetto usa solo soft-delete (`attivo = false`) — mai `del
 
 ### Traccia dell'operazione
 
-- **Reset generale**: nessuna traccia da preservare — `activityLog` viene cancellato insieme al resto, comportamento **accettato consapevolmente** (non è un problema da risolvere). Compensato lato procedura operativa: vedi sezione GDPR sotto. **Nota operativa**: questo significa che vengono cancellati anche i log di autenticazione (`login`/`logout`/`accessDenied`), non solo quelli relativi ai contatti — coerente con l'obiettivo di minimizzazione, ma non ovvio per chi esegue l'operazione senza saperlo: va richiamato esplicitamente nella procedura GDPR (vedi sotto) e nel documento operativo.
+- **Reset generale**: nessuna traccia da preservare — `activityLog` e `inviteCheckSuccess` vengono cancellati insieme al resto, comportamento **accettato consapevolmente** (non è un problema da risolvere). Compensato lato procedura operativa: vedi sezione GDPR sotto. **Nota operativa**: questo significa che vengono cancellati anche i log di autenticazione (`login`/`logout`/`accessDenied`), non solo quelli relativi ai contatti, e l’elenco delle email verificate con successo via check-invite — coerente con l'obiettivo di minimizzazione, ma non ovvio per chi esegue l'operazione senza saperlo: va richiamato esplicitamente nella procedura GDPR (vedi sotto) e nel documento operativo.
 - **Reset solo contatti**: scrivere un record normale su `activityLog` (che in questa azione non viene toccato) con un nuovo `eventType` dedicato, `user` = super-admin che ha eseguito l'operazione, `detail` con i conteggi eliminati. Nessuna nuova collection o servizio esterno — `activityLog` è già lo strumento giusto perché sopravvive a questa specifica azione.
   - **Dettaglio del record**: `area` = `admin`; `relatedContact` = vuoto/null (operazione bulk, non riferita a un singolo contatto); formato di `detail` (testo libero vs JSON strutturato con i conteggi) lasciato alla scelta dell'agente in fase di implementazione — non è una decisione di design, ma conviene fissarlo per coerenza con gli altri `eventType` esistenti (che usano `detail` testuale).
   - **Riferimenti dangling**: i record `activityLog` preesistenti con `relatedContact` che puntava a un contatto ora cancellato da questa azione restano con un riferimento a un documento non più esistente (nessun vincolo di integrità referenziale in MongoDB). Comportamento accettato — nessuna pulizia automatica prevista qui, si sovrappone al debito tecnico già dichiarato sotto ("pulizia log associata ai contatti").
@@ -65,7 +66,7 @@ Il meccanismo di reset descritto in questa specifica copre la minimizzazione dat
 La minimizzazione di fine evento richiede un intervento umano documentato, non un job pianificato — proporzionato alla frequenza (un evento alla volta) e coerente con l'approccio "nessuna sovrastruttura" del progetto. La procedura, esterna al codice, deve prevedere:
 
 1. **Quale azione eseguire**: per la chiusura GDPR di fine evento va sempre usato il **Reset generale**, non il "Reset solo contatti". Il "Reset solo contatti" lascia dati personali (nome, email) nei campi `previousValue`/`newValue` di `activityLog` — non soddisfa lo scopo di minimizzazione. Resta l'azione corretta solo per il caso distinto di pulizia pre-go-live dopo un test live.
-2. **Traccia fuori dal sistema**: prima di confermare il Reset generale, annotare altrove (ticket, email interna, verbale) i conteggi mostrati dal riepilogo pre-conferma — perché `activityLog`, che sarebbe la traccia naturale, viene cancellato insieme al resto. Compensa a costo zero la scelta già presa di non preservare traccia dell'operazione.
+2. **Traccia fuori dal sistema**: prima di confermare il Reset generale, annotare altrove (ticket, email interna, verbale) i conteggi mostrati dal riepilogo pre-conferma — perché `activityLog` e le statistiche check-invite (`inviteCheckSuccess` / Global Stats) vengono cancellati insieme al resto. Compensa a costo zero la scelta già presa di non preservare traccia dell'operazione. Se servono i KPI verifiche invito (totale / univoci), leggerli dal Global **Stats** (Sistema) **prima** del reset, o annotare i numeri dal riepilogo pre-conferma.
 3. **Limite noto sui backup Atlas**: il hard-delete pulisce il database primario; una copia dei dati pre-reset può sopravvivere nei backup automatici per la finestra di retention del piano Atlas in uso. Limite accettato, da citare nella procedura come nota informativa, non un problema da risolvere lato codice.
 4. **Sync automatico da valutare prima della pulizia pre-go-live**: se `syncAutomatico` (Global `hubspotSyncConfig`) è attivo, il timer in-process ripopola i contatti da HubSpot dopo un "Reset solo contatti" — non è un bug, ma la procedura pre-evento deve ricordare di valutare se disattivare temporaneamente `syncAutomatico` prima di eseguire il reset, altrimenti l'effetto della pulizia dura solo fino al prossimo ciclo di sync.
 

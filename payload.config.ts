@@ -8,11 +8,13 @@ import { ActivityLog } from './collections/ActivityLog'
 import { ConflittiImport } from './collections/ConflittiImport'
 import { Contatti } from './collections/Contatti'
 import { InviteCheckRateLimit } from './collections/InviteCheckRateLimit'
+import { InviteCheckSuccess } from './collections/InviteCheckSuccess'
 import { Users } from './collections/Users'
 import { ApiCredentials } from './globals/ApiCredentials'
 import { HubspotSyncConfig } from './globals/HubspotSyncConfig'
 import { ResetContattiELog } from './globals/ResetContattiELog'
 import { Settings } from './globals/Settings'
+import { Stats } from './globals/Stats'
 import { TicketConfig } from './globals/TicketConfig'
 import { googleAdminOAuth } from './plugins/googleAdminOAuth'
 import { googleAppOAuth } from './plugins/googleAppOAuth'
@@ -48,8 +50,8 @@ export default buildConfig({
       afterNavLinks: ['@/components/admin/CsvUploadNavLink'],
     },
   },
-  collections: [Users, ActivityLog, Contatti, ConflittiImport, InviteCheckRateLimit],
-  globals: [Settings, HubspotSyncConfig, ApiCredentials, ResetContattiELog, TicketConfig],
+  collections: [Users, ActivityLog, Contatti, ConflittiImport, InviteCheckRateLimit, InviteCheckSuccess],
+  globals: [Settings, HubspotSyncConfig, ApiCredentials, ResetContattiELog, TicketConfig, Stats],
   email: resendAdapter({
     apiKey: process.env.RESEND_API_KEY || '',
     defaultFromAddress: process.env.RESEND_FROM_ADDRESS || 'noreply@example.com',

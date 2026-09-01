@@ -152,6 +152,8 @@ Il biglietto vero e proprio, raggiungibile dal link contenuto nell'email o condi
 
 Un endpoint server-to-server, non un'interfaccia visibile: pensato per essere chiamato dalla landing page esterna dell'evento (un progetto separato) per sapere, dato un indirizzo email, se la persona è tra gli invitati — senza restituire nessun altro dato del contatto. Richiede una chiave API (gestita in Admin, §3.5) e applica un limite di richieste per indirizzo IP per contrastare tentativi di enumerazione.
 
+In Admin (**Sistema**): il Global **Stats** mostra quante verifiche hanno avuto esito positivo (totale e email distinte); la collection **Verifiche invito** elenca ogni hit con email e timestamp. Dettaglio operativo in `docs/operativo/check-invite.md`.
+
 ---
 
 ## 6. Come nasce e viaggia un biglietto (vista d'insieme)

@@ -71,6 +71,7 @@ export interface Config {
     contatti: Contatti;
     conflittiImport: ConflittiImport;
     inviteCheckRateLimit: InviteCheckRateLimit;
+    inviteCheckSuccess: InviteCheckSuccess;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -83,6 +84,7 @@ export interface Config {
     contatti: ContattiSelect<false> | ContattiSelect<true>;
     conflittiImport: ConflittiImportSelect<false> | ConflittiImportSelect<true>;
     inviteCheckRateLimit: InviteCheckRateLimitSelect<false> | InviteCheckRateLimitSelect<true>;
+    inviteCheckSuccess: InviteCheckSuccessSelect<false> | InviteCheckSuccessSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -99,6 +101,7 @@ export interface Config {
     apiCredentials: ApiCredential;
     resetContattiELog: ResetContattiELog;
     ticketConfig: TicketConfig;
+    stats: Stat;
   };
   globalsSelect: {
     settings: SettingsSelect<false> | SettingsSelect<true>;
@@ -106,6 +109,7 @@ export interface Config {
     apiCredentials: ApiCredentialsSelect<false> | ApiCredentialsSelect<true>;
     resetContattiELog: ResetContattiELogSelect<false> | ResetContattiELogSelect<true>;
     ticketConfig: TicketConfigSelect<false> | TicketConfigSelect<true>;
+    stats: StatsSelect<false> | StatsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -358,6 +362,15 @@ export interface InviteCheckRateLimit {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inviteCheckSuccess".
+ */
+export interface InviteCheckSuccess {
+  id: string;
+  email: string;
+  timestamp: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -395,6 +408,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'inviteCheckRateLimit';
         value: string | InviteCheckRateLimit;
+      } | null)
+    | ({
+        relationTo: 'inviteCheckSuccess';
+        value: string | InviteCheckSuccess;
       } | null)
     | ({
         relationTo: 'users';
@@ -508,6 +525,14 @@ export interface ConflittiImportSelect<T extends boolean = true> {
  */
 export interface InviteCheckRateLimitSelect<T extends boolean = true> {
   ip?: T;
+  timestamp?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inviteCheckSuccess_select".
+ */
+export interface InviteCheckSuccessSelect<T extends boolean = true> {
+  email?: T;
   timestamp?: T;
 }
 /**
@@ -737,6 +762,15 @@ export interface TicketConfig {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stats".
+ */
+export interface Stat {
+  id: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "settings_select".
  */
 export interface SettingsSelect<T extends boolean = true> {
@@ -820,6 +854,15 @@ export interface TicketConfigSelect<T extends boolean = true> {
   invioTicketProgressProcessed?: T;
   invioTicketProgressTotal?: T;
   invioTicketProgressPhase?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stats_select".
+ */
+export interface StatsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

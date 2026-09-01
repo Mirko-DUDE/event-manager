@@ -9,6 +9,8 @@ export type ResetSummary = {
   conflittiImport: number
   /** Presente solo per scope `generale` (tutte le voci, incluse auth). */
   activityLog?: number
+  /** Presente solo per scope `generale` — statistiche check-invite riuscite. */
+  inviteCheckSuccess?: number
 }
 
 export type ResetExecutionResult =
@@ -44,8 +46,11 @@ export async function countResetSummary(
   ])
 
   if (scope === 'generale') {
-    const activityLog = await countCollection(payload, 'activityLog')
-    return { contatti, conflittiImport, activityLog }
+    const [activityLog, inviteCheckSuccess] = await Promise.all([
+      countCollection(payload, 'activityLog'),
+      countCollection(payload, 'inviteCheckSuccess'),
+    ])
+    return { contatti, conflittiImport, activityLog, inviteCheckSuccess }
   }
 
   return { contatti, conflittiImport }
@@ -70,7 +75,7 @@ async function assertHeavyOpsLocksClear(payload: Payload): Promise<string | null
 }
 
 /**
- * Hard delete di contatti + conflittiImport + activityLog.
+ * Hard delete di contatti + conflittiImport + activityLog + inviteCheckSuccess.
  * Nessuna traccia su activityLog (viene svuotato). Chiamare solo da super-admin.
  */
 export async function runGeneralReset(payload: Payload): Promise<ResetExecutionResult> {
@@ -82,6 +87,7 @@ export async function runGeneralReset(payload: Payload): Promise<ResetExecutionR
   await deleteAllInCollection(payload, 'contatti')
   await deleteAllInCollection(payload, 'conflittiImport')
   await deleteAllInCollection(payload, 'activityLog')
+  await deleteAllInCollection(payload, 'inviteCheckSuccess')
 
   return { ok: true, deleted }
 }

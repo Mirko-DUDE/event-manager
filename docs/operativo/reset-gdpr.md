@@ -16,7 +16,7 @@
 | Scenario | Azione | Perché |
 |---|---|---|
 | **Fine evento (minimizzazione GDPR)** | **Reset generale** | Cancella anche `activityLog`. Il «Reset solo contatti» lascia dati personali (nome, email) in `previousValue`/`newValue` del log — non soddisfa lo scopo di minimizzazione. |
-| **Pulizia pre-go-live** (dopo test live con dati HubSpot reali) | **Reset solo contatti** | Svuota `contatti` e `conflittiImport`; lascia `activityLog` e scrive un record `contactsReset` con i conteggi. |
+| **Pulizia pre-go-live** (dopo test live con dati HubSpot reali) | **Reset solo contatti** | Svuota `contatti` e `conflittiImport`; lascia `activityLog`, `inviteCheckSuccess` (statistiche check-invite) e scrive un record `contactsReset` con i conteggi. |
 
 **A fine evento usare sempre Reset generale, non Reset solo contatti.**
 
@@ -38,14 +38,14 @@ Messaggio chiaro in UI; riprovare a operazione terminata (o dopo sblocco automat
 ## Procedura — chiusura GDPR a fine evento
 
 1. Accedere come **super-admin** al Global «Reset contatti e log».
-2. Nel blocco **Reset generale**, aprire il riepilogo (conteggi runtime: tutti i `contatti` incluso soft-deleted, `conflittiImport`, tutte le voci `activityLog`).
-3. **Annotare i conteggi fuori sistema** (ticket, email interna, verbale) **prima** di confermare — `activityLog` viene cancellato insieme al resto, quindi non resta traccia in-app dell’operazione.
+2. Nel blocco **Reset generale**, aprire il riepilogo (conteggi runtime: tutti i `contatti` incluso soft-deleted, `conflittiImport`, tutte le voci `activityLog`, tutte le voci `inviteCheckSuccess`).
+3. **Annotare i conteggi fuori sistema** (ticket, email interna, verbale) **prima** di confermare — `activityLog` e le statistiche check-invite vengono cancellati insieme al resto, quindi non resta traccia in-app dell’operazione. Opzionale: KPI totale/univoci anche da **Sistema → Stats** prima del reset.
 4. Digitare esattamente `RESET GENERALE` e confermare.
-5. Verificare che le tre collection risultino vuote (o al livello atteso post-reset).
+5. Verificare che le collection coinvolte risultino vuote (o al livello atteso post-reset).
 
 ### Note da tenere presenti *prima* di eseguire
 
-- **Log di autenticazione**: il Reset generale cancella anche `login` / `logout` / `accessDenied`, non solo i log legati ai contatti. Coerente con la minimizzazione, ma non ovvio se si guarda solo ai contatti.
+- **Log di autenticazione e statistiche check-invite**: il Reset generale cancella anche `login` / `logout` / `accessDenied`, non solo i log legati ai contatti, e l’intera collection `inviteCheckSuccess` (email verificate con `invited: true`). Coerente con la minimizzazione, ma non ovvio se si guarda solo ai contatti.
 - **Backup Atlas**: il hard-delete pulisce il database primario; una copia pre-reset può sopravvivere nei backup automatici per la finestra di retention del piano Atlas in uso. Limite accettato, informativo — non si risolve lato codice.
 
 ## Procedura — pulizia pre-go-live (Reset solo contatti)

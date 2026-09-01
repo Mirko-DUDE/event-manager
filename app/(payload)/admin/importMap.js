@@ -5,6 +5,7 @@ import { default as default_3d5ce89c464db94aedb7076c07c0af9d } from '@/component
 import { default as default_ad497af92bb660355af21ff3a549e177 } from '@/components/admin/ApiKeyRowControls'
 import { default as default_ac52999068ac781bf4b426d2378d169a } from '@/components/admin/ResetContattiELogPanel'
 import { default as default_3ffa6f8c1abac381580a93c7cbb2f0ca } from '@/components/admin/InvioTicketMassivoButton'
+import { default as default_9af06e613953cc99969839a6fbfa1efc } from '@/components/admin/StatsPanel'
 import { default as default_c147112e584c66ba0b5e4b5f7f822df0 } from '@/components/admin/CsvUploadNavLink'
 import { default as default_9c986bf00998f72758fbf6c76782cb67 } from '@/components/admin/GoogleAdminLoginButton'
 import { default as default_9490f073a9408ebc42a7406874d5bb3f } from '@/components/admin/LocalAdminLoginView'
@@ -20,6 +21,7 @@ export const importMap = {
   "@/components/admin/ApiKeyRowControls#default": default_ad497af92bb660355af21ff3a549e177,
   "@/components/admin/ResetContattiELogPanel#default": default_ac52999068ac781bf4b426d2378d169a,
   "@/components/admin/InvioTicketMassivoButton#default": default_3ffa6f8c1abac381580a93c7cbb2f0ca,
+  "@/components/admin/StatsPanel#default": default_9af06e613953cc99969839a6fbfa1efc,
   "@/components/admin/CsvUploadNavLink#default": default_c147112e584c66ba0b5e4b5f7f822df0,
   "@/components/admin/GoogleAdminLoginButton#default": default_9c986bf00998f72758fbf6c76782cb67,
   "@/components/admin/LocalAdminLoginView#default": default_9490f073a9408ebc42a7406874d5bb3f,

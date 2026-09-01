@@ -31,6 +31,10 @@ function formatSummary(scope: ResetScope, summary: ResetSummary): string {
     )
   }
 
+  if (scope === 'generale' && summary.inviteCheckSuccess != null) {
+    parts.push(`${summary.inviteCheckSuccess} verifiche invito riuscite (check-invite)`)
+  }
+
   return parts.join(' · ')
 }
 
@@ -115,7 +119,7 @@ function ResetBlock({
 
     const message =
       scope === 'generale'
-        ? `Reset generale completato: eliminati ${result.deleted.contatti} contatti, ${result.deleted.conflittiImport} conflitti, ${result.deleted.activityLog ?? 0} voci di log.`
+        ? `Reset generale completato: eliminati ${result.deleted.contatti} contatti, ${result.deleted.conflittiImport} conflitti, ${result.deleted.activityLog ?? 0} voci di log, ${result.deleted.inviteCheckSuccess ?? 0} verifiche invito.`
         : `Reset solo contatti completato: eliminati ${result.deleted.contatti} contatti e ${result.deleted.conflittiImport} conflitti. Traccia su activityLog (contactsReset).`
 
     setOutcome({ kind: 'success', message })
@@ -247,7 +251,7 @@ export default function ResetContattiELogPanel() {
       <ResetBlock
         busyScope={busyScope}
         canExecute={canExecute}
-        description="Elimina fisicamente contatti, conflitti di import e tutto l'activity log (inclusi login/logout/accessDenied). Nessuna traccia dell'operazione resta nel sistema. Usare a fine evento per minimizzazione GDPR."
+        description="Elimina fisicamente contatti, conflitti di import, tutto l'activity log (inclusi login/logout/accessDenied) e le statistiche check-invite (inviteCheckSuccess). Nessuna traccia dell'operazione resta nel sistema. Usare a fine evento per minimizzazione GDPR."
         onBusyChange={setBusyScope}
         scope="generale"
         title="Reset generale"

@@ -303,6 +303,7 @@ Sequenza operativa per dipendenze reali. Ogni passo indica se richiede ancora un
   - Lookup `contatti` su email normalizzata (trim + lowercase); `attivo: false` o assente → `{ invited: false }`; presente e attivo → `{ invited: true }`; body successo **solo** `{ invited: boolean }`.
   - Collection `inviteCheckRateLimit` (`ip`, `timestamp`; access chiusi; nascosta in Admin); indice TTL MongoDB `expireAfterSeconds: 600` creato in `onInit` (`lib/inviteCheck/ensureTtlIndex.ts`); soglia **1000** req/IP/10 min → `429` senza campo `invited`; chiave rate limit = header `X-Invite-Client-IP` (IP browser dalla LP) con fallback IP di connessione.
   - Note operative: `docs/operativo/check-invite.md`. Propagazione `INVITE_API_KEY` su Firebase resta manuale (§3).
+- **Amendment statistiche (2026-09-01, post-chiusura Fase 4)**: traccia verifiche con `{ invited: true }` su collection `inviteCheckSuccess`; KPI in Global Admin `stats` (Sistema); elenco read-only «Verifiche invito»; reset generale esteso — vedi `docs/operativo/check-invite.md` § «Statistiche verifiche invito riuscite». Test dev OK (2026-09-01).
 
 ### Passo 7 — Verifica di chiusura ✅
 - Checklist e2e Passo 7 **chiusa per conferma** (2026-08-05, umano): non ripetuti smoke dedicati; esiti già verificati e documentati nei Passi 3–6 sufficienti per la chiusura Fase 4.

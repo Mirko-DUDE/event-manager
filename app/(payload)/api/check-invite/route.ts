@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 
 import { isEmailInvited, normalizeInviteEmail } from '@/lib/inviteCheck/checkInvite'
+import { logInviteCheckSuccess } from '@/lib/inviteCheck/logSuccess'
 import { assertInviteCheckRateLimit, getRateLimitIp } from '@/lib/inviteCheck/rateLimit'
 import { extractBearerToken, isValidInviteApiKey } from '@/lib/inviteCheck/verifyBearer'
 
@@ -42,5 +43,8 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const invited = await isEmailInvited(payload, email)
+  if (invited) {
+    await logInviteCheckSuccess(payload, email)
+  }
   return Response.json({ invited })
 }
