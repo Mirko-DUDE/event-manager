@@ -18,7 +18,7 @@ const archivoBlack = Archivo_Black({
 const TICKET_MAPS_URL = 'https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6'
 const TICKET_DATE = '10 September 2026'
 const TICKET_ADDRESS = 'Via Argelati 33, Milan'
-const TICKET_TIME = 'From 6 PM'
+const TICKET_TIME = 'From 7 PM'
 const TICKET_DISCLAIMER_LINE_1 = 'This ticket is personal and non-transferable.'
 const TICKET_DISCLAIMER_LINE_2 = 'Valid for one entry only.'
 

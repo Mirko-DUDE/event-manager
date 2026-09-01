@@ -68,7 +68,7 @@ Motivazione: il contenuto guest-facing è specifico dell'evento (già deciso: la
 - Nome/cognome ospite: `{{firstName}} {{lastName}}` — riga discreta, subito prima della headline (decisione 2026-08-20, sostituisce l'ipotesi precedente "solo pagina, non email": ora appare **in entrambe le superfici**, stessa posizione). **Stile confermato**: stesso font display (Archivo Black) del resto del testo, colore accent `orange-500` (non testo muto grigio come nella prima bozza).
 - Headline: `This is your official adult certification.`
 - Subheadline: `Use it to enter the party.`
-- Footer: `Via Argelati 33, Milan` (collegato a Google Maps, vedi sotto) / `From 6 PM`
+- Footer: `Via Argelati 33, Milan` (collegato a Google Maps, vedi sotto) / `From 7 PM`
 
 **Link indirizzo → Google Maps**: `https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6` sull'indirizzo nel footer. Note tecniche per l'implementazione:
 - Stile del link (niente sottolineatura/colore blu di default) va impostato **inline sul tag `<a>`** (`style="color:#000000; text-decoration:none;"`), non in un blocco `<style>`/classe — molti client email ignorano/strippano gli stili non inline sui link.
