@@ -29,6 +29,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Changed
 
+- **`maxPoolSize` MongoDB esplicito (100) — post-audit connessioni Atlas (2026-09-02)**: in `payload.config.ts`, `mongooseAdapter` passa `connectOptions: { maxPoolSize: 100 }` — valore invariato rispetto al default implicito di Mongoose/driver MongoDB (`mongodb@6.20.0`), mai configurato prima; `DATABASE_URL` in Secret Manager senza override in query string. Decisione tracciata per non dipendere da default silenzioso di libreria. Dimensionamento: max 4 istanze Cloud Run × 100 = 400 connessioni teoriche vs tetto Atlas Flex 500 (~20% margine per script operativi concorrenti). Audit e analisi picco post-invio ticket (~2600 contatti) confermano 100 adeguato senza riduzione. Doc in `fase-3-deploy.md` § 3.2.
+
 - **Copy biglietto — data (2026-09-01)**: footer da `10 September 2026` a `Thursday, September 10` (email e pagina pubblica). Allineati `fase-8-contenuti-evento.md` §4 e mockup. Le email già inviate restano invariate.
 
 - **Copy biglietto — città (2026-09-01)**: footer da `Via Argelati 33, Milan` a `Via Argelati 33, Milano` (email e pagina pubblica). Allineati `fase-8-contenuti-evento.md` §4 e mockup. Le email già inviate restano invariate.
@@ -40,6 +42,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **Fase 9 § CSS bleed client-side (2026-08-20)**: `(frontend)/layout.tsx` importa `app/(app)/app.css` (stesso foglio del layout `(app)`) per eliminare alla radice la differenza di aspetto causata dal bleed CSS durante la navigazione client-side di Next.js — con CSS base diversi tra route group, una pagina appare diversamente a seconda dell'ordine di visita. `globals.css` rimosso da `(frontend)` (conteneva `body { display: flex }` e variabili `:root` che rompevano `/admin` e `/app` durante la navigazione client-side). Bottoni con specificità CSS doppia (`.btnDefault.btnDefault`, `0-2-0`) per sovrascrivere in modo affidabile le utility Tailwind a specificità singola iniettate da `app.css`.
 
 ### Tests
+
+- **`maxPoolSize` MongoDB esplicito — validazione (2026-09-02)**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK (solo warning preesistenti); avvio locale senza errori Mongoose (`/admin/login`, `/app/login` 200). Comportamento runtime invariato (stesso valore del default precedente).
 
 - **Fase 7 § Passo 9 — chiusura (2026-09-02)**: paginazione lista `/app/contatti` su Cloud Run con ~30 contatti — header + bottom nav vs controlli in fondo lista OK (Passo 8 #4). Fase 7 chiusa in piano.
 

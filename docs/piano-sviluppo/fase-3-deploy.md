@@ -113,6 +113,12 @@ Aggiornare lo stato di ogni sottofase qui sotto e in `00-piano-generale.md` non 
 - Prima build fallita (prerender `/app` + MongoDB) — fix in commit `6a1db0d` (`force-dynamic` su layout protetto e verify email); seconda build OK.
 - Container port: **8080** (default Cloud Run). `SERVER_URL` ancora placeholder — da impostare con URL reale `*.run.app` in § 3.3.
 
+**Connection pool MongoDB — `maxPoolSize` esplicito** (2026-09-02):
+- In `payload.config.ts`, `mongooseAdapter` passa `connectOptions: { maxPoolSize: 100 }`. Il valore è **invariato** rispetto al comportamento precedente: prima era il default implicito di Mongoose/driver MongoDB (`mongodb@6.20.0`), mai configurato nel progetto; `DATABASE_URL` in Secret Manager non contiene override nella query string (verificato in audit).
+- **Motivazione**: rendere esplicita e tracciata una decisione che prima dipendeva da un default silenzioso di libreria, suscettibile di cambiare con futuri aggiornamenti delle dipendenze.
+- **Dimensionamento**: Cloud Run configurato con massimo **4** istanze (Parte C) × `maxPoolSize` **100** = **400** connessioni simultanee teoriche verso Atlas (piano Flex, tetto **500** connessioni) — margine ~20% (~100 connessioni) per script operativi concorrenti (`seed:super-admin`, `backfill:qr-tokens`, smoke test) che riusano la stessa `payload.config.ts`, oltre alla riserva interna che Atlas trattiene per sé.
+- **Audit e fabbisogno reale**: sessione di verifica ha rilevato l'assenza di configurazione esplicita; analisi del picco post-invio ticket (~2600 contatti, scenario stress-test con quasi tutti gli invitati che aprono la pagina entro pochi secondi dall'invio) ha mostrato un fabbisogno di connessioni concorrenti per istanza di gran lunga inferiore a 100 anche nel caso estremo plausibile — **100 confermato adeguato, nessuna riduzione necessaria**.
+
 ---
 
 ## 3.3 — OAuth Google e redirect URI produzione

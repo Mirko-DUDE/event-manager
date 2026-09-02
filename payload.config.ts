@@ -61,6 +61,9 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
+    connectOptions: {
+      maxPoolSize: 100,
+    },
   }),
   plugins: [googleAdminOAuth, googleAppOAuth],
   sharp,
