@@ -150,9 +150,9 @@ Motivazione (gestione progetto + anti-spam):
 - [x] Domande aperte (§8) risolte e questo documento aggiornato di conseguenza
 - [x] Verifica pagina pubblica `/ticket/[qrToken]` mobile/desktop, entrambi gli stati *(2026-08-21)*
 - [x] Invio email ticket in produzione — invio massivo 30 contatti test (Upload+Wildcard, attivi, `qrToken`); DB prod solo contatti test/interni; `modalitaTestInvio` disattivata per la run; Resend Free; report massivo OK *(2026-08-25)*
-- [ ] Verifica rendering email su almeno 3 client reali (Gmail, Outlook, Apple Mail — logo CID, QR inline, copy DUDEHUB, link backup pagina)
-- [ ] `00-piano-generale.md` aggiornato a chiusura (dopo verifica 3 client)
+- [x] Verifica rendering email su almeno 3 client reali (Gmail, Outlook, Apple Mail — logo CID, QR inline, copy DUDEHUB, link backup pagina) *(2026-09-02)*
+- [x] `00-piano-generale.md` aggiornato a chiusura *(2026-09-02 — Fase 8 ✅)*
 
-**Note test invio (2026-08-25)**: Resend segnala (non bloccante) link Maps (`maps.app.goo.gl`) ≠ dominio mittente `services.dude.it` e uso `noreply@services.dude.it` — valutati accettabili per ticket transazionali; rivalutare solo se in test su Outlook/Gmail compaiono spam o rendering rotto.
+**Note test invio (2026-08-25)**: Resend segnala (non bloccante) link Maps (`maps.app.goo.gl`) ≠ dominio mittente `services.dude.it` e uso `noreply@services.dude.it` — valutati accettabili; rendering OK su Gmail, Outlook e Apple Mail *(2026-09-02)* — nessuna modifica richiesta.
 
 **Note implementazione (2026-08-20)**: dopo test email reale, mockup e codice allineati a correzioni spaziatura (logo −30%, gap verticali logo→nome 40px, nome→headline 26px, headline→subheadline 26px, subheadline→QR 44px) e larghezza card email 480px (pagina 420px invariata). Branding mittente/oggetto/titolo pagina unificato su **DUDEHUB** (`DUDEHUB - This is your ticket` per oggetto email e titolo pagina ticket valido).
