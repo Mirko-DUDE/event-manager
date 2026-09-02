@@ -84,6 +84,7 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 ### Tests
 
 - **Fase 7 § Passo 4 — Ottimizzazione ricerca contatti (2026-09-02)**: `pnpm exec tsc --noEmit`, `pnpm lint` OK.
+- **Fase 7 § Passo 4 — Test Cloud Run post-deploy (2026-09-02)**: (1) 1 carattere in `/app/contatti` — nessuna ricerca attiva, lista default OK; (2) 2+ caratteri — ricerca invariata OK; (3) check-in desktop — sotto soglia stato vuoto, ricerca OK; (4) badge All/NOT/IN coerenti con ricerca attiva OK.
 
 ### Fixed
 
