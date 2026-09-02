@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { cookies, headers } from 'next/headers'
 import type { TypedUser } from 'payload'
 import { getPayload } from 'payload'
@@ -8,8 +9,11 @@ import config from '@payload-config'
  * Autenticazione Area App lato server.
  * Usa il token dal cookie Next.js + Authorization Bearer per evitare il gate
  * Sec-Fetch-Site di extractJWT su richieste RSC (OAuth redirect → /app).
+ *
+ * Wrappato con `cache()` per deduplicare le chiamate nello stesso render tree
+ * (layout + page + SectionAccessGate sulla stessa request).
  */
-export async function getAuthenticatedAppUser(): Promise<TypedUser | null> {
+export const getAuthenticatedAppUser = cache(async (): Promise<TypedUser | null> => {
   const payload = await getPayload({ config })
   const cookieStore = await cookies()
   const token = cookieStore.get(`${payload.config.cookiePrefix}-token`)?.value
@@ -24,4 +28,4 @@ export async function getAuthenticatedAppUser(): Promise<TypedUser | null> {
 
   const { user } = await payload.auth({ headers: authHeaders })
   return user ?? null
-}
+})

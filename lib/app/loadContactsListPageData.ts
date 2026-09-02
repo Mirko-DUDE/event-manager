@@ -6,12 +6,12 @@ import {
   buildContactsListHref,
   buildContactsListSort,
   buildContactsListWhere,
-  buildContactsSearchWhere,
   CONTACTS_PAGE_SIZE,
   parseContactsListParams,
   type ContactsListCounts,
   type ContactsListParams,
 } from '@/lib/app/contactsListQuery'
+import { loadContactsSegmentCounts } from '@/lib/app/loadContactsSegmentCounts'
 import type { Contatti } from '@/payload-types'
 
 export type ContactsListPageData = {
@@ -29,11 +29,10 @@ export async function loadContactsListPageData(
   const params = parseContactsListParams(rawSearchParams)
   const payload = await getPayload({ config })
 
-  const searchWhere = buildContactsSearchWhere(params.q)
   const listWhere = buildContactsListWhere(params.q, params.filter)
   const sort = buildContactsListSort(params.sort, params.dir)
 
-  const [listResult, allCountResult, checkedInCountResult] = await Promise.all([
+  const [listResult, segmentCounts] = await Promise.all([
     payload.find({
       collection: 'contatti',
       depth: 0,
@@ -43,20 +42,7 @@ export async function loadContactsListPageData(
       overrideAccess: true,
       where: listWhere,
     }),
-    payload.find({
-      collection: 'contatti',
-      depth: 0,
-      limit: 0,
-      overrideAccess: true,
-      where: searchWhere,
-    }),
-    payload.find({
-      collection: 'contatti',
-      depth: 0,
-      limit: 0,
-      overrideAccess: true,
-      where: buildContactsListWhere(params.q, 'checked-in'),
-    }),
+    loadContactsSegmentCounts(params.q),
   ])
 
   const totalPages = listResult.totalPages
@@ -65,9 +51,9 @@ export async function loadContactsListPageData(
   }
 
   const counts: ContactsListCounts = {
-    all: allCountResult.totalDocs,
-    checkedIn: checkedInCountResult.totalDocs,
-    notCheckedIn: allCountResult.totalDocs - checkedInCountResult.totalDocs,
+    all: segmentCounts.all,
+    checkedIn: segmentCounts.checkedIn,
+    notCheckedIn: segmentCounts.all - segmentCounts.checkedIn,
   }
 
   const page = params.page > 0 ? params.page : 1

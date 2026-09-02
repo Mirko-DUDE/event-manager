@@ -3,7 +3,7 @@
 import { ArrowDown, ArrowDownWideNarrow, ArrowUp, Search, X } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 
 import {
   buildContactsListHref,
@@ -11,6 +11,8 @@ import {
   type ContactsListParams,
 } from '@/lib/app/contactsListQuery'
 import { cn } from '@/lib/utils'
+
+const SEARCH_DEBOUNCE_MS = 350
 
 type ContactsListToolbarProps = {
   params: ContactsListParams
@@ -132,13 +134,18 @@ function SortControl({
 
 export function ContactsListToolbar({ params, counts }: ContactsListToolbarProps) {
   const router = useRouter()
-  const searchInputRef = useRef<HTMLInputElement>(null)
+  const paramsRef = useRef(params)
+
+  const [draftQ, setDraftQ] = useState(params.q)
   const [isPending, startTransition] = useTransition()
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /** q della navigazione in corso — evita che useEffect risovrascriva draftQ durante clear/digitazione. */
+  const pendingNavQRef = useRef<string | null>(null)
 
   const navigate = useCallback(
     (patch: Partial<ContactsListParams>, replace = false) => {
       startTransition(() => {
-        const href = buildContactsListHref(params, patch)
+        const href = buildContactsListHref(paramsRef.current, patch)
         if (replace) {
           router.replace(href)
         } else {
@@ -146,97 +153,121 @@ export function ContactsListToolbar({ params, counts }: ContactsListToolbarProps
         }
       })
     },
-    [params, router],
+    [router],
   )
 
-  /*
-   * Sync the input value when params.q changes due to external navigation
-   * (e.g. filter click clears a search that was in progress).
-   * Uses the DOM ref directly — not setState — so the linter is happy.
-   */
   useEffect(() => {
-    if (searchInputRef.current && searchInputRef.current.value !== params.q) {
-      searchInputRef.current.value = params.q
+    paramsRef.current = params
+  }, [params])
+
+  useEffect(() => {
+    if (pendingNavQRef.current !== null) {
+      if (params.q === pendingNavQRef.current) {
+        pendingNavQRef.current = null
+      }
+      return
     }
+    setDraftQ(params.q)
   }, [params.q])
 
-  const clearSearch = () => {
-    if (searchInputRef.current) searchInputRef.current.value = ''
-    navigate({ q: '', page: 1 })
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
+
+  const commitSearch = useCallback(
+    (rawQ: string, replace = true) => {
+      const q = rawQ.trim()
+      pendingNavQRef.current = q
+      navigate({ q, page: 1 }, replace)
+    },
+    [navigate],
+  )
+
+  const scheduleDebouncedSearch = useCallback(
+    (rawQ: string) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(() => {
+        debounceRef.current = null
+        commitSearch(rawQ, true)
+      }, SEARCH_DEBOUNCE_MS)
+    },
+    [commitSearch],
+  )
+
+  const handleSearchChange = (value: string) => {
+    setDraftQ(value)
+    scheduleDebouncedSearch(value)
   }
 
-  const searchBox = (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault()
-        navigate({ q: searchInputRef.current?.value.trim() ?? '', page: 1 })
-      }}
-      className="w-full lg:max-w-[340px] lg:flex-1"
-    >
-      <div className="flex h-10 items-center gap-2 rounded-[10px] border border-app-border bg-app-surface px-3">
-        <Search className="size-4 shrink-0 text-app-text-muted" aria-hidden />
-        <input
-          ref={searchInputRef}
-          type="text"
-          name="q"
-          defaultValue={params.q}
-          placeholder="Search by first name, last name or email"
-          onChange={(event) => navigate({ q: event.target.value.trim(), page: 1 }, true)}
-          className="min-w-0 flex-1 border-0 bg-transparent text-base text-app-text-primary outline-none placeholder:text-app-text-muted lg:text-[13.5px]"
-          autoComplete="off"
-          enterKeyHint="search"
-        />
-        {params.q ? (
-          <button
-            type="button"
-            onClick={clearSearch}
-            className="flex shrink-0 text-app-text-muted hover:text-app-text-secondary"
-            aria-label="Clear search"
-          >
-            <X className="size-3.5" />
-          </button>
-        ) : null}
-      </div>
-    </form>
-  )
+  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
+    commitSearch(draftQ, true)
+  }
+
+  const clearSearch = () => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
+    setDraftQ('')
+    pendingNavQRef.current = ''
+    navigate({ q: '', page: 1 }, true)
+  }
 
   return (
     <div className={cn(isPending && 'opacity-70 transition-opacity')}>
-      {/* Mobile / tablet portrait */}
-      <div className="space-y-2.5 border-b border-app-border bg-app-bg pb-2 lg:hidden">
-        <h1 className="text-xl font-bold tracking-tight text-app-text-primary">Contacts</h1>
-        {searchBox}
-        <FilterSegments
-          params={params}
-          counts={counts}
-          buttonClassName="flex-1 min-h-10 px-1"
-        />
-        <SortControl
-          params={params}
-          onSortChange={(sort) => navigate({ sort, page: 1 })}
-          onToggleDir={() => navigate({ dir: params.dir === 'asc' ? 'desc' : 'asc', page: 1 })}
-          className="min-h-10"
-          selectClassName="py-2.5"
-          dirButtonClassName="min-w-[42px]"
-        />
-      </div>
+      <div className="space-y-2.5 border-b border-app-border bg-app-bg pb-2 lg:flex lg:items-center lg:gap-3 lg:space-y-0 lg:border-b-0 lg:bg-transparent lg:pb-0">
+        <h1 className="text-xl font-bold tracking-tight text-app-text-primary lg:hidden">Contacts</h1>
 
-      {/* Desktop / tablet landscape */}
-      <div className="hidden items-center gap-3 lg:flex">
-        {searchBox}
+        <form
+          onSubmit={handleSearchSubmit}
+          className="w-full lg:max-w-[340px] lg:shrink-0 lg:flex-1"
+        >
+          <div className="flex h-10 items-center gap-2 rounded-[10px] border border-app-border bg-app-surface px-3">
+            <Search className="size-4 shrink-0 text-app-text-muted" aria-hidden />
+            <input
+              type="text"
+              name="q"
+              value={draftQ}
+              onChange={(event) => handleSearchChange(event.target.value)}
+              placeholder="Search by first name, last name or email"
+              className="min-w-0 flex-1 border-0 bg-transparent text-base text-app-text-primary outline-none placeholder:text-app-text-muted lg:text-[13.5px]"
+              autoComplete="off"
+              enterKeyHint="search"
+            />
+            {draftQ ? (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="flex shrink-0 text-app-text-muted hover:text-app-text-secondary"
+                aria-label="Clear search"
+              >
+                <X className="size-3.5" />
+              </button>
+            ) : null}
+          </div>
+        </form>
+
         <FilterSegments
           params={params}
           counts={counts}
-          className="shrink-0"
-          buttonClassName="py-2 px-3.5 text-[12.5px]"
+          className="lg:shrink-0"
+          buttonClassName="flex-1 min-h-10 px-1 lg:flex-none lg:min-h-0 lg:py-2 lg:px-3.5 lg:text-[12.5px]"
         />
+
         <SortControl
           params={params}
           onSortChange={(sort) => navigate({ sort, page: 1 })}
           onToggleDir={() => navigate({ dir: params.dir === 'asc' ? 'desc' : 'asc', page: 1 })}
-          className="ml-auto shrink-0 pl-3 text-[12.5px]"
-          selectClassName="py-2"
-          dirButtonClassName="min-w-[34px] py-2"
+          className="min-h-10 lg:ml-auto lg:min-h-0 lg:shrink-0 lg:pl-3 lg:text-[12.5px]"
+          selectClassName="py-2.5 lg:py-2"
+          dirButtonClassName="min-w-[42px] lg:min-w-[34px] lg:py-2"
         />
       </div>
     </div>
