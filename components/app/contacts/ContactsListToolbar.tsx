@@ -142,6 +142,7 @@ export function ContactsListToolbar({ params, counts }: ContactsListToolbarProps
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   /** q della navigazione in corso — evita che useEffect risovrascriva draftQ durante clear/digitazione. */
   const pendingNavQRef = useRef<string | null>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const navigate = useCallback(
     (patch: Partial<ContactsListParams>, replace = false) => {
@@ -209,6 +210,8 @@ export function ContactsListToolbar({ params, counts }: ContactsListToolbarProps
       debounceRef.current = null
     }
     commitSearch(draftQ, true)
+    // Chiude la tastiera virtuale su mobile (Invio e tap icona ricerca).
+    searchInputRef.current?.blur()
   }
 
   const clearSearch = () => {
@@ -231,8 +234,15 @@ export function ContactsListToolbar({ params, counts }: ContactsListToolbarProps
           className="w-full lg:max-w-[340px] lg:shrink-0 lg:flex-1"
         >
           <div className="flex h-10 items-center gap-2 rounded-[10px] border border-app-border bg-app-surface px-3">
-            <Search className="size-4 shrink-0 text-app-text-muted" aria-hidden />
+            <button
+              type="submit"
+              className="flex shrink-0 text-app-text-muted"
+              aria-label="Search"
+            >
+              <Search className="size-4" aria-hidden />
+            </button>
             <input
+              ref={searchInputRef}
               type="text"
               name="q"
               value={draftQ}

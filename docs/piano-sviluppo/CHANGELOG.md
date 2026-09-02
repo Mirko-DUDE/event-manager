@@ -27,7 +27,13 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 - **Fase 9 § Passo 0–3 — Homepage pubblica `/`**: `app/(frontend)/page.tsx` sostituisce il placeholder Next.js con eyebrow «Event Manager», heading «Seleziona un'area», due bottoni `<Button asChild>` shadcn/ui: «Event Manager App» (`variant="default"`, colore `--de-blue` `#053643`) → `/app` e «Admin» (`variant="outline"`, bordo `--de-azure` `#00698F`) → `/admin`. Token `--de-blue`/`--de-azure`/`--de-black`/`--de-white`/`--de-muted` in `page.module.css` (namespace separato da Area App e biglietto). Mockup di riferimento: `docs/design/ticket-mockups/mockup-homepage.html`.
 
+### Fixed
+
+- **Ricerca contatti — chiusura tastiera mobile su Invio/tap ricerca**: in `ContactsListToolbar`, Invio e tap sull'icona Search passano entrambi dal submit del `<form>` (`preventDefault` già presente, nessun reload). Dopo `commitSearch` viene chiamato `blur()` sull'input via ref, così la tastiera virtuale si chiude. Digitazione con debounce invariata (tastiera resta aperta). L'icona Search, prima solo decorativa, è ora `type="submit"` per unificare i due gesti. Debounce, soglia minima caratteri e clear/reset non toccati.
+
 ### Changed
+
+- **Copy disclaimer biglietto (2026-09-02)**: da due frasi (`This ticket is personal and non-transferable.` / `Valid for one entry only.`) a una sola, identica in email (`renderTicketEmail.ts`) e pagina `/ticket/[qrToken]`: `This ticket is personal, non-transferable, and valid for one entry only.` Allineato `fase-8-contenuti-evento.md` §4/§5. I mockup in `docs/design/ticket-mockups/` non contengono questa copy (aggiunta in fine-tuning 2026-08-21, dopo i mockup) e non sono stati modificati. Le email già inviate restano invariate.
 
 - **`maxPoolSize` MongoDB esplicito (100) — post-audit connessioni Atlas (2026-09-02)**: in `payload.config.ts`, `mongooseAdapter` passa `connectOptions: { maxPoolSize: 100 }` — valore invariato rispetto al default implicito di Mongoose/driver MongoDB (`mongodb@6.20.0`), mai configurato prima; `DATABASE_URL` in Secret Manager senza override in query string. Decisione tracciata per non dipendere da default silenzioso di libreria. Dimensionamento: max 4 istanze Cloud Run × 100 = 400 connessioni teoriche vs tetto Atlas Flex 500 (~20% margine per script operativi concorrenti). Audit e analisi picco post-invio ticket (~2600 contatti) confermano 100 adeguato senza riduzione. Doc in `fase-3-deploy.md` § 3.2.
 
@@ -42,6 +48,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **Fase 9 § CSS bleed client-side (2026-08-20)**: `(frontend)/layout.tsx` importa `app/(app)/app.css` (stesso foglio del layout `(app)`) per eliminare alla radice la differenza di aspetto causata dal bleed CSS durante la navigazione client-side di Next.js — con CSS base diversi tra route group, una pagina appare diversamente a seconda dell'ordine di visita. `globals.css` rimosso da `(frontend)` (conteneva `body { display: flex }` e variabili `:root` che rompevano `/admin` e `/app` durante la navigazione client-side). Bottoni con specificità CSS doppia (`.btnDefault.btnDefault`, `0-2-0`) per sovrascrivere in modo affidabile le utility Tailwind a specificità singola iniettate da `app.css`.
 
 ### Tests
+
+- **Fix ricerca contatti + copy disclaimer (2026-09-02)**: `pnpm exec tsc --noEmit` OK; `pnpm lint` OK (solo warning preesistenti). Disclaimer: stringa identica byte-per-byte nei due punti di codice; nessun'altra occorrenza nel repo (mockup esclusi, non la contenevano). Wrap: paragrafo unico senza `<br />` forzato, `text-align:center`, 13px Archivo Black uppercase — su card pagina 420px (margini 16px → ~388px) e email (tabella 100% sotto card 480px) va a capo su ~2 righe come il layout precedente a due frasi; nessun overflow orizzontale atteso. Verifica runtime tastiera mobile e pagina ticket con token reale — da confermare in test dev.
 
 - **`maxPoolSize` MongoDB esplicito — validazione (2026-09-02)**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK (solo warning preesistenti); avvio locale senza errori Mongoose (`/admin/login`, `/app/login` 200). Comportamento runtime invariato (stesso valore del default precedente).
 

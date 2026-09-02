@@ -19,8 +19,8 @@ const TICKET_MAPS_URL = 'https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6'
 const TICKET_DATE = 'Thursday, September 10'
 const TICKET_ADDRESS = 'Via Argelati 33, Milano'
 const TICKET_TIME = 'From 7 PM'
-const TICKET_DISCLAIMER_LINE_1 = 'This ticket is personal and non-transferable.'
-const TICKET_DISCLAIMER_LINE_2 = 'Valid for one entry only.'
+const TICKET_DISCLAIMER =
+  'This ticket is personal, non-transferable, and valid for one entry only.'
 
 type PageProps = {
   params: Promise<{ qrToken: string }>
@@ -149,9 +149,7 @@ export default async function PublicTicketPage({ params }: PageProps) {
         </div>
         </div>
         <p className={styles.ticketDisclaimer}>
-          {TICKET_DISCLAIMER_LINE_1}
-          <br />
-          {TICKET_DISCLAIMER_LINE_2}
+          {TICKET_DISCLAIMER}
         </p>
       </main>
     </div>

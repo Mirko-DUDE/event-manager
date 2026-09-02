@@ -69,6 +69,7 @@ Motivazione: il contenuto guest-facing è specifico dell'evento (già deciso: la
 - Headline: `This is your official adult certification.`
 - Subheadline: `Use it to enter the party.`
 - Footer: `Via Argelati 33, Milano` (collegato a Google Maps, vedi sotto) / `Thursday, September 10` / `From 7 PM`
+- Disclaimer (sotto la card, prima del link backup QR): `This ticket is personal, non-transferable, and valid for one entry only.`
 
 **Link indirizzo → Google Maps**: `https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6` sull'indirizzo nel footer. Note tecniche per l'implementazione:
 - Stile del link (niente sottolineatura/colore blu di default) va impostato **inline sul tag `<a>`** (`style="color:#000000; text-decoration:none;"`), non in un blocco `<style>`/classe — molti client email ignorano/strippano gli stili non inline sui link.
@@ -95,6 +96,8 @@ Stessa identità visiva dell'email, come pagina web (CSS moderno consentito, non
 **Titolo pagina** (`<title>` / Open Graph, ticket valido): `DUDEHUB - This is your ticket` (fisso, senza nome ospite — decisione 2026-08-20). Lo stato errore mantiene titolo bilingue di sistema (§2).
 
 **Nome e cognome ospite**: stessa posizione dell'email, subito prima della headline (§4) — non più sotto il QR come nella prima bozza del mockup pagina. Soddisfa il requisito di `fase-6-invio-ticket.md` §2.2 ("contenuto minimo: nome e cognome").
+
+**Disclaimer** (sotto la cornice, bianco su nero — stesso testo di §4): `This ticket is personal, non-transferable, and valid for one entry only.`
 
 **Indirizzo → Google Maps**: stesso link di §4, stile inline analogo (qui senza le complicazioni email-specifiche: è una pagina web normale, `text-decoration:none` in CSS è sufficiente e affidabile in browser).
 

@@ -11,8 +11,8 @@ const TICKET_MAPS_URL = 'https://maps.app.goo.gl/XTiPjJj2ZUdWqDgv6'
 const TICKET_DATE = 'Thursday, September 10'
 const TICKET_ADDRESS = 'Via Argelati 33, Milano'
 const TICKET_TIME = 'From 7 PM'
-const TICKET_DISCLAIMER_LINE_1 = 'This ticket is personal and non-transferable.'
-const TICKET_DISCLAIMER_LINE_2 = 'Valid for one entry only.'
+const TICKET_DISCLAIMER =
+  'This ticket is personal, non-transferable, and valid for one entry only.'
 const TICKET_EMAIL_SUBJECT = 'DUDEHUB - This is your ticket'
 
 const DISPLAY_FONT =
@@ -46,8 +46,7 @@ ${TICKET_DATE}
 ${TICKET_TIME}
 ${TICKET_MAPS_URL}
 
-${TICKET_DISCLAIMER_LINE_1}
-${TICKET_DISCLAIMER_LINE_2}
+${TICKET_DISCLAIMER}
 
 Trouble seeing the QR code?
 Open your ticket here:
@@ -133,8 +132,7 @@ ${publicTicketUrl}
           <tr>
             <td align="center" style="padding:24px 16px 4px 16px;">
               <p style="margin:0; color:#FFFFFF; font-family:${DISPLAY_FONT}; font-size:13px; line-height:1.5; font-weight:900; letter-spacing:0.3px; text-transform:uppercase;">
-                ${escapeHtml(TICKET_DISCLAIMER_LINE_1)}<br />
-                ${escapeHtml(TICKET_DISCLAIMER_LINE_2)}
+                ${escapeHtml(TICKET_DISCLAIMER)}
               </p>
             </td>
           </tr>
