@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 
 import {
   buildContactsListHref,
+  normalizeContactsSearchQuery,
   type ContactsListCounts,
   type ContactsListParams,
 } from '@/lib/app/contactsListQuery'
@@ -178,7 +179,7 @@ export function ContactsListToolbar({ params, counts }: ContactsListToolbarProps
 
   const commitSearch = useCallback(
     (rawQ: string, replace = true) => {
-      const q = rawQ.trim()
+      const q = normalizeContactsSearchQuery(rawQ)
       pendingNavQRef.current = q
       navigate({ q, page: 1 }, replace)
     },

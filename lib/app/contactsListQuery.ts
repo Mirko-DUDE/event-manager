@@ -2,6 +2,16 @@ import type { Where } from 'payload'
 
 export const CONTACTS_PAGE_SIZE = 20
 
+/** Sotto questa lunghezza (dopo trim) la ricerca testuale è trattata come assente. */
+export const MIN_SEARCH_QUERY_LENGTH = 2
+
+/** Normalizza `q`: stringa vuota se sotto soglia minima — stesso effetto di ricerca disattiva. */
+export function normalizeContactsSearchQuery(q: string): string {
+  const trimmed = q.trim()
+  if (trimmed.length < MIN_SEARCH_QUERY_LENGTH) return ''
+  return trimmed
+}
+
 export type ContactsCheckInFilter = 'all' | 'checked-in' | 'not-checked-in'
 export type ContactsSortField = 'firstName' | 'lastName'
 export type ContactsSortDir = 'asc' | 'desc'
@@ -110,14 +120,14 @@ const ACTIVE_WHERE: Where = {
 }
 
 function buildTextSearchWhere(q: string): Where | null {
-  const trimmed = q.trim()
-  if (!trimmed) return null
+  const normalized = normalizeContactsSearchQuery(q)
+  if (!normalized) return null
 
   return {
     or: [
-      { firstName: { contains: trimmed } },
-      { lastName: { contains: trimmed } },
-      { email: { contains: trimmed } },
+      { firstName: { contains: normalized } },
+      { lastName: { contains: normalized } },
+      { email: { contains: normalized } },
     ],
   }
 }

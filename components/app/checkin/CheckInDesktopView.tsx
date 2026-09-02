@@ -7,7 +7,7 @@ import { ContactDetailOverlay } from '@/components/app/contacts/ContactDetailOve
 import { CheckInPill } from '@/components/app/contacts/CheckInPill'
 import { ContactAvatar } from '@/components/app/contacts/ContactAvatar'
 import type { ContactOverlayData } from '@/lib/app/buildContactOverlayData'
-import { parseContactsListParams } from '@/lib/app/contactsListQuery'
+import { normalizeContactsSearchQuery, parseContactsListParams } from '@/lib/app/contactsListQuery'
 import { loadCheckInContactOverlay } from '@/lib/contacts/loadCheckInContactOverlay'
 import {
   searchCheckInGuests,
@@ -29,14 +29,14 @@ export function CheckInDesktopView({ canResend, canUndoCheckIn }: CheckInDesktop
   const [loadPending, startLoadTransition] = useTransition()
 
   useEffect(() => {
-    const trimmed = query.trim()
-    if (!trimmed) {
+    const q = normalizeContactsSearchQuery(query)
+    if (!q) {
       return
     }
 
     const timer = window.setTimeout(() => {
       startSearchTransition(async () => {
-        const result = await searchCheckInGuests(trimmed)
+        const result = await searchCheckInGuests(q)
         if (result.ok) {
           setResults(result.results)
         } else {
@@ -50,7 +50,7 @@ export function CheckInDesktopView({ canResend, canUndoCheckIn }: CheckInDesktop
 
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value)
-    if (!value.trim()) {
+    if (!normalizeContactsSearchQuery(value)) {
       setResults([])
     }
   }, [])
@@ -73,6 +73,7 @@ export function CheckInDesktopView({ canResend, canUndoCheckIn }: CheckInDesktop
   }, [])
 
   const trimmedQuery = query.trim()
+  const searchActive = normalizeContactsSearchQuery(query).length > 0
 
   return (
     <>
@@ -99,7 +100,7 @@ export function CheckInDesktopView({ canResend, canUndoCheckIn }: CheckInDesktop
           ) : null}
         </div>
 
-        {!trimmedQuery ? (
+        {!searchActive ? (
           <div className="mt-10 flex flex-col items-center gap-2.5 text-center text-[13px] text-app-text-muted">
             <Search className="size-8" aria-hidden />
             <p>Search for a guest by name or email to check them in manually.</p>

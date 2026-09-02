@@ -10,7 +10,7 @@ import {
   getContactEmail,
   getContactInitials,
 } from '@/lib/app/contactDisplay'
-import { buildContactsSearchWhere } from '@/lib/app/contactsListQuery'
+import { buildContactsSearchWhere, normalizeContactsSearchQuery } from '@/lib/app/contactsListQuery'
 import type { Contatti } from '@/payload-types'
 
 const SEARCH_LIMIT = 20
@@ -39,7 +39,7 @@ export async function searchCheckInGuests(query: string): Promise<SearchCheckInG
     return { ok: false, error: 'Access denied.' }
   }
 
-  const q = typeof query === 'string' ? query.trim() : ''
+  const q = normalizeContactsSearchQuery(typeof query === 'string' ? query : '')
   if (!q) {
     return { ok: true, results: [] }
   }

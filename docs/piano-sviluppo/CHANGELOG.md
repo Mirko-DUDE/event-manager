@@ -77,6 +77,14 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 - **Fase 8 § Passo 3 — Validazione codice (2026-08-20)**: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build` OK (solo warning preesistenti). Stato errore pagina verificato via dev (`/ticket/invalid-token-test`); CSS compilato con valori aggiornati. Verifica pagina mobile/desktop (entrambi gli stati) — OK 2026-08-21. Test umano invio email multi-client — **non chiuso** (§9 fase-8).
 
+### Changed
+
+- **Fase 7 § Passo 4 — Ottimizzazione ricerca contatti (2026-09-02)**: soglia minima `MIN_SEARCH_QUERY_LENGTH = 2` in `buildTextSearchWhere` (`normalizeContactsSearchQuery`) — sotto soglia, ricerca testuale disattiva (equivalente a `q` vuota); difesa client su `ContactsListToolbar` e `CheckInDesktopView`. Conteggi segmentati All/IN unificati in un solo round-trip Mongo (`$facet` via driver, `loadContactsSegmentCounts`); cache `unstable_cache` 60s invariata.
+
+### Tests
+
+- **Fase 7 § Passo 4 — Ottimizzazione ricerca contatti (2026-09-02)**: `pnpm exec tsc --noEmit`, `pnpm lint` OK.
+
 ### Fixed
 
 - **Fase 7 § Passo 4/5 — Performance ricerca/lista/scheda contatto (2026-09-02)**: ricerca `/app/contatti` con debounce 350ms e input controllato (`draftQ`); clear/X con feedback immediato e `router.replace`; un solo input DOM (fix ref mobile/desktop); sync `params.q` non sovrascrive clear/digitazione in corso. Conteggi segmentati All/IN in `unstable_cache` (chiave `q`, revalidate 60s) — paginazione/sort non ricalcolano i due count. `getAuthenticatedAppUser` wrappato con `React.cache()` per dedup per-request (layout + page + gate).
