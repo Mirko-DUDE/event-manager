@@ -85,8 +85,8 @@ Il mockup (`app-lista-contatti.html` / `-desktop.html`) va **replicato esattamen
 - Email e Telefono: opzionali singolarmente, ma se **entrambi** vuoti al submit → warning bloccante ("Please provide at least an email or a phone number...").
 - Email duplicata → blocco con messaggio inline, nessun nuovo record.
 - Soft-match nome+cognome (stesso nome, email diversa) → banner di warning con doppia conferma esplicita.
-- Layout: una colonna su mobile, due colonne su desktop (Nome+Cognome, Email+Telefono, Company+Category).
-- **Category**: opzionale, stessi valori già sincronizzati da HubSpot (stesso set noto usato per `dudeCompany` in §2.3 — verificare l'elenco esatto sullo schema `contatti.category` al momento dell'implementazione; nessun nuovo vincolo introdotto).
+- Layout: una colonna su mobile, due colonne su desktop (Nome+Cognome, Email+Telefono); DUDE Company e Assegnazione a larghezza ridotta su desktop.
+- **Category**: non presente nel form Wildcard (2026-09-03) — il contatto nasce senza categoria; valorizzazione solo in Admin se necessaria. In lista «Your wildcards so far» la colonna Category mostra `—` finché assente.
 
 **Thank-you page** (dopo insert riuscito, non si torna direttamente alla vista principale):
 - Email **e** telefono presenti → bottoni WhatsApp **e** Email (§2.4, invio già reale).

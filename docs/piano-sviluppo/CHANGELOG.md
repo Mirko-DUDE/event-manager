@@ -35,6 +35,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Changed
 
+- **Form Wildcard — Category nascosta (2026-09-03)**: rimosso il select Category da `WildcardInsertForm`; insert senza `category` (record senza categoria finché non impostata in Admin). Doc aggiornata in `wildcard-insert.md`, `fase-7-area-app-ui.md` §2.6, `fix-mobile-iphone.md`. Mockup HTML in `docs/design/app-mockups/app-wildcard*.html` non aggiornati (riferimento storico pre-modifica).
+
 - **Copy disclaimer biglietto (2026-09-02)**: da due frasi (`This ticket is personal and non-transferable.` / `Valid for one entry only.`) a una sola, identica in email (`renderTicketEmail.ts`) e pagina `/ticket/[qrToken]`: `This ticket is personal, non-transferable, and valid for one entry only.` Allineato `fase-8-contenuti-evento.md` §4/§5. I mockup in `docs/design/ticket-mockups/` non contengono questa copy (aggiunta in fine-tuning 2026-08-21, dopo i mockup) e non sono stati modificati. Le email già inviate restano invariate.
 
 - **`maxPoolSize` MongoDB esplicito (100) — post-audit connessioni Atlas (2026-09-02)**: in `payload.config.ts`, `mongooseAdapter` passa `connectOptions: { maxPoolSize: 100 }` — valore invariato rispetto al default implicito di Mongoose/driver MongoDB (`mongodb@6.20.0`), mai configurato prima; `DATABASE_URL` in Secret Manager senza override in query string. Decisione tracciata per non dipendere da default silenzioso di libreria. Dimensionamento: max 4 istanze Cloud Run × 100 = 400 connessioni teoriche vs tetto Atlas Flex 500 (~20% margine per script operativi concorrenti). Audit e analisi picco post-invio ticket (~2600 contatti) confermano 100 adeguato senza riduzione. Doc in `fase-3-deploy.md` § 3.2.

@@ -22,8 +22,9 @@ Documento per **chi usa l’Area App** (manager / full-access) e per chi verific
 | Email | No* | *Al submit serve **email oppure telefono** (almeno uno) — vedi validazione sotto. |
 | Phone | No* | Salvato sul contatto; abilita il bottone WhatsApp in thank-you. **Non** precompila il link WhatsApp con questo numero. |
 | DUDE Company | No | Select valori HubSpot |
-| Category | No | Select enum contatti |
 | Assegnazione | — | Read-only, derivata dalla parte locale della tua email (prima della `@`) |
+
+**Category** non è nel form Wildcard: il contatto viene creato senza categoria; se serve, va impostata in Admin o resta vuota (in lista Wildcard compare `—`).
 
 **Validazione client (blocco prima del server)**:
 - Nome e cognome obbligatori.
@@ -115,7 +116,7 @@ Riferimenti storici: `analisi-vecchi-progetti-wa-wildcard.md`, `fase-6-invio-tic
 | Email assente sull’input | Ammesso se c’è telefono |
 | Telefono assente sull’input | Ammesso se c’è email |
 | Entrambi assenti | Blocco lato form (client) |
-| Category fuori enum | Normalizzata a `Needs Review` (select UI usa solo enum) |
+| Category | Non richiesta in insert Wildcard; assente sul record finché non valorizzata in Admin |
 | Manager quota esaurita | Create disabilitato in UI; server → `quotaEsaurita` |
 
 ---

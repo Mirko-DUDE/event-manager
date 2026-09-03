@@ -6,7 +6,6 @@ import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { CONTACT_CATEGORY_VALUES } from '@/lib/contacts/category'
 import { DUDE_COMPANY_VALUES } from '@/lib/contacts/dudeCompany'
 import {
   executeWildcardInsert,
@@ -22,7 +21,6 @@ type FormFields = {
   email: string
   telefono: string
   dudeCompany: string
-  category: string
 }
 
 const EMPTY_FORM: FormFields = {
@@ -31,7 +29,6 @@ const EMPTY_FORM: FormFields = {
   email: '',
   telefono: '',
   dudeCompany: '',
-  category: '',
 }
 
 type FieldErrors = {
@@ -168,7 +165,6 @@ export function WildcardInsertForm({ assegnazione, onBack, onSuccess }: Wildcard
         email: form.email || undefined,
         telefono: form.telefono || undefined,
         dudeCompany: form.dudeCompany || undefined,
-        category: form.category || undefined,
         confermaSoftMatch,
       })
       handleResult(response)
@@ -293,44 +289,23 @@ export function WildcardInsertForm({ assegnazione, onBack, onSuccess }: Wildcard
             </div>
           ) : null}
 
-          <div className="grid gap-3.5 lg:grid-cols-2 lg:gap-4">
-            <div>
-              <Label className="mb-1 block text-xs font-semibold text-app-text-secondary">
-                DUDE Company
-              </Label>
-              <select
-                name="dudeCompany"
-                value={form.dudeCompany}
-                onChange={(event) => updateField('dudeCompany', event.target.value)}
-                className={selectClass()}
-              >
-                <option value="">Select…</option>
-                {DUDE_COMPANY_VALUES.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <Label className="mb-1 block text-xs font-semibold text-app-text-secondary">
-                Category <span className="font-normal text-app-text-muted">(optional)</span>
-              </Label>
-              <select
-                name="category"
-                value={form.category}
-                onChange={(event) => updateField('category', event.target.value)}
-                className={selectClass()}
-              >
-                <option value="">Select…</option>
-                {CONTACT_CATEGORY_VALUES.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="lg:max-w-[260px]">
+            <Label className="mb-1 block text-xs font-semibold text-app-text-secondary">
+              DUDE Company
+            </Label>
+            <select
+              name="dudeCompany"
+              value={form.dudeCompany}
+              onChange={(event) => updateField('dudeCompany', event.target.value)}
+              className={selectClass()}
+            >
+              <option value="">Select…</option>
+              {DUDE_COMPANY_VALUES.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="lg:max-w-[260px]">

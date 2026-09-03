@@ -48,7 +48,7 @@
 
 **Superfici da controllare**:
 - Filtro segmentato All / NOT / IN in `/app/contatti`
-- Select DUDE Company / Category nel form Wildcard (`/app/wildcard`)
+- Select DUDE Company nel form Wildcard (`/app/wildcard`)
 
 **Fix**: correggere padding/posizionamento sui trigger `Select` coinvolti.
 
