@@ -3,7 +3,10 @@
 import { Button } from '@payloadcms/ui'
 import { useCallback, useEffect, useState, type CSSProperties } from 'react'
 
-import { loadInviteCheckStats } from '@/lib/inviteCheck/statsActions'
+import {
+  exportDistinctInviteCheckEmailsCsv,
+  loadInviteCheckStats,
+} from '@/lib/inviteCheck/statsActions'
 
 function panelBoxStyle(): CSSProperties {
   return {
@@ -19,7 +22,9 @@ export default function StatsPanel() {
   const [total, setTotal] = useState<number | null>(null)
   const [unique, setUnique] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [exportError, setExportError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [exportLoading, setExportLoading] = useState(false)
 
   const applyStatsResult = useCallback(
     (result: Awaited<ReturnType<typeof loadInviteCheckStats>>) => {
@@ -44,6 +49,28 @@ export default function StatsPanel() {
     setLoading(false)
   }, [applyStatsResult])
 
+  const downloadCsv = useCallback(async () => {
+    setExportLoading(true)
+    setExportError(null)
+
+    const result = await exportDistinctInviteCheckEmailsCsv()
+    if (!result.ok) {
+      setExportError(result.error)
+      setExportLoading(false)
+      return
+    }
+
+    const blob = new Blob([result.csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = result.filename
+    link.click()
+    URL.revokeObjectURL(url)
+
+    setExportLoading(false)
+  }, [])
+
   useEffect(() => {
     let cancelled = false
 
@@ -66,7 +93,8 @@ export default function StatsPanel() {
         Conteggi da <code>POST /api/check-invite</code> con risposta{' '}
         <code>{'{ "invited": true }'}</code>. Ogni richiesta positiva aggiunge un record; il totale
         include i duplicati sulla stessa email. Elenco dettagliato: collection{' '}
-        <strong>Verifiche invito</strong> nel menu Sistema.
+        <strong>Verifiche invito</strong> nel menu Sistema. Il download CSV elenca le email
+        distinte presenti in database (include eventuali hit di test da sviluppo locale).
       </p>
 
       <div style={panelBoxStyle()}>
@@ -104,7 +132,17 @@ export default function StatsPanel() {
         )}
       </div>
 
-      <div style={{ marginTop: '1rem' }}>
+      {exportError && (
+        <p
+          className="field-description"
+          role="alert"
+          style={{ color: 'var(--theme-error-500)', margin: '1rem 0 0' }}
+        >
+          {exportError}
+        </p>
+      )}
+
+      <div style={{ marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
         <Button
           buttonStyle="secondary"
           disabled={loading}
@@ -112,6 +150,14 @@ export default function StatsPanel() {
           type="button"
         >
           {loading ? 'Aggiornamento…' : 'Aggiorna conteggi'}
+        </Button>
+        <Button
+          buttonStyle="secondary"
+          disabled={loading || exportLoading || unique === 0 || unique == null || Boolean(error)}
+          onClick={() => void downloadCsv()}
+          type="button"
+        >
+          {exportLoading ? 'Export in corso…' : 'Scarica CSV email univoche'}
         </Button>
       </div>
     </div>

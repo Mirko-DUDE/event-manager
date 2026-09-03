@@ -126,6 +126,7 @@ Due superfici complementari (gruppo sidebar **Sistema**, come Log attività):
 1. **Global `stats`** (label «Stats») — pannello UI read-only con conteggi calcolati al load (nessun campo business persistito sul Global):
    - **Totale**: numero di documenti in `inviteCheckSuccess` (`count`).
    - **Univoci**: numero di email distinte (`distinct` su `email`).
+   - **Download CSV**: bottone «Scarica CSV email univoche» — una colonna `email` (+ header), ordine alfabetico, deduplica via `distinct` su Mongo (stessa logica del conteggio univoci). Filename: `verifiche-invito-univoche-YYYY-MM-DD.csv`. L’export riflette tutto ciò che è in database, incluse verifiche di test da sviluppo locale (`curl` su `/api/check-invite`); non c’è pulizia automatica.
 2. **Collection `inviteCheckSuccess`** (label «Verifiche invito») — elenco read-only, colonne `email` + `timestamp` (stesso modello di consultazione di Log attività). Consente di verificare se una singola email (es. `mario@example.com`) è stata cercata e quante volte, riga per riga.
 
 Accesso: `admin` e `super-admin` (`hasAdminPanelAccess`). Create/update/delete disabilitati in Admin — scrittura solo via Local API con `overrideAccess` nella route `POST /api/check-invite`.
@@ -145,7 +146,7 @@ Comportamento allineato ad `activityLog` (vedi `docs/specifica-reset-contatti-lo
 | **Reset solo contatti** | **Non** viene toccata (sopravvive) |
 | **Reset generale** | **Hard delete** insieme a contatti, conflitti e log |
 
-Il riepilogo pre-conferma del Reset generale include anche il conteggio delle voci `inviteCheckSuccess`. Prima del Reset generale di fine evento, annotare fuori sistema anche totali/univoci se servono a fini operativi — come già previsto per `activityLog`.
+Il riepilogo pre-conferma del Reset generale include anche il conteggio delle voci `inviteCheckSuccess`. Prima del Reset generale di fine evento, annotare fuori sistema anche totali/univoci (o scaricare il CSV email univoche da **Stats**) se servono a fini operativi — come già previsto per `activityLog`.
 
 ## Test dev statistiche (2026-09-01)
 
@@ -156,3 +157,11 @@ Checklist eseguita in locale dopo implementazione:
 3. Admin → **Sistema → Stats**: conteggi **Totale** e **Email distinte** coerenti con i record (totale include richieste ripetute sulla stessa email; univoci no).
 
 Reset generale / solo contatti: non testati in questa sessione (perimetro documentato in `specifica-reset-contatti-log.md`).
+
+## Test dev export CSV (2026-09-03)
+
+Checklist eseguita in locale dopo implementazione download CSV:
+
+1. `curl` ripetuto su `POST /api/check-invite` con Bearer valido — più hit sulla stessa email + almeno un’email diversa → `{ "invited": true }` dove atteso.
+2. Admin → **Sistema → Stats** → «Scarica CSV email univoche»: file `verifiche-invito-univoche-YYYY-MM-DD.csv` con header `email` + una riga per email distinta (deduplica rispetto al totale), ordine alfabetico.
+3. Conteggi KPI coerenti con il numero di righe del CSV (univoci).

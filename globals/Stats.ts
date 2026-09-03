@@ -3,7 +3,7 @@ import type { GlobalConfig } from 'payload'
 import { hasAdminPanelAccess } from '../collections/users/access'
 
 /**
- * KPI check-invite (totale + univoci) — conteggi runtime, nessun campo business persistito.
+ * KPI check-invite (totale + univoci) + export CSV email distinte — runtime, nessun campo business persistito.
  * Dettaglio riga-per-riga: collection inviteCheckSuccess (Sistema).
  */
 export const Stats: GlobalConfig = {

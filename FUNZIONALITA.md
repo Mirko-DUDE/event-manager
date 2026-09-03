@@ -33,6 +33,8 @@ Ogni utente (collection `users`) ha **due campi di ruolo indipendenti**, non cum
 | Contatti | Lettura/Scrittura | Lettura/Scrittura |
 | Sync HubSpot / Import CSV | Lettura/Scrittura | Lettura/Scrittura |
 | Invio massivo ticket | Lettura/Scrittura | Lettura/Scrittura |
+| Log attività | Sola lettura | Sola lettura |
+| Stats / Verifiche invito | Sola lettura | Sola lettura |
 | Configurazione generale (domini autorizzati) | Sola lettura | Lettura/Scrittura |
 | Zona pericolosa (reset GDPR) | Vede il riepilogo, non può eseguire | Lettura/Scrittura (unico che può eseguire) |
 
@@ -97,12 +99,23 @@ Dallo stesso Global si avvia l'**invio massivo dei ticket** a tutti i contatti a
 
 La collection `activityLog`, in sola lettura da Admin, registra login/logout/accessi negati, sincronizzazioni, caricamenti CSV, inserimenti wildcard, invii ticket e check-in/annullamenti — con riferimento al contatto coinvolto dove applicabile.
 
-### 3.8 Zona pericolosa — reset GDPR
+### 3.8 Statistiche verifiche invito
+
+Ogni chiamata a `POST /api/check-invite` (§5.3) che restituisce `{ invited: true }` viene registrata automaticamente — **solo** gli esiti positivi, non le ricerche fallite né le risposte di errore. Non c'è deduplica: tre verifiche positive sulla stessa email producono tre record distinti (da cui la distinzione tra totale e univoci nei KPI).
+
+Due superfici complementari in Admin, gruppo **Sistema** (sola lettura per `admin` e `super-admin`):
+
+- **Stats** (Global): KPI calcolati al caricamento — **totale** verifiche riuscite e **email distinte** (univoci), con bottone per scaricare un CSV dell’elenco email univoche (colonna `email` + header, ordine alfabetico, filename `verifiche-invito-univoche-YYYY-MM-DD.csv`). L’export riflette tutto ciò che è in database, incluse verifiche di test da sviluppo locale.
+- **Verifiche invito** (collection): elenco riga per riga con email e timestamp di ogni hit positivo.
+
+Dettaglio operativo in `docs/operativo/check-invite.md`.
+
+### 3.9 Zona pericolosa — reset GDPR
 
 Una sezione dedicata (visibile a `admin`, eseguibile solo da `super-admin`) offre due azioni distinte, entrambe cancellazioni reali e irreversibili (l'unica eccezione al principio di soft-delete usato ovunque nel resto del progetto):
 
-- **Reset generale**: cancella contatti, conflitti d'importazione e l'intero log attività (compresi i log di login) — da usare a fine evento per la minimizzazione dati GDPR.
-- **Reset solo contatti**: cancella solo contatti e conflitti, log attività invariato — da usare per ripulire dati di test prima del go-live.
+- **Reset generale**: cancella contatti, conflitti d'importazione, l'intero log attività (compresi i log di login) **e le statistiche verifiche invito** (§3.8) — da usare a fine evento per la minimizzazione dati GDPR. Il riepilogo pre-conferma include anche il conteggio delle verifiche invito; se servono i KPI o l’elenco email univoche a fini operativi, annotarli fuori sistema o scaricare il CSV da **Stats** prima di procedere.
+- **Reset solo contatti**: cancella solo contatti e conflitti; log attività **e statistiche verifiche invito restano invariati** — da usare per ripulire dati di test prima del go-live.
 
 Entrambe richiedono di digitare una frase di conferma esatta (case-sensitive) dopo aver visto un riepilogo con i conteggi reali di cosa verrà eliminato, e sono bloccate se una sincronizzazione è in corso.
 
@@ -114,7 +127,7 @@ L'interfaccia operativa per lo staff durante l'evento, pensata mobile-first (sha
 
 ### 4.1 Contatti
 
-Lista di tutti i contatti attivi con ricerca testuale (nome/cognome/email), filtro per stato (tutti / check-in effettuato / non ancora) e ordinamento, paginata. Cliccando su un contatto si apre una scheda di dettaglio (bottom sheet su mobile, finestra modale su desktop) con tutti i suoi dati (nome, contatti, azienda, categoria, provenienza, stato check-in) e, in base al ruolo:
+Lista di tutti i contatti attivi con ricerca testuale (nome/cognome/email) — attiva solo da **2 caratteri** in su; sotto soglia la lista resta quella predefinita — filtro per stato (tutti / check-in effettuato / non ancora) e ordinamento, paginata. Cliccando su un contatto si apre una scheda di dettaglio (bottom sheet su mobile, finestra modale su desktop) con tutti i suoi dati (nome, contatti, azienda, categoria, provenienza, stato check-in) e, in base al ruolo:
 
 - **Check-in manuale**: chiunque abbia accesso alla shell può segnare l'ingresso di un ospite direttamente dalla scheda.
 - **Annulla check-in**: solo `full-access` — riporta il contatto a "non check-in" e lascia una traccia distinta nel log (l'evento originale di check-in resta comunque nello storico).
@@ -126,7 +139,7 @@ Permette a `manager` e `full-access` di accreditare al volo un ospite non ancora
 
 ### 4.3 Check-in
 
-Su mobile/tablet apre la fotocamera e scansiona il QR del biglietto (libreria `qr-scanner`); su desktop propone una ricerca manuale per nome/email al posto della fotocamera. In entrambi i casi la verifica del codice è di **sola lettura**: non registra nulla finché lo staff non conferma esplicitamente. Tre esiti possibili:
+Su mobile/tablet apre la fotocamera e scansiona il QR del biglietto (libreria `qr-scanner`); su desktop propone una ricerca manuale per nome/email al posto della fotocamera (stessa soglia minima di 2 caratteri della lista contatti). In entrambi i casi la verifica del codice è di **sola lettura**: non registra nulla finché lo staff non conferma esplicitamente. Tre esiti possibili:
 
 - **Codice valido, primo ingresso** → si apre la scheda del contatto con il bottone "Check in": la scrittura avviene solo al click.
 - **Già check-in** → un avviso dedicato mostra chi e quando, con la scelta di vedere comunque la scheda o continuare a scansionare.
@@ -142,7 +155,7 @@ Nessuna autenticazione richiesta. Comprende tre superfici:
 
 ### 5.1 Homepage (`/`)
 
-Vetrina generica di ingresso al dominio pubblico dell'applicazione. Design ancora da definire (sessione dedicata non ancora tenuta) — oggi in stile neutro, non eredita il tono della eventuale landing page dedicata all'evento (che vive fuori da questo repository).
+Pagina di ingresso al dominio pubblico dell'applicazione: identità corporate dude.it (palette blue/azure, stile neutro SaaS), **non** il tono party del biglietto né della landing page dedicata all'evento (che vive fuori da questo repository). Contenuto minimo — eyebrow «Event Manager», titolo «Seleziona un'area», due bottoni della stessa larghezza verso **Event Manager App** (`/app`) e **Admin** (`/admin`). Nessuna autenticazione: l'auth è gestita dalle rispettive aree di destinazione.
 
 ### 5.2 Pagina biglietto (`/ticket/[qrToken]`)
 
@@ -150,9 +163,7 @@ Il biglietto vero e proprio, raggiungibile dal link contenuto nell'email o condi
 
 ### 5.3 Verifica invito (`POST /api/check-invite`)
 
-Un endpoint server-to-server, non un'interfaccia visibile: pensato per essere chiamato dalla landing page esterna dell'evento (un progetto separato) per sapere, dato un indirizzo email, se la persona è tra gli invitati — senza restituire nessun altro dato del contatto. Richiede una chiave API (gestita in Admin, §3.5) e applica un limite di richieste per indirizzo IP per contrastare tentativi di enumerazione.
-
-In Admin (**Sistema**): il Global **Stats** mostra quante verifiche hanno avuto esito positivo (totale e email distinte); la collection **Verifiche invito** elenca ogni hit con email e timestamp. Dettaglio operativo in `docs/operativo/check-invite.md`.
+Un endpoint server-to-server, non un'interfaccia visibile: pensato per essere chiamato dalla landing page esterna dell'evento (un progetto separato) per sapere, dato un indirizzo email, se la persona è tra gli invitati — senza restituire nessun altro dato del contatto. Richiede una chiave API (gestita in Admin, §3.5) e applica un limite di richieste per indirizzo IP per contrastare tentativi di enumerazione. Le verifiche con esito positivo sono tracciate in Admin (§3.8).
 
 ---
 
@@ -166,7 +177,7 @@ Il ciclo del ticket attraversa tutte e tre le aree ed è utile vederlo per inter
    - **Wildcard** (App): immediato, al click, subito dopo l'inserimento.
    - **Reinvio singolo** (App, Contatti): manuale, riservato a manager/full-access.
    - **Invio massivo** (Admin): verso tutti i contatti attivi con email, a lotti.
-   L'email arriva con il QR come immagine incorporata (non come link) più un link di backup alla pagina pubblica; i contenuti sono bilingue italiano/inglese. Un quarto "canale", la condivisione WhatsApp, non è un invio automatico: apre semplicemente l'app di messaggistica con un link precompilato al biglietto pubblico, così funziona anche per chi non ha un'email.
+   L'email arriva con il QR come immagine incorporata (non come link) più un link di backup alla pagina pubblica. Il **contenuto guest-facing** (copy e grafica del biglietto in email e pagina pubblica) è **per-evento**: per l'evento in corso è mono-lingua inglese; un evento futuro può scegliere altra lingua o formato. I **messaggi di sistema** (es. token non valido/scaduto) restano sempre bilingue italiano/inglese, con grafica neutra indipendente dal branding dell'evento. Un quarto "canale", la condivisione WhatsApp, non è un invio automatico: apre semplicemente l'app di messaggistica con un link precompilato al biglietto pubblico, così funziona anche per chi non ha un'email.
 4. **Check-in**: allo scanner o alla ricerca manuale corrisponde sempre lo stesso identico meccanismo di scrittura, azionato solo dal bottone "Check in" nella scheda contatto — mai automaticamente dallo scan. Non dipende dalla scadenza della pagina pubblica: se l'organizzatore ha impostato una data di scadenza web, l'ingresso resta possibile finché il contatto non viene cancellato con il reset GDPR.
 
 Ogni passaggio rilevante (invio riuscito o bloccato, check-in, annullamento) lascia traccia nel log attività, consultabile da Admin.
@@ -175,4 +186,4 @@ Ogni passaggio rilevante (invio riuscito o bloccato, check-in, annullamento) las
 
 ## 7. Stato del progetto
 
-Al momento di questa scrittura: Fasi 1–6 e **10** (sicurezza area pubblica: indicizzazione, Referrer-Policy, scadenza pagina biglietto) completate; Fasi 7–9 in corso con verifiche umane residue (test device post deploy, email su client reali, homepage mobile/desktop). Per lo stato aggiornato e il dettaglio di ogni fase, fare riferimento a `docs/piano-sviluppo/00-piano-generale.md` e a `docs/piano-sviluppo/CHANGELOG.md`. Panoramica funzionale completa: questo file; analisi sicurezza/indicizzazione area pubblica: `docs/sicurezza-indicizzazione-area-pubblica.md`.
+Al momento di questa scrittura (2026-09-03): **tutte le fasi 1–10** del piano di sviluppo risultano completate — inclusi Area App UI (Fase 7), contenuti reali evento email/pagina ticket (Fase 8), homepage pubblica `/` (Fase 9) e sicurezza area pubblica (Fase 10: indicizzazione, Referrer-Policy, scadenza pagina biglietto). Per lo stato aggiornato e il dettaglio di ogni fase, fare riferimento a `docs/piano-sviluppo/00-piano-generale.md` e a `docs/piano-sviluppo/CHANGELOG.md`. Panoramica funzionale completa: questo file; analisi sicurezza/indicizzazione area pubblica: `docs/sicurezza-indicizzazione-area-pubblica.md`.
