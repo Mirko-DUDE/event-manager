@@ -14,6 +14,9 @@ const TICKET_TIME = 'From 7 PM'
 const TICKET_DISCLAIMER =
   'This ticket is personal, non-transferable, and valid for one entry only.'
 const TICKET_EMAIL_SUBJECT = 'DUDEHUB - This is your ticket'
+const TICKET_HEADLINE =
+  'CONGRATULATIONS! YOUR ADULT STATUS HAS BEEN VERIFIED.'
+const TICKET_SUBHEADLINE = 'SCAN TO ACCESS THE PARTY.'
 
 const DISPLAY_FONT =
   "'Archivo Black', 'Arial Black', Arial, Helvetica, sans-serif"
@@ -38,8 +41,8 @@ export function renderTicketEmail(args: {
 
   const text = `${fullName}
 
-This is your official adult certification.
-Use it to enter the party.
+${TICKET_HEADLINE}
+${TICKET_SUBHEADLINE}
 
 ${TICKET_ADDRESS}
 ${TICKET_DATE}
@@ -89,7 +92,7 @@ ${publicTicketUrl}
                 <tr>
                   <td align="center" style="padding:26px 28px 0 28px;">
                     <p style="margin:0; color:#FFFFFF; font-family:${DISPLAY_FONT}; font-size:26px; line-height:1.18; font-weight:900; letter-spacing:0.5px; text-transform:uppercase;">
-                      This is your official<br />adult certification.
+                      ${escapeHtml(TICKET_HEADLINE)}
                     </p>
                   </td>
                 </tr>
@@ -97,7 +100,7 @@ ${publicTicketUrl}
                 <tr>
                   <td align="center" style="padding:26px 28px 0 28px;">
                     <p style="margin:0; color:#FF9000; font-family:${DISPLAY_FONT}; font-size:22px; line-height:1.22; font-weight:900; letter-spacing:0.5px; text-transform:uppercase;">
-                      Use it to enter<br />the party.
+                      ${escapeHtml(TICKET_SUBHEADLINE)}
                     </p>
                   </td>
                 </tr>

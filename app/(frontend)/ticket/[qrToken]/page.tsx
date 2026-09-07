@@ -115,15 +115,9 @@ export default async function PublicTicketPage({ params }: PageProps) {
           />
           <p className={styles.guestName}>{fullName}</p>
           <p className={styles.headline}>
-            This is your official
-            <br />
-            adult certification.
+            CONGRATULATIONS! YOUR ADULT STATUS HAS BEEN VERIFIED.
           </p>
-          <p className={styles.subheadline}>
-            Use it to enter
-            <br />
-            the party.
-          </p>
+          <p className={styles.subheadline}>SCAN TO ACCESS THE PARTY.</p>
           <div className={styles.qrBox}>
             {/* data URI ammesso in pagina pubblica; vietato solo nell'email (Outlook). */}
             {/* eslint-disable-next-line @next/next/no-img-element */}

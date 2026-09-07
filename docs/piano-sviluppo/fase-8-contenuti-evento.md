@@ -66,8 +66,8 @@ Motivazione: il contenuto guest-facing è specifico dell'evento (già deciso: la
 - **Oggetto email**: `DUDEHUB - This is your ticket` (fisso, senza nome ospite — decisione 2026-08-20).
 - **Mittente** (`fromName`, solo flusso invio ticket): `DUDEHUB` — hardcoded in `sendTicket.ts`, non eredita `RESEND_FROM_NAME` né `defaultFromName` Payload (per-evento; le altre email di sistema restano su «Event Manager»).
 - Nome/cognome ospite: `{{firstName}} {{lastName}}` — riga discreta, subito prima della headline (decisione 2026-08-20, sostituisce l'ipotesi precedente "solo pagina, non email": ora appare **in entrambe le superfici**, stessa posizione). **Stile confermato**: stesso font display (Archivo Black) del resto del testo, colore accent `orange-500` (non testo muto grigio come nella prima bozza).
-- Headline: `This is your official adult certification.`
-- Subheadline: `Use it to enter the party.`
+- Headline: `CONGRATULATIONS! YOUR ADULT STATUS HAS BEEN VERIFIED.`
+- Subheadline: `SCAN TO ACCESS THE PARTY.`
 - Footer: `Via Argelati 33, Milano` (collegato a Google Maps, vedi sotto) / `Thursday, September 10` / `From 7 PM`
 - Disclaimer (sotto la card, prima del link backup QR): `This ticket is personal, non-transferable, and valid for one entry only.`
 

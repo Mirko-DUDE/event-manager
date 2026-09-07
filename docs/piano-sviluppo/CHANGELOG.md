@@ -35,6 +35,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Changed
 
+- **Copy biglietto — headline e subheadline (2026-09-07)**: headline da `This is your official adult certification.` a `CONGRATULATIONS! YOUR ADULT STATUS HAS BEEN VERIFIED.`; subheadline da `Use it to enter the party.` a `SCAN TO ACCESS THE PARTY.` — email (`renderTicketEmail.ts`) e pagina `/ticket/[qrToken]`. Allineati `fase-8-contenuti-evento.md` §4 e mockup ticket. Le email già inviate restano invariate.
+
 - **Form Wildcard — Category nascosta (2026-09-03)**: rimosso il select Category da `WildcardInsertForm`; insert senza `category` (record senza categoria finché non impostata in Admin). Doc aggiornata in `wildcard-insert.md`, `fase-7-area-app-ui.md` §2.6, `fix-mobile-iphone.md`. Mockup HTML in `docs/design/app-mockups/app-wildcard*.html` non aggiornati (riferimento storico pre-modifica).
 
 - **Copy disclaimer biglietto (2026-09-02)**: da due frasi (`This ticket is personal and non-transferable.` / `Valid for one entry only.`) a una sola, identica in email (`renderTicketEmail.ts`) e pagina `/ticket/[qrToken]`: `This ticket is personal, non-transferable, and valid for one entry only.` Allineato `fase-8-contenuti-evento.md` §4/§5. I mockup in `docs/design/ticket-mockups/` non contengono questa copy (aggiunta in fine-tuning 2026-08-21, dopo i mockup) e non sono stati modificati. Le email già inviate restano invariate.
