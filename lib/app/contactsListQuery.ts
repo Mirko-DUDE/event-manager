@@ -119,17 +119,75 @@ const ACTIVE_WHERE: Where = {
   attivo: { not_equals: false },
 }
 
+export type FullNameSearchPair = {
+  firstNamePart: string
+  lastNamePart: string
+}
+
+/** Escape metacharatteri regex — condiviso con match Mongo raw in loadContactsSegmentCounts. */
+export function escapeContactsSearchRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function collapseSearchWhitespace(q: string): string {
+  return q.trim().replace(/\s+/g, ' ')
+}
+
+function isSearchPartLongEnough(part: string): boolean {
+  return part.length >= MIN_SEARCH_QUERY_LENGTH
+}
+
+/**
+ * Coppie nome+cognome per query multi-parola (additivo rispetto al match sulla stringa intera).
+ * Primo spazio: sempre se ≥2 parole; ultimo spazio: solo se ≥3 parole (evita duplicato a 2 parole).
+ */
+export function parseFullNameSearchPairs(normalized: string): FullNameSearchPair[] {
+  const collapsed = collapseSearchWhitespace(normalized)
+  const wordCount = collapsed.split(' ').length
+  if (wordCount < 2) return []
+
+  const pairs: FullNameSearchPair[] = []
+  const seen = new Set<string>()
+
+  const addPair = (firstNamePart: string, lastNamePart: string) => {
+    if (!isSearchPartLongEnough(firstNamePart) || !isSearchPartLongEnough(lastNamePart)) return
+    const key = `${firstNamePart}\0${lastNamePart}`
+    if (seen.has(key)) return
+    seen.add(key)
+    pairs.push({ firstNamePart, lastNamePart })
+  }
+
+  const firstSpaceIdx = collapsed.indexOf(' ')
+  addPair(collapsed.slice(0, firstSpaceIdx), collapsed.slice(firstSpaceIdx + 1))
+
+  if (wordCount >= 3) {
+    const lastSpaceIdx = collapsed.lastIndexOf(' ')
+    addPair(collapsed.slice(0, lastSpaceIdx), collapsed.slice(lastSpaceIdx + 1))
+  }
+
+  return pairs
+}
+
 function buildTextSearchWhere(q: string): Where | null {
   const normalized = normalizeContactsSearchQuery(q)
   if (!normalized) return null
 
-  return {
-    or: [
-      { firstName: { contains: normalized } },
-      { lastName: { contains: normalized } },
-      { email: { contains: normalized } },
-    ],
+  const or: Where[] = [
+    { firstName: { contains: normalized } },
+    { lastName: { contains: normalized } },
+    { email: { contains: normalized } },
+  ]
+
+  for (const pair of parseFullNameSearchPairs(normalized)) {
+    or.push({
+      and: [
+        { firstName: { contains: pair.firstNamePart } },
+        { lastName: { contains: pair.lastNamePart } },
+      ],
+    })
   }
+
+  return { or }
 }
 
 function buildCheckInFilterWhere(filter: ContactsCheckInFilter): Where | null {

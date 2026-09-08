@@ -71,7 +71,7 @@ Nessuna decisione nuova qui — solo implementazione di quanto già deciso in `a
 
 Il mockup (`app-lista-contatti.html` / `-desktop.html`) va **replicato esattamente** per i controlli, non solo per le colonne — decisione confermata, non lasciata a discrezione:
 
-- **Ricerca testuale** (nome/cognome, come da mockup).
+- **Ricerca testuale** (nome/cognome/email singoli, oppure nome+cognome se la query contiene spazi — es. `"Mario Rossi"`, `"Mario de Rossi"`; additivo rispetto al match “contiene” su ciascun campo; dettaglio in § Passo 4).
 - **Filtro segmentato**: All / Checked in / Not checked in.
 - **Ordinamento**: campo + direzione, come da mockup.
 - Colonne mobile: nome/cognome, stato check-in essenziale. Colonne desktop aggiuntive: Email, Assegnazione (coerente con `preparazione-design-app.md`).
@@ -185,6 +185,7 @@ Vedi §2.3: campo telefono (+ verifica Admin), select `dudeCompany`, `assegnazio
   - **(c) MongoDB Atlas Search** (Lucene/`$search`): unica opzione che manterrebbe performance **e** UX substring-like (con index autocomplete/n-gram), ma effort e rischio più alti di tutte — bypass completo di Payload, aggregation pipeline dedicata, verifica di disponibilità/limiti sul tier Flex da fare in console Atlas (non verificabile da codice).
   - **(d1) Regex con prefisso ancorato (`^query`) su campo indicizzato**: semplice e Payload-friendly, ma cambia la UX a "inizia con" invece di "contiene".
   **Decisione da prendere quando si riprende in mano il debito**: la scelta tra (a)/(d1) e (c) dipende da un vincolo di prodotto non ancora deciso — se la ricerca deve restare "contiene ovunque" (di fatto obbliga verso (c), più costosa) o se è accettabile passare a "per parola"/"inizia con" (sblocca (a)/(d1), più semplici ed economiche). Non decidere questo punto implicitamente in fase di implementazione — richiede conferma esplicita con Mirko.
+- **Ricerca nome+cognome additiva (2026-09-08)**: estensione approvata di `buildTextSearchWhere` / `buildContactsSearchMongoMatch` — il comportamento esistente (`contains` OR su firstName/lastName/email sulla stringa intera) resta invariato; in più, se la query contiene spazi, si aggiungono rami AND nome+cognome in OR con i tre esistenti. Split **primo spazio** se ≥2 parole (es. `"Mario Rossi"` → firstName `"Mario"` + lastName `"Rossi"`); split **ultimo spazio** solo se ≥3 parole (es. `"Mario de Rossi"` → anche `"Mario de"` + `"Rossi"`). Ogni parte dello split deve rispettare `MIN_SEARCH_QUERY_LENGTH` (2). Spazi multipli normalizzati. Helper condiviso `parseFullNameSearchPairs` in `contactsListQuery.ts`. Vale per lista contatti e check-in desktop (`searchCheckInGuests`). **Non riapre** il debito motore di ricerca (indice `$text`, Atlas Search, ecc.) — resta su `contains`/regex.
 
 ### Passo 5 — Scheda contatto ✅
 - Componente bottom sheet (vaul) mobile / modale desktop, deep-link da `/app/contatti/[id]` (§2.7).

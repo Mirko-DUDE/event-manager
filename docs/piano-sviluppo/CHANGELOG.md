@@ -35,6 +35,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Changed
 
+- **Ricerca contatti — nome+cognome additivo (2026-09-08)**: query multi-parola (es. `"Mario Rossi"`, `"Mario de Rossi"`) matchano anche firstName+cognome via split primo spazio (≥2 parole) e ultimo spazio (≥3 parole), in OR con il comportamento esistente (`contains` su firstName/lastName/email sulla stringa intera). Ogni parte dello split rispetta `MIN_SEARCH_QUERY_LENGTH`. Helper `parseFullNameSearchPairs`; allineamento Payload (`buildTextSearchWhere`) e Mongo raw (`buildContactsSearchMongoMatch`). Lista `/app/contatti` e check-in desktop condividono la stessa logica. Motore di ricerca invariato (regex/`contains`, nessun indice `$text`).
+
 - **Copy biglietto — headline e subheadline (2026-09-07)**: headline da `This is your official adult certification.` a `CONGRATULATIONS! YOUR ADULT STATUS HAS BEEN VERIFIED.`; subheadline da `Use it to enter the party.` a `SCAN TO ACCESS THE PARTY.` — email (`renderTicketEmail.ts`) e pagina `/ticket/[qrToken]`. Allineati `fase-8-contenuti-evento.md` §4 e mockup ticket. Le email già inviate restano invariate.
 
 - **Form Wildcard — Category nascosta (2026-09-03)**: rimosso il select Category da `WildcardInsertForm`; insert senza `category` (record senza categoria finché non impostata in Admin). Doc aggiornata in `wildcard-insert.md`, `fase-7-area-app-ui.md` §2.6, `fix-mobile-iphone.md`. Mockup HTML in `docs/design/app-mockups/app-wildcard*.html` non aggiornati (riferimento storico pre-modifica).
@@ -54,6 +56,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **Fase 9 § CSS bleed client-side (2026-08-20)**: `(frontend)/layout.tsx` importa `app/(app)/app.css` (stesso foglio del layout `(app)`) per eliminare alla radice la differenza di aspetto causata dal bleed CSS durante la navigazione client-side di Next.js — con CSS base diversi tra route group, una pagina appare diversamente a seconda dell'ordine di visita. `globals.css` rimosso da `(frontend)` (conteneva `body { display: flex }` e variabili `:root` che rompevano `/admin` e `/app` durante la navigazione client-side). Bottoni con specificità CSS doppia (`.btnDefault.btnDefault`, `0-2-0`) per sovrascrivere in modo affidabile le utility Tailwind a specificità singola iniettate da `app.css`.
 
 ### Tests
+
+- **Ricerca contatti — nome+cognome additivo (2026-09-08)**: `pnpm exec tsc --noEmit`, `pnpm lint` OK (solo warning preesistenti). Test manuale locale OK. Test Cloud Run con `"Mario Rossi"` / `"Mario de Rossi"` sul dataset reale (~2800 contatti) — **da eseguire** (tempo di risposta percepito).
 
 - **Export CSV email univoche check-invite — test dev (2026-09-03)**: hit multipli sulla stessa email + email diversa via `curl` locale; download da Admin **Sistema → Stats** → CSV con header + righe deduplicate in ordine alfabetico, coerente con KPI univoci. Auth guard non testato in sessione (stesso pattern di `loadInviteCheckStats`).
 

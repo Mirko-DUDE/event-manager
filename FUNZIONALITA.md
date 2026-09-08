@@ -127,7 +127,7 @@ L'interfaccia operativa per lo staff durante l'evento, pensata mobile-first (sha
 
 ### 4.1 Contatti
 
-Lista di tutti i contatti attivi con ricerca testuale (nome/cognome/email) — attiva solo da **2 caratteri** in su; sotto soglia la lista resta quella predefinita — filtro per stato (tutti / check-in effettuato / non ancora) e ordinamento, paginata. Cliccando su un contatto si apre una scheda di dettaglio (bottom sheet su mobile, finestra modale su desktop) con tutti i suoi dati (nome, contatti, azienda, categoria, provenienza, stato check-in) e, in base al ruolo:
+Lista di tutti i contatti attivi con ricerca testuale — attiva solo da **2 caratteri** in su; sotto soglia la lista resta quella predefinita. La stringa digitata viene cercata (case-insensitive, “contiene”) in **nome, cognome ed email** singolarmente; se la query contiene **spazi** (es. `"Mario Rossi"`, `"Mario de Rossi"`), matcha anche la coppia nome+cognome (split sul primo spazio; con tre o più parole anche sull’ultimo, per cognomi composti). Filtro per stato (tutti / check-in effettuato / non ancora) e ordinamento, paginata. Cliccando su un contatto si apre una scheda di dettaglio (bottom sheet su mobile, finestra modale su desktop) con tutti i suoi dati (nome, contatti, azienda, categoria, provenienza, stato check-in) e, in base al ruolo:
 
 - **Check-in manuale**: chiunque abbia accesso alla shell può segnare l'ingresso di un ospite direttamente dalla scheda.
 - **Annulla check-in**: solo `full-access` — riporta il contatto a "non check-in" e lascia una traccia distinta nel log (l'evento originale di check-in resta comunque nello storico).
@@ -139,7 +139,7 @@ Permette a `manager` e `full-access` di accreditare al volo un ospite non ancora
 
 ### 4.3 Check-in
 
-Su mobile/tablet apre la fotocamera e scansiona il QR del biglietto (libreria `qr-scanner`); su desktop propone una ricerca manuale per nome/email al posto della fotocamera (stessa soglia minima di 2 caratteri della lista contatti). In entrambi i casi la verifica del codice è di **sola lettura**: non registra nulla finché lo staff non conferma esplicitamente. Tre esiti possibili:
+Su mobile/tablet apre la fotocamera e scansiona il QR del biglietto (libreria `qr-scanner`); su desktop propone una **ricerca manuale** con la **stessa logica** della lista contatti (nome/cognome/email singoli, oppure nome+cognome se la query contiene spazi; soglia minima 2 caratteri) al posto della fotocamera. In entrambi i casi la verifica del codice è di **sola lettura**: non registra nulla finché lo staff non conferma esplicitamente. Tre esiti possibili:
 
 - **Codice valido, primo ingresso** → si apre la scheda del contatto con il bottone "Check in": la scrittura avviene solo al click.
 - **Già check-in** → un avviso dedicato mostra chi e quando, con la scelta di vedere comunque la scheda o continuare a scansionare.

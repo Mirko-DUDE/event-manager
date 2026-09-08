@@ -2,7 +2,11 @@ import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 
 import config from '@payload-config'
-import { normalizeContactsSearchQuery } from '@/lib/app/contactsListQuery'
+import {
+  escapeContactsSearchRegex,
+  normalizeContactsSearchQuery,
+  parseFullNameSearchPairs,
+} from '@/lib/app/contactsListQuery'
 
 type ContactsSegmentCounts = {
   all: number
@@ -11,29 +15,31 @@ type ContactsSegmentCounts = {
 
 type MongoMatch = Record<string, unknown>
 
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
-/** Filtro MongoDB allineato a buildContactsSearchWhere (attivo + optional contains su 3 campi). */
+/** Filtro MongoDB allineato a buildTextSearchWhere (attivo + contains su 3 campi + nome+cognome). */
 function buildContactsSearchMongoMatch(q: string): MongoMatch {
   const normalized = normalizeContactsSearchQuery(q)
   if (!normalized) {
     return { attivo: { $ne: false } }
   }
 
-  const pattern = escapeRegex(normalized)
+  const pattern = escapeContactsSearchRegex(normalized)
+  const or: MongoMatch[] = [
+    { firstName: { $regex: pattern, $options: 'i' } },
+    { lastName: { $regex: pattern, $options: 'i' } },
+    { email: { $regex: pattern, $options: 'i' } },
+  ]
+
+  for (const pair of parseFullNameSearchPairs(normalized)) {
+    or.push({
+      $and: [
+        { firstName: { $regex: escapeContactsSearchRegex(pair.firstNamePart), $options: 'i' } },
+        { lastName: { $regex: escapeContactsSearchRegex(pair.lastNamePart), $options: 'i' } },
+      ],
+    })
+  }
+
   return {
-    $and: [
-      { attivo: { $ne: false } },
-      {
-        $or: [
-          { firstName: { $regex: pattern, $options: 'i' } },
-          { lastName: { $regex: pattern, $options: 'i' } },
-          { email: { $regex: pattern, $options: 'i' } },
-        ],
-      },
-    ],
+    $and: [{ attivo: { $ne: false } }, { $or: or }],
   }
 }
 
