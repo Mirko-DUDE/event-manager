@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Check, Mail } from 'lucide-react'
 
+import { PublicTicketLinkCopy } from '@/components/app/PublicTicketLinkCopy'
 import { WildcardQuotaBadge } from '@/components/app/wildcard/WildcardQuotaCard'
 import { Button } from '@/components/ui/button'
 import {
@@ -93,9 +94,14 @@ export function WildcardThankYou({ inserted, quotaInfo, onDone, onAddAnother }: 
 
       <WildcardQuotaBadge quotaInfo={quotaInfo} />
 
+      <PublicTicketLinkCopy
+        publicTicketUrl={inserted.publicTicketUrl}
+        className="mt-3 w-full self-start text-left"
+      />
+
       {canSend ? (
         <>
-          <p className="mt-3 w-full self-start text-left text-[11.5px] font-bold tracking-wide text-app-text-secondary uppercase">
+          <p className="mt-1 w-full self-start text-left text-[11.5px] font-bold tracking-wide text-app-text-secondary uppercase">
             Send ticket via
           </p>
           <div className="flex w-full gap-2">

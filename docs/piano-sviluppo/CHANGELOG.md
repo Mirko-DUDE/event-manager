@@ -23,6 +23,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 - **Scheda contatto — copia link pagina pubblica biglietto**: in `ContactResendPanel`, sopra i bottoni WhatsApp/Email, campo read-only con URL `{SERVER_URL}/ticket/{qrToken}` e bottone **Copy** (`navigator.clipboard` + toast `sonner`). Stessi permessi del resend (manager/full-access, contatto non check-in, `qrToken` presente). Nessuna modifica backend — riusa `publicTicketUrl` già calcolato in `buildContactOverlayData` / pagina contatto. Doc: `docs/operativo/contact-resend.md`.
 
+- **Wildcard thank-you — copia link pagina pubblica biglietto**: stesso componente `PublicTicketLinkCopy` sopra «Send ticket via»; riusa `publicTicketUrl` già restituito da `executeWildcardInsert`. Visibile sempre post-insert riuscito (utile anche senza email/telefono). Doc: `docs/operativo/wildcard-insert.md`.
+
 - **Export CSV email univoche da Global Stats (check-invite)**: Server Action `exportDistinctInviteCheckEmailsCsv` (`lib/inviteCheck/statsActions.ts`) con guard `hasAdminPanelAccess`; logica `distinct('email')` condivisa con i KPI in `getDistinctInviteCheckEmails` (`lib/inviteCheck/stats.ts`); bottone «Scarica CSV email univoche» in `StatsPanel` (Blob + download client-side). CSV v1: colonna `email` + header, ordine alfabetico, filename `verifiche-invito-univoche-YYYY-MM-DD.csv`. Doc in `check-invite.md` § «Dove consultare in Admin» e `FUNZIONALITA.md` §3.8.
 
 - **Statistiche check-invite**: collection `inviteCheckSuccess` (`collections/InviteCheckSuccess.ts`, Sistema, read-only Admin); scrittura in `POST /api/check-invite` via `logInviteCheckSuccess` (`lib/inviteCheck/logSuccess.ts`, `try/catch` + `payload.logger.error`); Global `stats` + `StatsPanel` (KPI totale/univoci, `loadInviteCheckStats`); reset generale esteso in `lib/contacts/reset.ts` e `ResetContattiELogPanel`. Decisione documentata in `docs/operativo/check-invite.md` § «Statistiche verifiche invito riuscite»; perimetro reset in `specifica-reset-contatti-log.md` / `reset-gdpr.md`.
@@ -35,11 +37,15 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 - **Scheda contatto — copia link biglietto (2026-09-09)**: `pnpm exec tsc --noEmit` OK; `pnpm lint --quiet` OK. Verifica runtime (manager/full-access, hostess, copy/incolla URL) — da confermare in test dev.
 
+- **Wildcard thank-you — copia link biglietto (2026-09-09)**: `pnpm exec tsc --noEmit` OK; `pnpm lint --quiet` OK. Verifica runtime post-insert Wildcard — da confermare in test dev.
+
 ### Fixed
 
 - **Ricerca contatti — chiusura tastiera mobile su Invio/tap ricerca**: in `ContactsListToolbar`, Invio e tap sull'icona Search passano entrambi dal submit del `<form>` (`preventDefault` già presente, nessun reload). Dopo `commitSearch` viene chiamato `blur()` sull'input via ref, così la tastiera virtuale si chiude. Digitazione con debounce invariata (tastiera resta aperta). L'icona Search, prima solo decorativa, è ora `type="submit"` per unificare i due gesti. Debounce, soglia minima caratteri e clear/reset non toccati.
 
 ### Changed
+
+- **Copia link biglietto — componente condiviso (2026-09-09)**: UI estratta in `PublicTicketLinkCopy.tsx`, riusata da `ContactResendPanel` e `WildcardThankYou` (comportamento invariato sulla scheda contatto).
 
 - **Ricerca contatti — nome+cognome additivo (2026-09-08)**: query multi-parola (es. `"Mario Rossi"`, `"Mario de Rossi"`) matchano anche firstName+cognome via split primo spazio (≥2 parole) e ultimo spazio (≥3 parole), in OR con il comportamento esistente (`contains` su firstName/lastName/email sulla stringa intera). Ogni parte dello split rispetta `MIN_SEARCH_QUERY_LENGTH`. Helper `parseFullNameSearchPairs`; allineamento Payload (`buildTextSearchWhere`) e Mongo raw (`buildContactsSearchMongoMatch`). Lista `/app/contatti` e check-in desktop condividono la stessa logica. Motore di ricerca invariato (regex/`contains`, nessun indice `$text`).
 

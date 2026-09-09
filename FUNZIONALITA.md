@@ -135,7 +135,7 @@ Lista di tutti i contatti attivi con ricerca testuale — attiva solo da **2 car
 
 ### 4.2 Wildcard
 
-Permette a `manager` e `full-access` di accreditare al volo un ospite non ancora presente nel sistema (es. arrivato senza invito preventivo). Il form richiede solo nome e cognome; email e telefono sono facoltativi singolarmente ma non entrambi vuoti insieme. Blocca l'inserimento se l'email esiste già, e avvisa (richiedendo doppia conferma) se nome e cognome coincidono con un contatto esistente diverso. `manager` ha una quota configurabile di inserimenti (mostrata in UI, bottone disabilitato a quota esaurita, nessun override); `full-access` è illimitato. Dopo l'inserimento, una pagina di ringraziamento propone i bottoni per inviare subito il biglietto via email e/o condividerlo su WhatsApp, a seconda di quali contatti sono disponibili.
+Permette a `manager` e `full-access` di accreditare al volo un ospite non ancora presente nel sistema (es. arrivato senza invito preventivo). Il form richiede solo nome e cognome; email e telefono sono facoltativi singolarmente ma non entrambi vuoti insieme. Blocca l'inserimento se l'email esiste già, e avvisa (richiedendo doppia conferma) se nome e cognome coincidono con un contatto esistente diverso. `manager` ha una quota configurabile di inserimenti (mostrata in UI, bottone disabilitato a quota esaurita, nessun override); `full-access` è illimitato. Dopo l'inserimento, una pagina di ringraziamento mostra il link pubblico del biglietto (copiabile negli appunti) e propone i bottoni per inviare subito il biglietto via email e/o condividerlo su WhatsApp, a seconda di quali contatti sono disponibili.
 
 ### 4.3 Check-in
 

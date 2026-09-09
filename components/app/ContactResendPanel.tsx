@@ -1,9 +1,9 @@
 'use client'
 
-import { useCallback, useState, useTransition } from 'react'
-import { Copy, Mail } from 'lucide-react'
-import { toast } from 'sonner'
+import { useState, useTransition } from 'react'
+import { Mail } from 'lucide-react'
 
+import { PublicTicketLinkCopy } from '@/components/app/PublicTicketLinkCopy'
 import { executeSendContactResendTicket } from '@/lib/contacts/contactResendActions'
 
 export type ContactResendPanelProps = {
@@ -56,7 +56,6 @@ export function ContactResendPanel({
   ticketInviatoAt,
 }: ContactResendPanelProps) {
   const [pending, startTransition] = useTransition()
-  const [copyPending, setCopyPending] = useState(false)
   const [sendMessage, setSendMessage] = useState<{
     tone: 'ok' | 'warn' | 'err'
     text: string
@@ -64,18 +63,6 @@ export function ContactResendPanel({
   const [emailSentOk, setEmailSentOk] = useState(false)
 
   const hasEmail = Boolean(email?.trim())
-
-  const copyTicketUrl = useCallback(async () => {
-    setCopyPending(true)
-    try {
-      await navigator.clipboard.writeText(publicTicketUrl)
-      toast.success('Link copied to clipboard.')
-    } catch {
-      toast.error('Could not copy to clipboard.')
-    } finally {
-      setCopyPending(false)
-    }
-  }, [publicTicketUrl])
 
   function sendEmail() {
     setSendMessage(null)
@@ -95,28 +82,7 @@ export function ContactResendPanel({
 
   return (
     <div className="space-y-2 pt-1">
-      <div className="space-y-1.5">
-        <p className="text-[11px] font-semibold text-app-text-muted">Public ticket link</p>
-        <div className="flex gap-1.5">
-          <input
-            type="text"
-            readOnly
-            value={publicTicketUrl}
-            aria-label="Public ticket page URL"
-            className="min-w-0 flex-1 truncate rounded-[10px] border border-app-border bg-app-bg px-2.5 py-2 text-[11px] font-medium text-app-text-secondary"
-            onFocus={(event) => event.target.select()}
-          />
-          <button
-            type="button"
-            disabled={copyPending}
-            onClick={() => void copyTicketUrl()}
-            className="flex shrink-0 items-center gap-1 rounded-[10px] border border-app-border bg-app-surface px-2.5 py-2 text-xs font-bold text-app-text-primary transition-colors hover:bg-app-bg disabled:opacity-60"
-          >
-            <Copy className="size-3.5" aria-hidden />
-            {copyPending ? '…' : 'Copy'}
-          </button>
-        </div>
-      </div>
+      <PublicTicketLinkCopy publicTicketUrl={publicTicketUrl} />
 
       <p className="text-[11px] font-semibold text-app-text-muted">Resend ticket</p>
 

@@ -93,6 +93,7 @@ Il mockup (`app-lista-contatti.html` / `-desktop.html`) va **replicato esattamen
 - Solo uno dei due → solo il bottone corrispondente.
 - Nessuno dei due (caso limite, comunque bloccato a monte dalla validazione) → nota che il biglietto non può essere inviato automaticamente.
 - Badge quota rimanente (`wildcardQuota - wildcardUsed`) visibile per `manager`, assente per `full-access`.
+- **Copia link pagina pubblica** *(post-chiusura fase, 2026-09-09)*: sopra i bottoni invio, campo read-only + **Copy** (`PublicTicketLinkCopy`) — sempre visibile post-insert; vedi `docs/operativo/wildcard-insert.md`.
 
 **Link WhatsApp (thank-you e resend)** — comportamento esplicito per chi usa l’App:
 - Formato: `https://wa.me/?text=<URL-encoded {SERVER_URL}/ticket/{qrToken}>` — **senza** numero di telefono nel path del link.

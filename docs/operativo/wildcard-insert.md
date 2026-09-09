@@ -46,6 +46,8 @@ Record creato: `source=Wildcard`, `createdBy=<email utente App>`, `assegnazione`
 
 L’invio email **non** parte in automatico: serve un click esplicito.
 
+Sempre visibile sulla thank-you (sopra i bottoni invio): **Public ticket link** — campo read-only con URL `{SERVER_URL}/ticket/{qrToken}` + bottone **Copy** (stesso componente della scheda contatto).
+
 | Situazione | Cosa vedi |
 |---|---|
 | Email **e** telefono | Bottoni **WhatsApp** e **Email** |
