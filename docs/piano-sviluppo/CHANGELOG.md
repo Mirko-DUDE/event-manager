@@ -21,6 +21,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Added
 
+- **Scheda contatto — copia link pagina pubblica biglietto**: in `ContactResendPanel`, sopra i bottoni WhatsApp/Email, campo read-only con URL `{SERVER_URL}/ticket/{qrToken}` e bottone **Copy** (`navigator.clipboard` + toast `sonner`). Stessi permessi del resend (manager/full-access, contatto non check-in, `qrToken` presente). Nessuna modifica backend — riusa `publicTicketUrl` già calcolato in `buildContactOverlayData` / pagina contatto. Doc: `docs/operativo/contact-resend.md`.
+
 - **Export CSV email univoche da Global Stats (check-invite)**: Server Action `exportDistinctInviteCheckEmailsCsv` (`lib/inviteCheck/statsActions.ts`) con guard `hasAdminPanelAccess`; logica `distinct('email')` condivisa con i KPI in `getDistinctInviteCheckEmails` (`lib/inviteCheck/stats.ts`); bottone «Scarica CSV email univoche» in `StatsPanel` (Blob + download client-side). CSV v1: colonna `email` + header, ordine alfabetico, filename `verifiche-invito-univoche-YYYY-MM-DD.csv`. Doc in `check-invite.md` § «Dove consultare in Admin» e `FUNZIONALITA.md` §3.8.
 
 - **Statistiche check-invite**: collection `inviteCheckSuccess` (`collections/InviteCheckSuccess.ts`, Sistema, read-only Admin); scrittura in `POST /api/check-invite` via `logInviteCheckSuccess` (`lib/inviteCheck/logSuccess.ts`, `try/catch` + `payload.logger.error`); Global `stats` + `StatsPanel` (KPI totale/univoci, `loadInviteCheckStats`); reset generale esteso in `lib/contacts/reset.ts` e `ResetContattiELogPanel`. Decisione documentata in `docs/operativo/check-invite.md` § «Statistiche verifiche invito riuscite»; perimetro reset in `specifica-reset-contatti-log.md` / `reset-gdpr.md`.
@@ -28,6 +30,10 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 - **Fase 10 § Passo 0–5 — Sicurezza, indicizzazione e scadenza pagina pubblica biglietto**: `public/robots.txt` (`Disallow: /`); meta `robots: noindex,nofollow` su `app/layout.tsx` (root pass-through); header globale `Referrer-Policy: same-origin` in `next.config.ts`; campo opzionale `scadenzaBiglietto` (data+ora) su Global `ticketConfig` con descrizione Admin che chiarisce scope pagina pubblica ≠ check-in; check scadenza in `loadPublicTicketByToken` → stesso esito token non trovato. Riferimento: `fase-10-sicurezza-indicizzazione.md`, analisi in `docs/sicurezza-indicizzazione-area-pubblica.md`.
 
 - **Fase 9 § Passo 0–3 — Homepage pubblica `/`**: `app/(frontend)/page.tsx` sostituisce il placeholder Next.js con eyebrow «Event Manager», heading «Seleziona un'area», due bottoni `<Button asChild>` shadcn/ui: «Event Manager App» (`variant="default"`, colore `--de-blue` `#053643`) → `/app` e «Admin» (`variant="outline"`, bordo `--de-azure` `#00698F`) → `/admin`. Token `--de-blue`/`--de-azure`/`--de-black`/`--de-white`/`--de-muted` in `page.module.css` (namespace separato da Area App e biglietto). Mockup di riferimento: `docs/design/ticket-mockups/mockup-homepage.html`.
+
+### Tests
+
+- **Scheda contatto — copia link biglietto (2026-09-09)**: `pnpm exec tsc --noEmit` OK; `pnpm lint --quiet` OK. Verifica runtime (manager/full-access, hostess, copy/incolla URL) — da confermare in test dev.
 
 ### Fixed
 

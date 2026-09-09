@@ -108,6 +108,7 @@ Il mockup (`app-lista-contatti.html` / `-desktop.html`) va **replicato esattamen
 - **Check-in**: disponibile a tutti i ruoli con accesso alla shell. Scrittura reale al click sul bottone "Check in" nella scheda: vedi §2.8bis.
 - **Annulla check-in**: solo `appRole = full-access`. Per `hostess`/`manager` con contatto già check-in, nessun bottone — solo nota su chi può farlo. Scrittura reale: vedi §2.8bis.
 - **Reinvio ticket** (WhatsApp/Email): solo `manager`/`full-access`, **solo se il contatto non è ancora check-in** — riusa la logica di §2.4, non la superficie minima attuale.
+- **Copia link pagina pubblica** *(post-chiusura fase, 2026-09-09)*: sopra WhatsApp/Email, campo read-only con URL `/ticket/{qrToken}` + bottone **Copy** — stessi permessi e condizioni del resend; vedi `docs/operativo/contact-resend.md`.
 
 ### 2.8 — Check-in: libreria, endpoint, stati (validazione, sola lettura)
 

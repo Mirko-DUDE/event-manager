@@ -131,7 +131,7 @@ Lista di tutti i contatti attivi con ricerca testuale — attiva solo da **2 car
 
 - **Check-in manuale**: chiunque abbia accesso alla shell può segnare l'ingresso di un ospite direttamente dalla scheda.
 - **Annulla check-in**: solo `full-access` — riporta il contatto a "non check-in" e lascia una traccia distinta nel log (l'evento originale di check-in resta comunque nello storico).
-- **Reinvio del ticket** (email e/o WhatsApp): solo `manager`/`full-access`, e solo se il contatto non ha ancora fatto check-in.
+- **Reinvio del ticket** (email e/o WhatsApp): solo `manager`/`full-access`, e solo se il contatto non ha ancora fatto check-in. Nella stessa sezione, **copia del link** alla pagina pubblica del biglietto (`/ticket/{qrToken}`) negli appunti — stessi permessi del resend.
 
 ### 4.2 Wildcard
 
