@@ -89,9 +89,8 @@ Il mockup (`app-lista-contatti.html` / `-desktop.html`) va **replicato esattamen
 - **Category**: non presente nel form Wildcard (2026-09-03) — il contatto nasce senza categoria; valorizzazione solo in Admin se necessaria. In lista «Your wildcards so far» la colonna Category mostra `—` finché assente.
 
 **Thank-you page** (dopo insert riuscito, non si torna direttamente alla vista principale):
-- Email **e** telefono presenti → bottoni WhatsApp **e** Email (§2.4, invio già reale).
-- Solo uno dei due → solo il bottone corrispondente.
-- Nessuno dei due → nota che il biglietto non può essere inviato automaticamente; resta disponibile la copia del link pubblico (§2.6).
+- Bottone **WhatsApp** sempre visibile (link `wa.me/?text=…`, §2.4) — non dipende dal telefono in anagrafica.
+- Bottone **Email** solo se il contatto ha email; altrimenti etichetta «No email» (come `ContactResendPanel`).
 - Badge quota rimanente (`wildcardQuota - wildcardUsed`) visibile per `manager`, assente per `full-access`.
 - **Copia link pagina pubblica** *(post-chiusura fase, 2026-09-09)*: sopra i bottoni invio, campo read-only + **Copy** (`PublicTicketLinkCopy`) — sempre visibile post-insert; vedi `docs/operativo/wildcard-insert.md`.
 

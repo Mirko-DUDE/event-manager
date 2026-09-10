@@ -575,22 +575,13 @@ function renderForm() {
 
 function renderThankYou() {
   const hasEmail = !!(lastCreated && lastCreated.email);
-  const hasPhone = !!(lastCreated && lastCreated.phone);
-
-  let sendSection = "";
-  if (hasEmail || hasPhone) {
-    const waBtn = hasPhone
-      ? '<button class="ty-send-btn whatsapp' + (sentVia.whatsapp ? " sent" : "") + '" id="sendWaBtn">' + (sentVia.whatsapp ? ICON_CHECK_BIG + 'Sent' : ICON_WA + 'WhatsApp') + '</button>'
-      : "";
-    const mailBtn = hasEmail
-      ? '<button class="ty-send-btn' + (sentVia.email ? " sent" : "") + '" id="sendMailBtn">' + (sentVia.email ? ICON_CHECK_BIG + 'Sent' : ICON_MAIL + 'Email') + '</button>'
-      : "";
-    sendSection =
-      '<div class="ty-section-label">Send ticket via</div>' +
-      '<div class="ty-send-row">' + waBtn + mailBtn + '</div>';
-  } else {
-    sendSection = '<div class="ty-no-contact-note">No email or phone on file \u2014 the ticket can\u2019t be sent automatically. Add one from the contact card later.</div>';
-  }
+  const waBtn = '<button class="ty-send-btn whatsapp' + (sentVia.whatsapp ? " sent" : "") + '" id="sendWaBtn">' + (sentVia.whatsapp ? ICON_CHECK_BIG + 'Sent' : ICON_WA + 'WhatsApp') + '</button>';
+  const mailBtn = hasEmail
+    ? '<button class="ty-send-btn' + (sentVia.email ? " sent" : "") + '" id="sendMailBtn">' + (sentVia.email ? ICON_CHECK_BIG + 'Sent' : ICON_MAIL + 'Email') + '</button>'
+    : '<span class="ty-send-btn ty-no-email" role="status">No email</span>';
+  const sendSection =
+    '<div class="ty-section-label">Send ticket via</div>' +
+    '<div class="ty-send-row">' + waBtn + mailBtn + '</div>';
 
   return (
     '<main class="content">' +

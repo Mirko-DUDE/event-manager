@@ -60,8 +60,6 @@ export function WildcardThankYou({ inserted, quotaInfo, onDone, onAddAnother }: 
     [inserted.contatto.firstName, inserted.contatto.lastName].filter(Boolean).join(' ') || 'Contact'
 
   const hasEmail = Boolean(inserted.contatto.email?.trim())
-  const hasPhone = Boolean(inserted.contatto.telefono?.trim())
-  const canSend = hasEmail || hasPhone
 
   function sendEmail() {
     setSendMessage(null)
@@ -99,53 +97,49 @@ export function WildcardThankYou({ inserted, quotaInfo, onDone, onAddAnother }: 
         className="mt-3 w-full self-start text-left"
       />
 
-      {canSend ? (
-        <>
-          <p className="mt-1 w-full self-start text-left text-[11.5px] font-bold tracking-wide text-app-text-secondary uppercase">
-            Send ticket via
-          </p>
-          <div className="flex w-full gap-2">
-            {hasPhone ? (
-              <a
-                href={inserted.whatsappShareUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-[#bbf0cf] bg-[#f0fdf4] px-2.5 py-3 text-[13px] font-bold text-[#128C53] transition-colors hover:bg-app-success-bg"
-              >
-                <WhatsAppIcon className="size-4" />
-                WhatsApp
-              </a>
-            ) : null}
+      <p className="mt-1 w-full self-start text-left text-[11.5px] font-bold tracking-wide text-app-text-secondary uppercase">
+        Send ticket via
+      </p>
+      <div className="flex w-full gap-2">
+        <a
+          href={inserted.whatsappShareUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-[#bbf0cf] bg-[#f0fdf4] px-2.5 py-3 text-[13px] font-bold text-[#128C53] transition-colors hover:bg-app-success-bg"
+        >
+          <WhatsAppIcon className="size-4" />
+          WhatsApp
+        </a>
 
-            {hasEmail ? (
-              <button
-                type="button"
-                disabled={pending || emailSentOk}
-                onClick={sendEmail}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-app-border bg-app-surface px-2.5 py-3 text-[13px] font-bold text-app-text-primary transition-colors hover:bg-app-bg disabled:opacity-60 data-[sent=true]:border-app-success-border data-[sent=true]:bg-app-success-bg data-[sent=true]:text-app-success-text"
-                data-sent={emailSentOk || undefined}
-              >
-                {emailSentOk ? (
-                  <>
-                    <Check className="size-4 stroke-[2.5]" aria-hidden />
-                    Sent
-                  </>
-                ) : (
-                  <>
-                    <Mail className="size-4" aria-hidden />
-                    {pending ? 'Sending…' : 'Email'}
-                  </>
-                )}
-              </button>
-            ) : null}
-          </div>
-        </>
-      ) : (
-        <p className="mt-2 w-full rounded-[10px] border border-dashed border-app-border bg-app-bg px-3 py-2.5 text-[11.5px] text-app-text-muted">
-          No email or phone on file — the ticket can&apos;t be sent automatically. Add one from the
-          contact card later.
-        </p>
-      )}
+        {hasEmail ? (
+          <button
+            type="button"
+            disabled={pending || emailSentOk}
+            onClick={sendEmail}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-app-border bg-app-surface px-2.5 py-3 text-[13px] font-bold text-app-text-primary transition-colors hover:bg-app-bg disabled:opacity-60 data-[sent=true]:border-app-success-border data-[sent=true]:bg-app-success-bg data-[sent=true]:text-app-success-text"
+            data-sent={emailSentOk || undefined}
+          >
+            {emailSentOk ? (
+              <>
+                <Check className="size-4 stroke-[2.5]" aria-hidden />
+                Sent
+              </>
+            ) : (
+              <>
+                <Mail className="size-4" aria-hidden />
+                {pending ? 'Sending…' : 'Email'}
+              </>
+            )}
+          </button>
+        ) : (
+          <span
+            className="flex flex-1 items-center justify-center rounded-[10px] border border-app-border bg-app-bg px-2.5 py-3 text-center text-[13px] font-medium text-app-text-muted"
+            role="status"
+          >
+            No email
+          </span>
+        )}
+      </div>
 
       {sendMessage ? (
         <p

@@ -21,7 +21,8 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ### Changed
 
-- **Wildcard form — email e telefono entrambi opzionali**: rimossa la validazione client che bloccava l’insert se mancavano email e telefono. Restano obbligatori solo nome e cognome; thank-you senza contatti mostra copia link pubblico e nota «No email or phone on file…». Doc: `wildcard-insert.md`, `FUNZIONALITA.md`, `fase-7-area-app-ui.md` §2.6.
+- **Wildcard form — email e telefono entrambi opzionali**: rimossa la validazione client che bloccava l’insert se mancavano email e telefono. Restano obbligatori solo nome e cognome. Doc: `wildcard-insert.md`, `FUNZIONALITA.md`, `fase-7-area-app-ui.md` §2.6.
+- **Wildcard thank-you — WhatsApp sempre attivo**: il bottone condivisione WhatsApp resta visibile anche senza telefono o email sull’ospite (allineato a `ContactResendPanel`); Email solo se presente, altrimenti «No email». Doc: `wildcard-insert.md`, `fase-7-area-app-ui.md` §2.6.
 
 ### Added
 

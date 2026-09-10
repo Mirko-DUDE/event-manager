@@ -20,7 +20,7 @@ Documento per **chi usa l’Area App** (manager / full-access) e per chi verific
 |---|---|---|
 | First name / Last name | Sì | |
 | Email | No | |
-| Phone | No | Salvato sul contatto; abilita il bottone WhatsApp in thank-you. **Non** precompila il link WhatsApp con questo numero. |
+| Phone | No | Salvato sul contatto (anagrafica). **Non** precompila il link WhatsApp con questo numero. |
 | DUDE Company | No | Select valori HubSpot |
 | Assegnazione | — | Read-only, derivata dalla parte locale della tua email (prima della `@`) |
 
@@ -49,10 +49,8 @@ Sempre visibile sulla thank-you (sopra i bottoni invio): **Public ticket link** 
 
 | Situazione | Cosa vedi |
 |---|---|
-| Email **e** telefono | Bottoni **WhatsApp** e **Email** |
-| Solo email | Solo bottone **Email** |
-| Solo telefono | Solo bottone **WhatsApp** |
-| Nessuno dei due | Non dovrebbe accadere (bloccato dal form); nota che il ticket non può essere inviato automaticamente |
+| Con email | Bottoni **WhatsApp** e **Email** |
+| Senza email | Bottone **WhatsApp** + etichetta «No email» al posto di Email |
 
 **Manager**: badge quota remaining sulla thank-you. **Full-access**: nessun badge.
 
@@ -93,14 +91,15 @@ https://wa.me/?text=https%3A%2F%2F<dominio-evento>%2Fticket%2F{qrToken}
 - **Non** invia automaticamente il messaggio all’ospite.
 
 **Perché**:
-1. Il telefono nel form serve ad **anagrafica** e a **mostrare** il bottone WhatsApp in thank-you (§2.6 Fase 7), non a costruire il deep link.
+1. Il telefono nel form serve solo ad **anagrafica** — **non** entra nel deep link WhatsApp.
 2. Senza numero nel link, WhatsApp apre il **picker contatti**: lo staff sceglie manualmente la chat (ospite, collega, gruppo) e invia il link del biglietto.
 3. Evita errori di **formato internazionale** (+39, prefissi, spazi) e non forza l’apertura di una chat sbagliata.
 
+Il bottone **WhatsApp** è **sempre** visibile in thank-you (e in scheda contatto), anche senza telefono o email sull’ospite — allineato a `ContactResendPanel`.
+
 **Flusso operativo consigliato**:
-1. Inserisci ospite con telefono (resta salvato in Admin / scheda contatto).
-2. Click **WhatsApp** sulla thank-you → si apre WhatsApp (app o Web) con messaggio precompilato = URL pagina pubblica `/ticket/{qrToken}`.
-3. Selezioni il contatto dell’ospite e invii.
+1. Dopo l’insert, click **WhatsApp** sulla thank-you → si apre WhatsApp (app o Web) con messaggio precompilato = URL pagina pubblica `/ticket/{qrToken}`.
+2. Selezioni il contatto dell’ospite (o un collega) e invii.
 
 Nessuna automazione server; nessuna WhatsApp Business API in questo flusso.
 
@@ -116,7 +115,7 @@ Riferimenti storici: `analisi-vecchi-progetti-wa-wildcard.md`, `fase-6-invio-tic
 | Nome+cognome uguali (trim, case-insensitive), email diversa o assente sul record trovato | Warning + conferma |
 | Email assente sull’input | Ammesso |
 | Telefono assente sull’input | Ammesso |
-| Entrambi assenti | Ammesso — thank-you con solo copia link pubblico (nessun bottone WhatsApp/Email) |
+| Entrambi assenti | Ammesso — thank-you con WhatsApp + «No email» + copia link pubblico |
 | Category | Non richiesta in insert Wildcard; assente sul record finché non valorizzata in Admin |
 | Manager quota esaurita | Create disabilitato in UI; server → `quotaEsaurita` |
 
@@ -130,7 +129,7 @@ Riferimenti storici: `analisi-vecchi-progetti-wa-wildcard.md`, `fase-6-invio-tic
 4. Insert email nuova → thank-you; Admin: `source=Wildcard`, `createdBy`, `telefono` se inserito, log `wildcardInsert`, `wildcardUsed` incrementato.
 5. Stessa email → errore inline / `emailEsistente`.
 6. Stesso nome+cognome, email diversa → soft-match → conferma → thank-you.
-7. Solo email → thank-you solo Email; solo telefono → thank-you solo WhatsApp; entrambi → entrambi i bottoni; nessuno dei due → thank-you con solo copia link pubblico.
+7. Con email → WhatsApp + Email; senza email → WhatsApp + «No email»; il telefono in anagrafica non influisce sui bottoni.
 8. Email in `contattiTest` (modalità test) → invio Email OK; fuori whitelist → `bloccato_modalita_test`.
 9. WhatsApp → URL `wa.me/?text=…` **senza** numero; testo = `{SERVER_URL}/ticket/{qrToken}` (localhost in dev, dominio produzione in prod).
 10. Lista wildcard → click → overlay scheda; chiusura → `/app/wildcard`.
