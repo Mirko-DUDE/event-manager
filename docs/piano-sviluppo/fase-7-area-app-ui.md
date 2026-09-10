@@ -82,7 +82,7 @@ Il mockup (`app-lista-contatti.html` / `-desktop.html`) va **replicato esattamen
 
 **Validazione form**:
 - Obbligatori: solo Nome e Cognome.
-- Email e Telefono: opzionali singolarmente, ma se **entrambi** vuoti al submit → warning bloccante ("Please provide at least an email or a phone number...").
+- Email e Telefono: opzionali (anche entrambi assenti).
 - Email duplicata → blocco con messaggio inline, nessun nuovo record.
 - Soft-match nome+cognome (stesso nome, email diversa) → banner di warning con doppia conferma esplicita.
 - Layout: una colonna su mobile, due colonne su desktop (Nome+Cognome, Email+Telefono); DUDE Company e Assegnazione a larghezza ridotta su desktop.
@@ -91,7 +91,7 @@ Il mockup (`app-lista-contatti.html` / `-desktop.html`) va **replicato esattamen
 **Thank-you page** (dopo insert riuscito, non si torna direttamente alla vista principale):
 - Email **e** telefono presenti → bottoni WhatsApp **e** Email (§2.4, invio già reale).
 - Solo uno dei due → solo il bottone corrispondente.
-- Nessuno dei due (caso limite, comunque bloccato a monte dalla validazione) → nota che il biglietto non può essere inviato automaticamente.
+- Nessuno dei due → nota che il biglietto non può essere inviato automaticamente; resta disponibile la copia del link pubblico (§2.6).
 - Badge quota rimanente (`wildcardQuota - wildcardUsed`) visibile per `manager`, assente per `full-access`.
 - **Copia link pagina pubblica** *(post-chiusura fase, 2026-09-09)*: sopra i bottoni invio, campo read-only + **Copy** (`PublicTicketLinkCopy`) — sempre visibile post-insert; vedi `docs/operativo/wildcard-insert.md`.
 

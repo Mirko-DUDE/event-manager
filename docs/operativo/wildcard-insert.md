@@ -19,8 +19,8 @@ Documento per **chi usa l’Area App** (manager / full-access) e per chi verific
 | Campo | Obbligatorio | Note |
 |---|---|---|
 | First name / Last name | Sì | |
-| Email | No* | *Al submit serve **email oppure telefono** (almeno uno) — vedi validazione sotto. |
-| Phone | No* | Salvato sul contatto; abilita il bottone WhatsApp in thank-you. **Non** precompila il link WhatsApp con questo numero. |
+| Email | No | |
+| Phone | No | Salvato sul contatto; abilita il bottone WhatsApp in thank-you. **Non** precompila il link WhatsApp con questo numero. |
 | DUDE Company | No | Select valori HubSpot |
 | Assegnazione | — | Read-only, derivata dalla parte locale della tua email (prima della `@`) |
 
@@ -28,7 +28,6 @@ Documento per **chi usa l’Area App** (manager / full-access) e per chi verific
 
 **Validazione client (blocco prima del server)**:
 - Nome e cognome obbligatori.
-- Se email **e** telefono entrambi vuoti → messaggio bloccante (EN): «Please provide at least an email or a phone number…».
 - Email già in anagrafica → errore inline «This email is already registered…» (`emailEsistente`).
 - Stesso nome+cognome di un contatto esistente (email diversa) → banner warning + conferma esplicita (`warningSoftMatch`).
 
@@ -115,9 +114,9 @@ Riferimenti storici: `analisi-vecchi-progetti-wa-wildcard.md`, `fase-6-invio-tic
 |---|---|
 | Email già in DB | Blocco (`emailEsistente`) |
 | Nome+cognome uguali (trim, case-insensitive), email diversa o assente sul record trovato | Warning + conferma |
-| Email assente sull’input | Ammesso se c’è telefono |
-| Telefono assente sull’input | Ammesso se c’è email |
-| Entrambi assenti | Blocco lato form (client) |
+| Email assente sull’input | Ammesso |
+| Telefono assente sull’input | Ammesso |
+| Entrambi assenti | Ammesso — thank-you con solo copia link pubblico (nessun bottone WhatsApp/Email) |
 | Category | Non richiesta in insert Wildcard; assente sul record finché non valorizzata in Admin |
 | Manager quota esaurita | Create disabilitato in UI; server → `quotaEsaurita` |
 
@@ -131,7 +130,7 @@ Riferimenti storici: `analisi-vecchi-progetti-wa-wildcard.md`, `fase-6-invio-tic
 4. Insert email nuova → thank-you; Admin: `source=Wildcard`, `createdBy`, `telefono` se inserito, log `wildcardInsert`, `wildcardUsed` incrementato.
 5. Stessa email → errore inline / `emailEsistente`.
 6. Stesso nome+cognome, email diversa → soft-match → conferma → thank-you.
-7. Solo email → thank-you solo Email; solo telefono → thank-you solo WhatsApp; entrambi → entrambi i bottoni.
+7. Solo email → thank-you solo Email; solo telefono → thank-you solo WhatsApp; entrambi → entrambi i bottoni; nessuno dei due → thank-you con solo copia link pubblico.
 8. Email in `contattiTest` (modalità test) → invio Email OK; fuori whitelist → `bloccato_modalita_test`.
 9. WhatsApp → URL `wa.me/?text=…` **senza** numero; testo = `{SERVER_URL}/ticket/{qrToken}` (localhost in dev, dominio produzione in prod).
 10. Lista wildcard → click → overlay scheda; chiusura → `/app/wildcard`.

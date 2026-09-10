@@ -34,11 +34,7 @@ const EMPTY_FORM: FormFields = {
 type FieldErrors = {
   firstName: boolean
   lastName: boolean
-  contact: boolean
 }
-
-const CONTACT_REQUIRED_MESSAGE =
-  'Please provide at least an email or a phone number — one of the two is needed to send the ticket.'
 
 type WildcardInsertFormProps = {
   assegnazione: string | null
@@ -77,7 +73,6 @@ export function WildcardInsertForm({ assegnazione, onBack, onSuccess }: Wildcard
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({
     firstName: false,
     lastName: false,
-    contact: false,
   })
   const [serverError, setServerError] = useState<string | null>(null)
   const [softMatch, setSoftMatch] = useState<WildcardSimilarContact | null>(null)
@@ -120,28 +115,25 @@ export function WildcardInsertForm({ assegnazione, onBack, onSuccess }: Wildcard
     setSoftMatch(null)
     setServerError(null)
     setForm(EMPTY_FORM)
-    setFieldErrors({ firstName: false, lastName: false, contact: false })
+    setFieldErrors({ firstName: false, lastName: false })
     setDuplicateEmail(false)
     onSuccess(result)
   }
 
   function validateClient(): boolean {
-    const email = form.email.trim()
-    const phone = form.telefono.trim()
     const firstName = form.firstName.trim()
     const lastName = form.lastName.trim()
 
     const errors: FieldErrors = {
       firstName: !firstName,
       lastName: !lastName,
-      contact: !email && !phone,
     }
 
     setFieldErrors(errors)
     setDuplicateEmail(false)
     setServerError(null)
 
-    if (errors.firstName || errors.lastName || errors.contact) {
+    if (errors.firstName || errors.lastName) {
       setSoftMatch(null)
       return false
     }
@@ -279,15 +271,6 @@ export function WildcardInsertForm({ assegnazione, onBack, onSuccess }: Wildcard
               />
             </div>
           </div>
-
-          {fieldErrors.contact ? (
-            <div className="rounded-[10px] border border-app-warning-border bg-app-warning-bg px-3 py-2.5 text-xs leading-relaxed text-app-warning-text">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="mt-0.5 size-[15px] shrink-0" aria-hidden />
-                <span>{CONTACT_REQUIRED_MESSAGE}</span>
-              </div>
-            </div>
-          ) : null}
 
           <div className="lg:max-w-[260px]">
             <Label className="mb-1 block text-xs font-semibold text-app-text-secondary">

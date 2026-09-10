@@ -443,7 +443,7 @@ let formError = null; // 'duplicate' | null
 let softMatchPending = false;
 let softMatchConfirmed = false;
 let formSuccess = false;
-let fieldErrors = { first: false, last: false, contact: false };
+let fieldErrors = { first: false, last: false };
 
 function getQuotaCtx() {
   return ROLE_QUOTA[roleKey];
@@ -551,7 +551,6 @@ function renderForm() {
           '<label>Phone <span class="optional">(optional)</span></label>' +
           '<input id="fPhone" type="tel" placeholder="+39 ...">' +
         '</div>' +
-        (fieldErrors.contact ? '<div class="warning-banner"><div class="warning-main">' + ICON_ALERT + '<span>Please provide at least an email or a phone number \u2014 one of the two is needed to send the ticket.</span></div></div>' : '') +
         '<div class="field-group"><label>DUDE Company</label>' +
           '<select id="fCompany"><option value="">Select...</option>' +
             DUDE_COMPANY_OPTIONS.map(o => '<option value="' + o + '">' + o + '</option>').join("") +
@@ -633,7 +632,7 @@ function render() {
         softMatchPending = false;
         softMatchConfirmed = false;
         formSuccess = false;
-        fieldErrors = { first: false, last: false, contact: false };
+        fieldErrors = { first: false, last: false };
         view = "form";
         render();
       });
@@ -680,10 +679,9 @@ function render() {
 
       fieldErrors = {
         first: !first,
-        last: !last,
-        contact: !email && !phone
+        last: !last
       };
-      if (fieldErrors.first || fieldErrors.last || fieldErrors.contact) {
+      if (fieldErrors.first || fieldErrors.last) {
         formError = null;
         softMatchPending = false;
         render();
@@ -712,7 +710,7 @@ function render() {
       formSuccess = true;
       softMatchPending = false;
       softMatchConfirmed = false;
-      fieldErrors = { first: false, last: false, contact: false };
+      fieldErrors = { first: false, last: false };
       view = "thankyou";
       render();
     });

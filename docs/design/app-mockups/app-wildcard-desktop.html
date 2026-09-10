@@ -247,7 +247,7 @@ let sentVia = { whatsapp: false, email: false };
 let formError = null;
 let softMatchPending = false;
 let softMatchConfirmed = false;
-let fieldErrors = { first: false, last: false, contact: false };
+let fieldErrors = { first: false, last: false };
 
 function getQuotaCtx() { return ROLE_QUOTA[roleKey]; }
 function quotaRemaining() {
@@ -355,7 +355,6 @@ function renderForm() {
             '</div>' +
             '<div class="field-group"><label>Phone <span class="optional">(optional)</span></label><input id="fPhone" type="tel" placeholder="+39 ..."></div>' +
           '</div>' +
-          (fieldErrors.contact ? '<div class="warning-banner"><div class="warning-main">' + ICON_ALERT + '<span>Please provide at least an email or a phone number \u2014 one of the two is needed to send the ticket.</span></div></div>' : '') +
           '<div class="field-row-2col">' +
             '<div class="field-group"><label>DUDE Company</label><select id="fCompany"><option value="">Select...</option>' + DUDE_COMPANY_OPTIONS.map(o => '<option value="' + o + '">' + o + '</option>').join("") + '</select></div>' +
             '<div class="field-group"><label>Category <span class="optional">(optional)</span></label><select id="fCategory"><option value="">Select...</option>' + CATEGORY_OPTIONS.map(o => '<option value="' + o + '">' + o + '</option>').join("") + '</select></div>' +
@@ -413,7 +412,7 @@ function render() {
   if (view === "main") {
     document.getElementById("createBtn").addEventListener("click", () => {
       formError = null; softMatchPending = false; softMatchConfirmed = false;
-      fieldErrors = { first: false, last: false, contact: false };
+      fieldErrors = { first: false, last: false };
       view = "form"; render();
     });
     document.querySelectorAll("tbody tr").forEach(row => {
@@ -437,8 +436,8 @@ function render() {
       const first = firstInput.value.trim();
       const last = lastInput.value.trim();
 
-      fieldErrors = { first: !first, last: !last, contact: !email && !phone };
-      if (fieldErrors.first || fieldErrors.last || fieldErrors.contact) { formError = null; softMatchPending = false; render(); return; }
+      fieldErrors = { first: !first, last: !last };
+      if (fieldErrors.first || fieldErrors.last) { formError = null; softMatchPending = false; render(); return; }
 
       if (email === "test@exists.com") { formError = "duplicate"; softMatchPending = false; render(); return; }
       formError = null;
@@ -451,7 +450,7 @@ function render() {
       lastCreated = { first: first, last: last, email: email || null, phone: phone || null };
       sentVia = { whatsapp: false, email: false };
       softMatchPending = false; softMatchConfirmed = false;
-      fieldErrors = { first: false, last: false, contact: false };
+      fieldErrors = { first: false, last: false };
       view = "thankyou"; render();
     });
 

@@ -19,6 +19,10 @@ Ogni voce va categorizzata in una di queste sottosezioni (solo quelle effettivam
 
 ## [Unreleased]
 
+### Changed
+
+- **Wildcard form — email e telefono entrambi opzionali**: rimossa la validazione client che bloccava l’insert se mancavano email e telefono. Restano obbligatori solo nome e cognome; thank-you senza contatti mostra copia link pubblico e nota «No email or phone on file…». Doc: `wildcard-insert.md`, `FUNZIONALITA.md`, `fase-7-area-app-ui.md` §2.6.
+
 ### Added
 
 - **Scheda contatto — copia link pagina pubblica biglietto**: in `ContactResendPanel`, sopra i bottoni WhatsApp/Email, campo read-only con URL `{SERVER_URL}/ticket/{qrToken}` e bottone **Copy** (`navigator.clipboard` + toast `sonner`). Stessi permessi del resend (manager/full-access, contatto non check-in, `qrToken` presente). Nessuna modifica backend — riusa `publicTicketUrl` già calcolato in `buildContactOverlayData` / pagina contatto. Doc: `docs/operativo/contact-resend.md`.
